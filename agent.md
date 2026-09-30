@@ -50,46 +50,30 @@
 ## Files in this project
 - `guide.md` — Product spec, protocol contract, session protocol, and status log.
 - `agent.md` — Engineering conventions, architecture rules, and file inventory.
+- `build.gradle.kts` (root and app) — KSP, Room, and serialization configured.
 - `app/src/main/AndroidManifest.xml`
 - `app/src/main/java/com/antigravity/virtual32/`:
-  - `MainActivity.kt` — App entry point, role switching & layout.
-  - `camera/`:
-    - `CameraCaptureManager.kt` — CameraX silent JPEG capture controller.
-    - `SensorSpecs.kt` — OV3660 sensor specs and resolution presets.
-  - `network/`:
-    - `ImageUploader.kt` — OkHttp multipart POST client.
-    - `NetworkResult.kt` — Network response sealed class hierarchy.
-    - `ResponseStatusHandler.kt` — LED status and vibration mappings.
+  - `MainActivity.kt` — App entry point and bottom navigation.
+  - `data/` — Data layer, `AnswerStore.kt`.
   - `receiver/`:
-    - `GeminiVisionClient.kt` — Gemini 1.5 Flash Vision client.
-    - `ReceiverHttpServer.kt` — Coroutine HTTP socket server.
-    - `TtsManager.kt` — Text-to-speech manager (to be retired in Phase 6).
+    - `ai/GeminiVisionClient.kt` — Gemini API integration.
+    - `pipeline/PhotoPipeline.kt` — Processing queue interface.
+    - `server/ReceiverHttpServer.kt` — Coroutine HTTP socket server.
+    - `server/ServerState.kt`, `LogBuffer.kt` — Server state and logs.
+    - `service/` — Future foreground service.
   - `settings/`:
     - `AppSettings.kt` — Settings data model.
     - `SettingsRepository.kt` — DataStore settings repository.
+  - `simulator/` — Future simulator logic.
   - `ui/`:
-    - `components/`:
-      - `DottedBackground.kt` — Cozy dotted canvas background.
-      - `LedIndicator.kt` — Glowing diode LED indicator.
-      - `Ov3660Viewfinder.kt` — Viewfinder with sensor framing overlay.
-      - `TriggerButton.kt` — Tactile trigger button.
-    - `screens/`:
-      - `CameraScreen.kt` — Phone 2 camera twin screen.
-      - `ReceiverScreen.kt` — Phone 1 receiver screen.
-      - `SettingsScreen.kt` — App settings and connectivity diagnostics.
-      - `WelcomeScreen.kt` — Onboarding wizard and role selector.
-    - `theme/`:
-      - `Color.kt`, `Theme.kt`, `Type.kt` — Design tokens and typography.
+    - `components/DottedBackgroundBox.kt` — Cozy dotted canvas background.
+    - `screens/HomeScreen.kt`, `AnswersScreen.kt`, `SimulatorScreen.kt`, `SettingsScreen.kt` — App screens.
+    - `theme/Color.kt`, `Theme.kt`, `Type.kt` — Design tokens and typography.
+  - `util/IpDiscovery.kt` — IP resolution helper.
 - `app/src/test/java/com/antigravity/virtual32/`:
-  - `camera/SensorSpecsTest.kt` — OV3660 resolution & preset tests.
-  - `network/OkHttpImageUploaderTest.kt` — MockWebServer upload tests.
-  - `network/ResponseStatusHandlerTest.kt` — Status and haptic feedback tests.
-  - `receiver/GeminiVisionClientTest.kt` — Gemini API client tests.
-  - `receiver/ReceiverHttpServerTest.kt` — HTTP server request parsing tests.
-- `tools/`:
-  - `mock_server.py` — Python HTTP mock server.
-  - `test_mock_server.py` — Mock server automated tests.
-  - `README.md` — Testing instructions.
+  - `receiver/server/ReceiverHttpServerTest.kt` — HTTP server request parsing tests.
+  - `settings/SettingsSmokeTest.kt`
+- `docs/ESP32_CONTRACT.md` — Blink language contract.
 
 ---
 

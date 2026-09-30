@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:40:06.897Z" hostname="MR-ROBOT" time="1.937">
+  <properties/>
+  <testcase name="testServer_oversizedBody_returns413" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.34"/>
+  <testcase name="testServer_pingEndpoint_returns200" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.193"/>
+  <testcase name="testServer_badImage_returns400" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.177"/>
+  <testcase name="testServer_answerSequences" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.254"/>
+  <testcase name="testServer_multipartUpload_returns200" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.236"/>
+  <testcase name="testServer_malformedRequest" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.171"/>
+  <testcase name="testServer_rawUpload_returns200" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.236"/>
+  <testcase name="testServer_concurrentRequests" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.16"/>
+  <testcase name="testServer_emptyAnswerStore" classname="com.antigravity.virtual32.receiver.server.ReceiverHttpServerTest" time="0.169"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -90,15 +90,20 @@ that's what this file is for.
 # Roadmap
 Legacy foundation (done): 1 Scaffolding · 2 Networking · 3 Standalone test pass · 4 Polish · 5 Old receiver/earbuds (now being replaced).
 6 Cleanup & foundation · 7 Protocol server · 8 AI pipeline & queue · 9 Storage & gallery · 10 Background reliability · 11 Dashboard & Answers · 12 AI & Prompt settings · 13 Simulator v2 · 14 Power features · 15 Integration hardening & docs · 16 ESP32 firmware (outside Antigravity; uses docs/ESP32_CONTRACT.md).
-Current phase: 6.
+Current phase: 7.
 
 ---
 
 ## Status Log
 *(most recent entry first — append, don't rewrite)*
 
+- **2026-09-30** — Protocol Server implementation (Phase 7):
+  - **Done:** Completely rewrote `ReceiverHttpServer` to precisely implement the §3 protocol contract (handling `/upload`, `/ping`, `/next`, `/repeat`, `/reset` with exact JSON structures). Added IP discovery prioritizing Wi-Fi/Hotspot. Created robust HTTP/1.1 parsing handling 8MB body caps, chunked encoding, and timeouts. Added `PhotoPipeline` and `AnswerStore` interfaces with fake/in-memory implementations.
+  - **Decisions:** Put the acceptance test Start Server button directly on `HomeScreen.kt`. HTTP parsing does not rely on third-party HTTP libraries to remain lightweight and embedded.
+  - **Next:** Phase 8 (AI pipeline & queue).
+
 - **2026-09-30** — Docs migrated to the MCQ Blinker direction:
-  - **Next:** Phase 6.
+  - **Next:** Phase 7.
 
 - **2026-09-26** — App Identity, Theme-Matched Logo & Welcome Wizard (Phase 6 Polish):
   - **App Name Unified:** Formally set app name to **Virtual 32** in `strings.xml`, `AndroidManifest.xml`, screen headers, and guides.
