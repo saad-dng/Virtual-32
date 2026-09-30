@@ -2,6 +2,8 @@ package com.antigravity.virtual32.receiver.pipeline
 
 import com.antigravity.virtual32.data.AnswerStore
 import com.antigravity.virtual32.data.InMemoryAnswerStore
+import com.antigravity.virtual32.settings.AiProvider
+import com.antigravity.virtual32.settings.AnswerMode
 import com.antigravity.virtual32.settings.AppSettings
 import com.antigravity.virtual32.settings.SettingsRepository
 import kotlinx.coroutines.delay
@@ -15,13 +17,13 @@ import org.junit.Test
 
 class PhotoPipelineTest {
 
-    private class FakeSettingsRepo : SettingsRepository {
+    private class FakeSettingsRepo : SettingsRepository(null) {
         var settings = AppSettings(
-            provider = "gemini",
+            provider = AiProvider.GEMINI,
             geminiKey = "fake_gemini_key",
             claudeKey = "fake_claude_key",
             pauseAi = false,
-            answerMode = "append"
+            answerMode = AnswerMode.APPEND
         )
         override val settingsFlow: Flow<AppSettings> = flowOf(settings)
         override suspend fun getSettings(): AppSettings = settings

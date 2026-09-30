@@ -120,12 +120,12 @@ class PhotoPipelineImpl(
         } else null
 
         val resizedJpeg = ImageResizer.downscaleIfNeeded(jpeg)
-        var instruction = PromptBuilder.build(settings.aiPrompt)
+        var instruction = PromptBuilder.build("")
 
         // Attempt 1
         var res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
         if (res.isParseError) {
-            instruction = PromptBuilder.build(settings.aiPrompt, isRetry = true)
+            instruction = PromptBuilder.build("", isRetry = true)
             res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
         }
 

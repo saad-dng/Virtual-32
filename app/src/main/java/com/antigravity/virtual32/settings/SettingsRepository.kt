@@ -12,7 +12,7 @@ import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-class SettingsRepository(private val context: Context) {
+open class SettingsRepository(private val context: Context?) {
 
     private object PreferencesKeys {
         val SERVER_PORT = intPreferencesKey("server_port")
@@ -34,7 +34,8 @@ class SettingsRepository(private val context: Context) {
         val SIM_JPEG_QUALITY = intPreferencesKey("sim_jpeg_quality")
     }
 
-    val settingsFlow: Flow<AppSettings> = context.dataStore.data
+    open val settingsFlow: Flow<AppSettings>
+        get() = context!!.dataStore.data
         .catch { exception ->
             if (exception is IOException) {
                 emit(emptyPreferences())
@@ -64,10 +65,10 @@ class SettingsRepository(private val context: Context) {
             )
         }
 
-    suspend fun getSettings(): AppSettings = kotlinx.coroutines.flow.first(settingsFlow)
+    open suspend fun getSettings(): AppSettings = settingsFlow.first()
 
-    suspend fun updateSettings(update: (AppSettings) -> AppSettings) {
-        context.dataStore.edit { preferences ->
+    open suspend fun updateSettings(update: (AppSettings) -> AppSettings) {
+        context!!.dataStore.edit { preferences ->
             val current = AppSettings(
                 serverPort = preferences[PreferencesKeys.SERVER_PORT] ?: 5000,
                 provider = try { AiProvider.valueOf(preferences[PreferencesKeys.PROVIDER] ?: "GEMINI") } catch (e: Exception) { AiProvider.GEMINI },

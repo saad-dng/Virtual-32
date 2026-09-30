@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.camera.SensorSpecsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:40:03.561Z" hostname="MR-ROBOT" time="0.017">
+<testsuite name="com.antigravity.virtual32.camera.SensorSpecsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:59:14.684Z" hostname="MR-ROBOT" time="0.015">
   <properties/>
-  <testcase name="testOv3660Resolutions_are4by3AspectRatio" classname="com.antigravity.virtual32.camera.SensorSpecsTest" time="0.01"/>
+  <testcase name="testOv3660Resolutions_are4by3AspectRatio" classname="com.antigravity.virtual32.camera.SensorSpecsTest" time="0.009"/>
   <testcase name="testOv3660DefaultResolution_isSVGA" classname="com.antigravity.virtual32.camera.SensorSpecsTest" time="0.0"/>
-  <testcase name="testJpegQualityPresets" classname="com.antigravity.virtual32.camera.SensorSpecsTest" time="0.001"/>
+  <testcase name="testJpegQualityPresets" classname="com.antigravity.virtual32.camera.SensorSpecsTest" time="0.0"/>
   <testcase name="testFromLabel_resolvesCorrectly" classname="com.antigravity.virtual32.camera.SensorSpecsTest" time="0.005"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

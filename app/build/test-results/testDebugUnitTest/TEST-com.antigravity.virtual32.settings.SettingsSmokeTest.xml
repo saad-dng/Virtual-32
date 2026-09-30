@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.settings.SettingsSmokeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:40:05.934Z" hostname="MR-ROBOT" time="0.002">
+<testsuite name="com.antigravity.virtual32.settings.SettingsSmokeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:59:17.259Z" hostname="MR-ROBOT" time="0.0">
   <properties/>
-  <testcase name="testDefaultSettings" classname="com.antigravity.virtual32.settings.SettingsSmokeTest" time="0.002"/>
+  <testcase name="testDefaultSettings" classname="com.antigravity.virtual32.settings.SettingsSmokeTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

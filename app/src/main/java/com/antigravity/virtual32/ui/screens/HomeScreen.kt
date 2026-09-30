@@ -10,9 +10,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.antigravity.virtual32.ui.components.DottedBackgroundBox
 import com.antigravity.virtual32.receiver.server.ReceiverHttpServer
-import com.antigravity.virtual32.receiver.pipeline.FakePhotoPipeline
+import com.antigravity.virtual32.receiver.pipeline.PhotoPipelineImpl
 import com.antigravity.virtual32.data.InMemoryAnswerStore
 import com.antigravity.virtual32.receiver.server.LogBuffer
+import com.antigravity.virtual32.settings.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
@@ -21,11 +25,25 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val server = remember { 
+        val answerStore = InMemoryAnswerStore()
+        val settingsRepo = SettingsRepository(context)
+        val okHttpClient = OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .build()
+        val pipeline = PhotoPipelineImpl(
+            settingsRepo = settingsRepo,
+            answerStore = answerStore,
+            okHttpClient = okHttpClient,
+            isNetworkAvailable = { true } // stub for acceptance test
+        )
         ReceiverHttpServer(
             port = 5000, 
-            pipeline = FakePhotoPipeline(), 
-            answerStore = InMemoryAnswerStore(), 
+            pipeline = pipeline, 
+            answerStore = answerStore, 
             logBuffer = LogBuffer()
         ) 
     }

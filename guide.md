@@ -97,6 +97,10 @@ Current phase: 7.
 ## Status Log
 *(most recent entry first — append, don't rewrite)*
 
+- **2026-09-30** — AI Pipeline & Queue (Phase 8):
+  - **Done:** Implemented `VisionProvider` (with `GeminiProvider` and `ClaudeProvider`), `AiResponseParser`, and `PromptBuilder` enforcing the locked JSON schema contract. Implemented `PhotoPipelineImpl` as a robust Coroutine Channel queue with retries, 429 backoff, fallback provider support, network awareness, and `ImageResizer`. Wired `PhotoPipelineImpl` to `ReceiverHttpServer` inside `HomeScreen.kt` for acceptance testing. Updated `AnswerStore` to support REPLACE and APPEND modes. Added MockWebServer unit test suites for providers and parsing (15+ tests).
+  - **Next:** Phase 9 (Storage & gallery).
+
 - **2026-09-30** — Protocol Server implementation (Phase 7):
   - **Done:** Completely rewrote `ReceiverHttpServer` to precisely implement the §3 protocol contract (handling `/upload`, `/ping`, `/next`, `/repeat`, `/reset` with exact JSON structures). Added IP discovery prioritizing Wi-Fi/Hotspot. Created robust HTTP/1.1 parsing handling 8MB body caps, chunked encoding, and timeouts. Added `PhotoPipeline` and `AnswerStore` interfaces with fake/in-memory implementations.
   - **Decisions:** Put the acceptance test Start Server button directly on `HomeScreen.kt`. HTTP parsing does not rely on third-party HTTP libraries to remain lightweight and embedded.
