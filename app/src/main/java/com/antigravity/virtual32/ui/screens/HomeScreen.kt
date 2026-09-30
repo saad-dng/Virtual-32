@@ -9,11 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.antigravity.virtual32.ui.components.DottedBackgroundBox
-import com.antigravity.virtual32.receiver.server.ReceiverHttpServer
 import com.antigravity.virtual32.receiver.pipeline.PhotoPipelineImpl
-import com.antigravity.virtual32.data.InMemoryAnswerStore
+import com.antigravity.virtual32.receiver.server.ReceiverHttpServer
+import com.antigravity.virtual32.data.AppDatabase
+import com.antigravity.virtual32.data.RoomAnswerStore
 import com.antigravity.virtual32.receiver.server.LogBuffer
 import com.antigravity.virtual32.settings.SettingsRepository
+import com.antigravity.virtual32.util.GalleryWriter
+import com.antigravity.virtual32.util.PhotoCache
 import androidx.compose.ui.platform.LocalContext
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -27,7 +30,8 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val server = remember { 
-        val answerStore = InMemoryAnswerStore()
+        val db = AppDatabase.getDatabase(context)
+        val answerStore = RoomAnswerStore(db.answerDao())
         val settingsRepo = SettingsRepository(context)
         val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
@@ -38,6 +42,8 @@ fun HomeScreen(
             settingsRepo = settingsRepo,
             answerStore = answerStore,
             okHttpClient = okHttpClient,
+            galleryWriter = GalleryWriter(context),
+            photoCache = PhotoCache(context),
             isNetworkAvailable = { true } // stub for acceptance test
         )
         ReceiverHttpServer(

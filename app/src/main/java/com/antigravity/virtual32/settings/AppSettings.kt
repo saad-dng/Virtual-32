@@ -28,5 +28,6 @@ data class AppSettings(
     val simPort: Int = 5000,
     val simLoopback: Boolean = false,
     val simResolution: String = "UXGA",
-    val simJpegQuality: Int = 80
+    val simJpegQuality: Int = 80,
+    val startOnBoot: Boolean = false
 )

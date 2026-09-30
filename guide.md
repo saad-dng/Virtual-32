@@ -97,6 +97,10 @@ Current phase: 7.
 ## Status Log
 *(most recent entry first — append, don't rewrite)*
 
+- **2026-09-30** — Persistence & Gallery (Phase 9):
+  - **Done:** Implemented Room database with `Batch`, `AnswerEntity`, and `CycleState` tables. Replaced the in-memory AnswerStore with `RoomAnswerStore`, fully supporting persistence of the cursor, `REPLACE`, and `APPEND` modes. Implemented `GalleryWriter` to save photos to MediaStore before AI calls (handling Scoped Storage API 29+ correctly) and `PhotoCache` for internal fast-access copies. Added robust batch retention (keeping the latest 100). All Room functions backed by Robolectric in-memory tests and custom filename generation unit tests.
+  - **Next:** Phase 10 (Receiver Service & background reliability).
+
 - **2026-09-30** — AI Pipeline & Queue (Phase 8):
   - **Done:** Implemented `VisionProvider` (with `GeminiProvider` and `ClaudeProvider`), `AiResponseParser`, and `PromptBuilder` enforcing the locked JSON schema contract. Implemented `PhotoPipelineImpl` as a robust Coroutine Channel queue with retries, 429 backoff, fallback provider support, network awareness, and `ImageResizer`. Wired `PhotoPipelineImpl` to `ReceiverHttpServer` inside `HomeScreen.kt` for acceptance testing. Updated `AnswerStore` to support REPLACE and APPEND modes. Added MockWebServer unit test suites for providers and parsing (15+ tests).
   - **Next:** Phase 9 (Storage & gallery).

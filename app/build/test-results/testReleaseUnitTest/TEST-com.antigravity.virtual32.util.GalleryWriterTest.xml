@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.util.GalleryWriterTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:08:27.362Z" hostname="MR-ROBOT" time="0.0">
+  <properties/>
+  <testcase name="testFileNameGeneration" classname="com.antigravity.virtual32.util.GalleryWriterTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

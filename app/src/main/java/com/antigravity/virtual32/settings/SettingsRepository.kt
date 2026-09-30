@@ -32,6 +32,7 @@ open class SettingsRepository(private val context: Context?) {
         val SIM_LOOPBACK = booleanPreferencesKey("sim_loopback")
         val SIM_RESOLUTION = stringPreferencesKey("sim_resolution")
         val SIM_JPEG_QUALITY = intPreferencesKey("sim_jpeg_quality")
+        val START_ON_BOOT = booleanPreferencesKey("start_on_boot")
     }
 
     open val settingsFlow: Flow<AppSettings>
@@ -61,7 +62,8 @@ open class SettingsRepository(private val context: Context?) {
                 simPort = preferences[PreferencesKeys.SIM_PORT] ?: 5000,
                 simLoopback = preferences[PreferencesKeys.SIM_LOOPBACK] ?: false,
                 simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
-                simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80
+                simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80,
+                startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false
             )
         }
 
@@ -86,7 +88,8 @@ open class SettingsRepository(private val context: Context?) {
                 simPort = preferences[PreferencesKeys.SIM_PORT] ?: 5000,
                 simLoopback = preferences[PreferencesKeys.SIM_LOOPBACK] ?: false,
                 simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
-                simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80
+                simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80,
+                startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false
             )
             
             val updated = update(current)
@@ -107,6 +110,7 @@ open class SettingsRepository(private val context: Context?) {
             preferences[PreferencesKeys.SIM_LOOPBACK] = updated.simLoopback
             preferences[PreferencesKeys.SIM_RESOLUTION] = updated.simResolution
             preferences[PreferencesKeys.SIM_JPEG_QUALITY] = updated.simJpegQuality
+            preferences[PreferencesKeys.START_ON_BOOT] = updated.startOnBoot
         }
     }
 }

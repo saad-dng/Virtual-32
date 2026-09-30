@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:59:19.212Z" hostname="MR-ROBOT" time="0.019">
+<testsuite name="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:08:25.514Z" hostname="MR-ROBOT" time="0.033">
   <properties/>
-  <testcase name="testGeminiProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
-  <testcase name="testClaudeProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
-  <testcase name="testProvider_error429" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
-  <testcase name="testProvider_error500" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.004"/>
+  <testcase name="testGeminiProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.009"/>
+  <testcase name="testClaudeProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.008"/>
+  <testcase name="testProvider_error429" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.008"/>
+  <testcase name="testProvider_error500" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.008"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

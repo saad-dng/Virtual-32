@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.data.RoomAnswerStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:08:22.859Z" hostname="MR-ROBOT" time="1.956">
+  <properties/>
+  <testcase name="testReplaceAndNext" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="1.161"/>
+  <testcase name="testEmpty" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.034"/>
+  <testcase name="testEdit" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.047"/>
+  <testcase name="testRetention" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.626"/>
+  <testcase name="testCursorPersistence" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.035"/>
+  <testcase name="testAppend" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.028"/>
+  <testcase name="testRepeat" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.025"/>
+  <system-out><![CDATA[WARNING: No manifest file found at .\AndroidManifest.xml.
+Falling back to the Android OS resources only.
+To remove this warning, annotate your test class with @Config(manifest=Config.NONE).
+]]></system-out>
+  <system-err><![CDATA[No such manifest file: .\AndroidManifest.xml
+]]></system-err>
+</testsuite>

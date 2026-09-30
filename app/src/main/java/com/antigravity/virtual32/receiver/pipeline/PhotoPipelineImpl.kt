@@ -2,6 +2,8 @@ package com.antigravity.virtual32.receiver.pipeline
 
 import android.util.Log
 import com.antigravity.virtual32.data.AnswerStore
+import com.antigravity.virtual32.data.Batch
+import com.antigravity.virtual32.data.RoomAnswerStore
 import com.antigravity.virtual32.receiver.ai.ClaudeProvider
 import com.antigravity.virtual32.receiver.ai.GeminiProvider
 import com.antigravity.virtual32.receiver.ai.PromptBuilder
@@ -11,7 +13,9 @@ import com.antigravity.virtual32.receiver.ai.VisionProvider
 import com.antigravity.virtual32.settings.AiProvider
 import com.antigravity.virtual32.settings.AnswerMode
 import com.antigravity.virtual32.settings.SettingsRepository
+import com.antigravity.virtual32.util.GalleryWriter
 import com.antigravity.virtual32.util.ImageResizer
+import com.antigravity.virtual32.util.PhotoCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -37,8 +41,10 @@ data class PipelineState(
 
 class PhotoPipelineImpl(
     private val settingsRepo: SettingsRepository,
-    private val answerStore: AnswerStore,
+    private val answerStore: RoomAnswerStore,
     private val okHttpClient: OkHttpClient,
+    private val galleryWriter: GalleryWriter,
+    private val photoCache: PhotoCache,
     private val isNetworkAvailable: () -> Boolean
 ) : PhotoPipeline {
 
@@ -107,6 +113,14 @@ class PhotoPipelineImpl(
         updateState { it.copy(isPaused = false, currentStatus = "Analyzing") }
 
         val settings = settingsRepo.getSettings()
+        
+        val batchIdStr = java.util.UUID.randomUUID().toString().substring(0, 8)
+        var galleryUri: String? = null
+        if (settings.saveToGallery) {
+            galleryUri = galleryWriter.savePhoto(jpeg, "ESP", batchIdStr)
+        }
+        val cachePath = photoCache.saveInternal(jpeg, "b${batchIdStr}.jpg")
+
         val primaryProvider = if (settings.provider == AiProvider.GEMINI) {
             GeminiProvider(okHttpClient, settings.geminiKey)
         } else {
@@ -146,10 +160,22 @@ class PhotoPipelineImpl(
         }
 
         if (res.status == "ok") {
+            val batch = Batch(
+                source = "ESP",
+                photoPath = cachePath,
+                galleryUri = galleryUri,
+                status = res.status,
+                provider = settings.provider.name,
+                model = if (settings.provider == AiProvider.GEMINI) settings.geminiModel else settings.claudeModel,
+                promptName = settings.activePromptId,
+                promptHash = instruction.hashCode().toString(),
+                latencyMs = 0L, // Handled outside or we can measure here
+                rawResponse = null // If we want to store it, we need to pass it from parser. Skip for now.
+            )
             if (settings.answerMode == AnswerMode.REPLACE) {
-                answerStore.replace(res.answers)
+                answerStore.applyBatch(batch, res.answers, "REPLACE")
             } else {
-                answerStore.append(res.answers)
+                answerStore.applyBatch(batch, res.answers, "APPEND")
             }
         }
 

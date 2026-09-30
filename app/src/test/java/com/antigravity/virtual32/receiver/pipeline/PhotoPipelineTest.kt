@@ -1,7 +1,8 @@
 package com.antigravity.virtual32.receiver.pipeline
 
 import com.antigravity.virtual32.data.AnswerStore
-import com.antigravity.virtual32.data.InMemoryAnswerStore
+import com.antigravity.virtual32.data.NextResult
+import com.antigravity.virtual32.receiver.ai.RawAnswer
 import com.antigravity.virtual32.settings.AiProvider
 import com.antigravity.virtual32.settings.AnswerMode
 import com.antigravity.virtual32.settings.AppSettings
@@ -35,7 +36,7 @@ class PhotoPipelineTest {
     @Test
     fun testPipelineQueueOrder() = runBlocking {
         val repo = FakeSettingsRepo()
-        val store = InMemoryAnswerStore()
+        // store not needed here
         var callCount = 0
 
         val pipeline = object : PhotoPipeline {
