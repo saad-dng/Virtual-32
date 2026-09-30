@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.antigravity.virtual32.app-mergeDebugResources-2:/values-v24/values-v24.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\5d920c1ccf378043ad0d959d44799f75\\transformed\\appcompat-1.1.0\\res\\values-v24\\values-v24.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,212",
+                        "endColumns": "156,134",
+                        "endOffsets": "207,342"
+                    }
+                }
+            ]
+        }
+    ]
+}

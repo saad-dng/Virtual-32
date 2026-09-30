@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Virtual 32</string>
+    <string name="trigger_button">Trigger (GPIO 1)</string>
+    <string name="led_indicator">LED (GPIO 2)</string>
+    <string name="settings">Settings</string>
+    <string name="server_ip">Server IP Address</string>
+    <string name="server_port">Server Port</string>
+    <string name="resolution">OV3660 Resolution</string>
+    <string name="save">Save Settings</string>
+    <string name="camera_permission_required">Camera permission is required for the digital twin viewfinder.</string>
+</resources>

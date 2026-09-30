@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.network.OkHttpImageUploaderTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-09-26T16:23:01.368Z" hostname="MR-ROBOT" time="0.666">
+  <properties/>
+  <testcase name="testConnection_successAndFailure" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.135"/>
+  <testcase name="testUpload_MalformedOrUnexpectedCode" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.008"/>
+  <testcase name="testUpload_422ValidationError" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.003"/>
+  <testcase name="testUpload_Timeout" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.51"/>
+  <testcase name="testUpload_500ServerError" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.004"/>
+  <testcase name="testResolveEndpointUrl_handlesComplexInputs" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.001"/>
+  <testcase name="testUpload_200Success" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Sep 26, 2026 10:23:02 PM okhttp3.mockwebserver.MockWebServer$SocketHandler handle
+WARNING: MockWebServer[59296] connection from /127.0.0.1 didn't make a request
+]]></system-err>
+</testsuite>

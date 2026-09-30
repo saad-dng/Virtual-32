@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_cozy">#F7F4EE</color>
+    <color name="dot_color">#D0C7B8</color>
+    <color name="hardware_dark">#2B2A27</color>
+    <color name="hardware_gray">#7A7873</color>
+    <color name="led_idle">#9E9E9E</color>
+    <color name="led_red">#E53935</color>
+</resources>
