@@ -28,75 +28,45 @@ don't duplicate the spec elsewhere or ask the user to repeat it.
 
 ---
 
-## 1. Project Overview
+# §1 Project Overview
+Virtual 32 is the phone-side app for a university project: an ESP32-S3 Sense device takes a photo of multiple-choice questions when Button 1 is pressed, sends it to this app over the phone's hotspot, the app sends it to a vision AI, stores the answers, and the ESP32 shows them ONLY via LEDs (no display, no sound). Button 2 cycles through the answers one by one; a double-click repeats the current one. A red LED signals problems. Test material: practice/sample MCQ sheets only.
+The ESP32 firmware is built outside Antigravity. This app must follow the contract in §3 exactly so the firmware can be written against it.
 
-**Anti-Gravity** is a unified dual-mode Android app providing the complete end-to-end pipeline on two phones before any real soldering happens:
+# §2 Modes (one APK)
+- Receiver (default): embedded HTTP server + AI pipeline + answer store + dashboard. Runs as a foreground service.
+- Simulator: the phone pretends to be the ESP32 (camera, virtual Button 1/2, virtual blue/red LEDs) using the same protocol and blink patterns. Used for testing before hardware arrives; can target this phone (loopback) or a second phone.
+Navigation: bottom bar = Home | Answers | Simulator | Settings.
 
-- **Phone 2 Mode (ESP32-S3 Camera Twin):** Simulates the ESP32-S3-CAM + OV3660 hardware rig: camera framing, silent trigger, GPIO 2 status LED, and multipart image upload.
-- **Phone 1 Mode (Receiver & Earbud Brain):** Acts as the receiver hub: runs an embedded local HTTP server (`/upload` on port 5000/8080), calls the Google Gemini Vision API to analyze incoming images, and streams spoken answers via Android Text-to-Speech (TTS) directly into Bluetooth earbuds.
+# §3 Protocol contract (source of truth; mirror in docs/ESP32_CONTRACT.md)
+Base URL: http://<phone-ip>:5000 (fallback port 8080). All replies are JSON with header "Connection: close".
+- GET /ping (alias /status) -> {"ok":true,"app":"virtual32","answers":N,"cursor":i,"busy":bool}. Any call updates "ESP last seen". The ESP pings about every 10 s.
+- POST /upload -> body is multipart field "image" OR raw Content-Type image/jpeg. Validate JPEG magic bytes (FF D8) and size 2 KB–8 MB (else 400 {"status":"error","reason":"bad_image"} / 413). Blocks until the AI result is ready (max 45 s), then 200:
+  {"status":"ok","count":N,"batch":id} | {"status":"unclear","reason":"..."} | {"status":"error","reason":"ai_failed|no_key|no_internet|timeout|paused"}.
+- GET /next -> advances the cycle. 200 {"ok":true,"q":7,"of":20,"choice":"C","blinks":3}. After the LAST answer, the next call returns {"ok":true,"end":true,"of":20} (cycle complete) and the following call wraps to the first answer. No answers stored: {"ok":false,"reason":"empty"}.
+- GET /repeat -> same shape as /next for the CURRENT answer without advancing. If nothing is current: {"ok":false,"reason":"empty"}.
+- GET /reset -> cursor back to the start, {"ok":true}.
+- choice -> blinks: A=1, B=2, C=3, D=4, E=5.
+- New batch rules: Replace mode = new photo replaces the active list and resets the cycle. Append mode = new answers are added to the end of the active list (same question number replaced by the newer answer), cursor unchanged.
+- Every photo is processed the same way, forever (continuous mode). Photos arriving while one is processing are queued FIFO.
 
-A single APK installs on both devices, with an instant toggle between **Camera Twin (Phone 2)** and **Earbud Brain (Phone 1)**.
+# §4 Blink language (identical in Simulator, app docs and future firmware)
+Blue LED: answer = N blinks (250 ms on / 250 ms off) | processing = slow pulse (500/500) until a reply | ready (upload ok) = solid 1000 ms.
+Red LED: photo unclear = 1 long (1200 ms) | cycle complete = 2 medium (500 on / 300 off) | no answers yet = 1 short (150) + 1 long (800), 200 ms gap | server unreachable (ESP-side) = 3 fast (120/120) | server/AI error = 5 fast (120/120).
+A new button press interrupts any pattern in progress. Double-click window = 350 ms. All timings live in one constants object (BlinkPatterns.kt).
 
----
+# §5 Features
+Core: continuous processing queue; answer list in the app (with cursor mirror, manual edit, low-confidence flag); every photo saved to the gallery (Pictures/Virtual32); editable AI prompt with presets and a locked JSON output contract; Gemini + Claude providers with fallback; runs reliably in the background.
+Extras: process photos from the gallery (test without ESP); reprocess a batch with a new prompt; history + export; diagnostics + self-test; usage stats; settings backup/restore; Quick Settings tile; pause-AI switch.
 
-## 2. Phone 2 App Spec
-
-### UI
-- Camera viewfinder — mimics the real OV3660 sensor's framing/behavior (see
-  §3 for sensor specs to match).
-- Virtual trigger button → stands in for **GPIO 1** on real hardware.
-- Virtual LED status indicator → stands in for **GPIO 2** on real hardware.
-- Settings screen: server IP (and port) for Phone 1's Termux server.
-- Visual style: cozy, dotted background, per the reference screenshot the
-  user shared during planning.
-
-### Core workflow
-1. User taps the trigger.
-2. App **silently** captures a JPEG frame — no shutter sound, no capture
-   animation (this must feel like a silent hardware trigger, not a camera
-   app photo).
-3. App POSTs the JPEG to Phone 1's Termux server at the configured IP, over
-   the local hotspot/LAN.
-4. Response handling (LED = GPIO 2 stand-in):
-   | Response | LED state | Hex Color | Vibration |
-   |---|---|---|---|
-   | HTTP 200 (Success) | Gray (idle) | `#9E9C96` | None |
-   | HTTP 422 (Validation) | Red | `#D32F2F` | 1 second continuous buzz (`longArrayOf(0, 1000)`) |
-   | Timeout / Unreachable | Amber | `#FFB300` | 2 short pulses (`longArrayOf(0, 200, 100, 200)`) |
-   | No Network / Hotspot Down | Blue | `#1E88E5` | 3 rapid pulses (`longArrayOf(0, 100, 100, 100, 100, 100)`) |
-   | HTTP 5xx (Server Error) | Purple | `#8E24AA` | 1 long + 1 short buzz (`longArrayOf(0, 500, 150, 200)`) |
-   | Malformed / Unexpected Body | Orange | `#FB8C00` | 1 medium pulse (`longArrayOf(0, 400)`) |
-
-### Finalized Error Cases & Mappings
-The extra error handling cases beyond 200/422 have been finalized and verified in `ResponseStatusHandler.kt`:
-- **Request timeout / server unreachable:** Amber LED (`#FFB300`), 2 short buzzes.
-- **No network / hotspot disconnected:** Blue LED (`#1E88E5`), 3 rapid pulses.
-- **HTTP 5xx server failure:** Purple LED (`#8E24AA`), 1 long + 1 short buzz.
-- **Malformed or unexpected response body:** Orange LED (`#FB8C00`), 1 medium pulse.
-Each status is handled through `ResponseStatusHandler` and verified with unit tests (`ResponseStatusHandlerTest`).
-
-### Image capture quality — match real OV3660 sensor
-Real OV3660 hardware spec (for parity, not necessarily to run at max):
-- Max resolution: 2048×1536 (3MP, "QXGA")
-- Output format: JPEG (also supports raw/YUV/RGB565, but JPEG is what
-  this pipeline uses)
-- Diagonal field of view: ~65–68°
-Default the app's capture to a resolution/quality that a real ESP32-S3-CAM
-would realistically stream at (not full 3MP — that sensor is typically run
-down-scaled for speed), and make this tunable so it can be matched exactly
-once real hardware is in hand.
-
-### Upload approach
-Multipart/form-data POST of the JPEG to the configured server IP — this is
-the standard, least-surprising approach and matches what a Flask server on
-the other end will expect with minimal glue code.
-
----
-
-## 3. Architecture & Unified Scope
-- **Phone 2 (Digital Twin Camera):** Built natively with CameraX, silent capture, OV3660 framing, GPIO 1 trigger, GPIO 2 status LED, OkHttp multipart POST.
-- **Phone 1 (Earbud Brain / Receiver):** Built natively into this same app with an embedded HTTP server listening on `/upload`, Google Gemini Vision API client, and Android TextToSpeech streaming to connected Bluetooth earbuds.
-- **Out of scope:** Dedicated Termux scripts (replaced by native Android embedded receiver).
+# §6 Failure & backup matrix
+| Failure | Behaviour |
+|---|---|
+| Primary AI fails / rate-limited | Retry 2x with backoff, then fallback provider if configured |
+| No internet | Photo stays queued (gallery copy already saved), auto-retry when network returns; /upload replies error/no_internet |
+| ESP32 dies or is absent | Next / Repeat / Reset available on the phone; answers persist |
+| App/process killed | Foreground service restarts (sticky); answers + cursor restored from the database |
+| Hotspot/Wi-Fi changes | Server rebinds, notification and Home show the new IP |
+| Garbage AI output | Tolerant parser; one retry; otherwise status error |
 
 ---
 
@@ -117,27 +87,18 @@ that's what this file is for.
 
 ---
 
-## Roadmap
-*(where any given task sits in the bigger picture — update phase status as
-each completes, don't delete finished phases, they're useful history)*
-
-1. **Phone 2 scaffolding** [DONE] — package structure (`camera/`, `network/`, `settings/`, `ui/`), camera capture screen with OV3660 framing, settings screen with DataStore persistence, silent JPEG capture via CameraX.
-2. **Phone 2 networking** [DONE] — wired trigger to real OkHttp multipart POST; implemented centralized `ResponseStatusHandler` with finalized LED and vibration feedback for all 6 response states; verified via unit tests (`ResponseStatusHandlerTest`) and APK assemble.
-3. **Standalone test pass** [DONE] — built standalone local mock server (`tools/mock_server.py`) supporting dynamic mode switching (`cycle`, `200`, `422`, `500`, `malformed`, `timeout`) and saving captured frames; automated Python test runner (`tools/test_mock_server.py`); MockWebServer unit tests in Android (`OkHttpImageUploaderTest`).
-4. **Polish & real-world parity** [DONE] — tuned OV3660 capture resolution presets with hardware DMA payload estimates, added tunable JPEG compression quality (`JpegQualityPreset`), animated diode pulse/glow on active LED indicator, hardware telemetry strip on main camera view, multi-device layout responsiveness, verified 15 unit tests and clean APK assembly.
-5. **Phone 1 Receiver & Earbud Brain** [DONE] — embedded HTTP server (`/upload` on port 5000/8080), Gemini 1.5 Flash Vision API integration, Android Text-to-Speech (TTS) routed to Bluetooth earbuds, and live reception dashboard.
-6. **End-to-end integration test** — both phones live on one hotspot,
-   full loop, deliberately break things to confirm error paths hold up
-   outside the mock.
-7. **Real hardware** — port trigger/capture/upload logic to actual
-   ESP32-S3 + OV3660 firmware; GPIO 1/2 become real pins.
-
-**Current phase: 6 (End-to-end integration test).**
+# Roadmap
+Legacy foundation (done): 1 Scaffolding · 2 Networking · 3 Standalone test pass · 4 Polish · 5 Old receiver/earbuds (now being replaced).
+6 Cleanup & foundation · 7 Protocol server · 8 AI pipeline & queue · 9 Storage & gallery · 10 Background reliability · 11 Dashboard & Answers · 12 AI & Prompt settings · 13 Simulator v2 · 14 Power features · 15 Integration hardening & docs · 16 ESP32 firmware (outside Antigravity; uses docs/ESP32_CONTRACT.md).
+Current phase: 6.
 
 ---
 
 ## Status Log
 *(most recent entry first — append, don't rewrite)*
+
+- **2026-09-30** — Docs migrated to the MCQ Blinker direction:
+  - **Next:** Phase 6.
 
 - **2026-09-26** — App Identity, Theme-Matched Logo & Welcome Wizard (Phase 6 Polish):
   - **App Name Unified:** Formally set app name to **Virtual 32** in `strings.xml`, `AndroidManifest.xml`, screen headers, and guides.
