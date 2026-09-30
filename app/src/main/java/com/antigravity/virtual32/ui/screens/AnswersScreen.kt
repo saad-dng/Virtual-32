@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -187,6 +188,7 @@ fun AnswersScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .animateContentSize()
                                 .combinedClickable(
                                     onClick = { viewModel.setCursor(i) },
                                     onLongClick = { answerToEdit = ans }
@@ -194,7 +196,8 @@ fun AnswersScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (isCursor) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-                            )
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
                             Row(
                                 modifier = Modifier.padding(16.dp).fillMaxWidth(),

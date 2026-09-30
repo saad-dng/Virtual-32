@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import android.content.Intent
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.animateContentSize
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -94,6 +95,7 @@ fun HistoryScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateContentSize()
                             .combinedClickable(
                                 onClick = { viewModel.toggleSelection(batch.id) },
                                 onLongClick = { viewModel.toggleSelection(batch.id) }
@@ -101,7 +103,8 @@ fun HistoryScreen(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-                        )
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (batch.photoPath != null) {

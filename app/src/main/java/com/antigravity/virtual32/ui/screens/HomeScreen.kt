@@ -46,6 +46,11 @@ import com.antigravity.virtual32.util.OemUtils
 import java.io.File
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
 
 @Composable
 fun HomeScreen(
@@ -163,7 +168,8 @@ fun StatusCard(health: BackgroundHealth, onChecklistClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Receiver Status", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -233,9 +239,10 @@ fun StatusCard(health: BackgroundHealth, onChecklistClick: () -> Unit) {
 @Composable
 fun PipelineCard(state: PipelineState?, onImageTap: (String) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Photo Pipeline", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
@@ -254,18 +261,26 @@ fun PipelineCard(state: PipelineState?, onImageTap: (String) -> Unit) {
                 Text("Idle (Last Latency: ${state.lastLatencyMs}ms)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            if (state.lastPhotoPath != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                AsyncImage(
-                    model = File(state.lastPhotoPath),
-                    contentDescription = "Current photo",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onImageTap(state.lastPhotoPath) },
-                    contentScale = ContentScale.Crop
-                )
+            AnimatedVisibility(
+                visible = state.lastPhotoPath != null,
+                enter = fadeIn(animationSpec = tween(500)),
+                exit = fadeOut(animationSpec = tween(500))
+            ) {
+                if (state.lastPhotoPath != null) {
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        AsyncImage(
+                            model = File(state.lastPhotoPath),
+                            contentDescription = "Current photo",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { onImageTap(state.lastPhotoPath) },
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
             }
         }
     }
@@ -274,11 +289,12 @@ fun PipelineCard(state: PipelineState?, onImageTap: (String) -> Unit) {
 @Composable
 fun NowSignallingCard(lastResult: NextResult?) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier.padding(16.dp).animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Now Signalling", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -311,7 +327,8 @@ fun ManualControlsCard(onNext: () -> Unit, onRepeat: () -> Unit, onReset: () -> 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = onReset, modifier = Modifier.weight(1f).height(48.dp)) { Text("Reset") }
@@ -326,11 +343,12 @@ fun ManualControlsCard(onNext: () -> Unit, onRepeat: () -> Unit, onReset: () -> 
 @Composable
 fun MiniLogCard(logs: List<String>) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp).animateContentSize()) {
             Text("Recent Server Logs", fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             val recent = logs.takeLast(5)
@@ -350,7 +368,8 @@ fun BackgroundHealthCard(health: BackgroundHealth, onChecklistClick: () -> Unit)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(

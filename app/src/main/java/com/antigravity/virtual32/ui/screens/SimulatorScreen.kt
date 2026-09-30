@@ -73,102 +73,103 @@ fun SimulatorScreen(
             }
         )
 
-        // Viewfinder
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(Color.Black)
-        ) {
-            AndroidView(
-                factory = { ctx ->
-                    val previewView = PreviewView(ctx)
-                    val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                    cameraProviderFuture.addListener({
-                        val cameraProvider = cameraProviderFuture.get()
-                        val preview = Preview.Builder().build().also {
-                            it.surfaceProvider = previewView.surfaceProvider
-                        }
-                        
-                        val targetSize = when (resolution) {
-                            "VGA" -> Size(640, 480)
-                            "SVGA" -> Size(800, 600)
-                            "XGA" -> Size(1024, 768)
-                            "SXGA" -> Size(1280, 1024)
-                            "UXGA" -> Size(1600, 1200)
-                            else -> Size(1600, 1200)
-                        }
-
-                        val ic = ImageCapture.Builder()
-                            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                            .setTargetResolution(targetSize)
-                            .build()
-                        imageCapture = ic
-
-                        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                        try {
-                            cameraProvider.unbindAll()
-                            cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, ic)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }, ContextCompat.getMainExecutor(ctx))
-                    previewView
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-
-            // Lamps overlay
-            Row(
-                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            // Viewfinder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(3f / 4f)
+                    .background(Color.Black)
             ) {
-                Box(
-                    modifier = Modifier.size(24.dp).clip(CircleShape).background(if (lamps.blueOn) Color.Blue else Color.DarkGray)
-                )
-                Box(
-                    modifier = Modifier.size(24.dp).clip(CircleShape).background(if (lamps.redOn) Color.Red else Color.DarkGray)
-                )
-            }
-
-            // Buttons overlay
-            Row(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(
-                    onClick = {
-                        val ic = imageCapture ?: return@Button
-                        ic.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
-                            override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                                val buffer = imageProxy.planes[0].buffer
-                                val bytes = ByteArray(buffer.remaining())
-                                buffer.get(bytes)
-                                imageProxy.close()
-                                viewModel.onButton1(bytes)
+                AndroidView(
+                    factory = { ctx ->
+                        val previewView = PreviewView(ctx)
+                        val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                        cameraProviderFuture.addListener({
+                            val cameraProvider = cameraProviderFuture.get()
+                            val preview = Preview.Builder().build().also {
+                                it.surfaceProvider = previewView.surfaceProvider
                             }
-                            override fun onError(exception: ImageCaptureException) {
-                                exception.printStackTrace()
+                            
+                            val targetSize = when (resolution) {
+                                "VGA" -> Size(640, 480)
+                                "SVGA" -> Size(800, 600)
+                                "XGA" -> Size(1024, 768)
+                                "SXGA" -> Size(1280, 1024)
+                                "UXGA" -> Size(1600, 1200)
+                                else -> Size(1600, 1200)
                             }
-                        })
+    
+                            val ic = ImageCapture.Builder()
+                                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                                .setTargetResolution(targetSize)
+                                .build()
+                            imageCapture = ic
+    
+                            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                            try {
+                                cameraProvider.unbindAll()
+                                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, ic)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }, ContextCompat.getMainExecutor(ctx))
+                        previewView
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+    
+                // Lamps overlay
+                Row(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.size(24.dp).clip(CircleShape).background(if (lamps.blueOn) Color.Blue else Color.DarkGray)
+                    )
+                    Box(
+                        modifier = Modifier.size(24.dp).clip(CircleShape).background(if (lamps.redOn) Color.Red else Color.DarkGray)
+                    )
+                }
+    
+                // Buttons overlay
+                Row(
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            val ic = imageCapture ?: return@Button
+                            ic.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
+                                override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                                    val buffer = imageProxy.planes[0].buffer
+                                    val bytes = ByteArray(buffer.remaining())
+                                    buffer.get(bytes)
+                                    imageProxy.close()
+                                    viewModel.onButton1(bytes)
+                                }
+                                override fun onError(exception: ImageCaptureException) {
+                                    exception.printStackTrace()
+                                }
+                            })
+                        }
+                    ) {
+                        Text("BTN 1 (Capture)")
                     }
-                ) {
-                    Text("BTN 1 (Capture)")
-                }
-
-                Button(
-                    onClick = { viewModel.onButton2() }
-                ) {
-                    Text("BTN 2 (Next/Rep)")
+    
+                    Button(
+                        onClick = { viewModel.onButton2() }
+                    ) {
+                        Text("BTN 2 (Next/Rep)")
+                    }
                 }
             }
-        }
-
-        // Settings
-        Column(
-            modifier = Modifier.fillMaxWidth().height(250.dp).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+    
+            // Settings
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
             Text("Simulator Network", fontWeight = FontWeight.SemiBold)
             
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -241,6 +242,7 @@ fun SimulatorScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Apply Settings (rebinds camera)")
+            }
             }
         }
     }
