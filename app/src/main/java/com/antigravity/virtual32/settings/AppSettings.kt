@@ -1,36 +1,32 @@
 package com.antigravity.virtual32.settings
 
-import com.antigravity.virtual32.camera.JpegQualityPreset
-import com.antigravity.virtual32.camera.Ov3660Resolution
+import kotlinx.serialization.Serializable
 
-/**
- * Operating mode of the application.
- * Allows a single APK to act as either the Camera Twin rig (Phone 2) or the Receiver Earbud Brain (Phone 1).
- */
-enum class AppMode(val label: String) {
-    CAMERA_TWIN("Phone 2: ESP32-S3 Camera Twin"),
-    RECEIVER_BRAIN("Phone 1: Earbud Brain & Receiver")
+enum class AiProvider {
+    GEMINI, CLAUDE, NONE
 }
 
-/**
- * Data model for persisted configuration.
- */
+enum class AnswerMode {
+    REPLACE, APPEND
+}
+
+@Serializable
 data class AppSettings(
-    val serverIp: String = DEFAULT_SERVER_IP,
-    val serverPort: Int = DEFAULT_SERVER_PORT,
-    val resolution: Ov3660Resolution = Ov3660Resolution.DEFAULT,
-    val jpegQuality: Int = JpegQualityPreset.DEFAULT.qualityPercentage,
-    val appMode: AppMode = AppMode.CAMERA_TWIN,
-    val receiverPort: Int = DEFAULT_RECEIVER_PORT,
-    val geminiApiKey: String = "",
-    val geminiPrompt: String = DEFAULT_GEMINI_PROMPT,
-    val hasCompletedWelcome: Boolean = false
-) {
-    companion object {
-        const val DEFAULT_SERVER_IP = "192.168.43.1"
-        const val DEFAULT_SERVER_PORT = 5000
-        const val DEFAULT_RECEIVER_PORT = 5000
-        const val DEFAULT_GEMINI_PROMPT =
-            "You are an earbud voice assistant for a wearable camera. Briefly describe what is in front of the user in 1-2 punchy sentences."
-    }
-}
+    val serverPort: Int = 5000,
+    val provider: AiProvider = AiProvider.GEMINI,
+    val fallbackProvider: AiProvider = AiProvider.NONE,
+    val geminiModel: String = "gemini-1.5-flash",
+    val claudeModel: String = "claude-sonnet-5-5",
+    val geminiKey: String = "",
+    val claudeKey: String = "",
+    val activePromptId: String = "default",
+    val answerMode: AnswerMode = AnswerMode.REPLACE,
+    val saveToGallery: Boolean = true,
+    val pauseAi: Boolean = false,
+    val requestTimeoutSec: Int = 40,
+    val simHost: String = "127.0.0.1",
+    val simPort: Int = 5000,
+    val simLoopback: Boolean = false,
+    val simResolution: String = "UXGA",
+    val simJpegQuality: Int = 80
+)

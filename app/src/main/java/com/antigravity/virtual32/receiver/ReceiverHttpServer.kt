@@ -21,7 +21,6 @@ import java.net.NetworkInterface
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.Collections
-import org.json.JSONObject
 
 data class NetworkInterfaceDetail(
     val ip: String,
@@ -31,7 +30,7 @@ data class NetworkInterfaceDetail(
 )
 
 /**
- * Embedded HTTP server for Phone 1 (Earbud Brain).
+ * Embedded HTTP server for Receiver.
  * Receives multipart JPEG uploads from Phone 2 on /upload, invokes Gemini Vision,
  * and responds with HTTP 200 (or HTTP 422 on invalid payload).
  */
@@ -218,7 +217,7 @@ class ReceiverHttpServer(
             Log.d(TAG, "Request: $requestLine from $clientIp")
 
             if (requestLine.startsWith("GET /status") || requestLine.startsWith("GET / ")) {
-                val body = "{\"status\":\"online\",\"role\":\"Phone 1 Earbud Brain\"}"
+                val body = "{\"status\":\"online\",\"role\":\"Receiver\"}"
                 sendResponse(output, 200, "OK", "application/json", body.toByteArray())
                 return@withContext
             }

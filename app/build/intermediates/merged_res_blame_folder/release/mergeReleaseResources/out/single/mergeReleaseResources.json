@@ -1,0 +1,58 @@
+[
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/xml_data_extraction_rules.xml.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/xml_network_security_config.xml.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/xml/network_security_config.xml"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/xml_backup_rules.xml.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/drawable_app_logo.jpg.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/drawable/app_logo.jpg"
+    },
+    {
+        "merged": "com.antigravity.virtual32.app-release-4:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.antigravity.virtual32.app-main-5:/mipmap-xxhdpi/ic_launcher.png"
+    }
+]

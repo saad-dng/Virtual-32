@@ -2,37 +2,35 @@ package com.antigravity.virtual32.settings
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.antigravity.virtual32.camera.JpegQualityPreset
-import com.antigravity.virtual32.camera.Ov3660Resolution
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "anti_gravity_settings")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-/**
- * Persists and retrieves application settings using Jetpack Preferences DataStore.
- * Supports both Phone 2 (Camera Twin) and Phone 1 (Receiver Brain) configuration.
- */
 class SettingsRepository(private val context: Context) {
 
     private object PreferencesKeys {
-        val SERVER_IP = stringPreferencesKey("server_ip")
         val SERVER_PORT = intPreferencesKey("server_port")
-        val RESOLUTION_LABEL = stringPreferencesKey("resolution_label")
-        val JPEG_QUALITY = intPreferencesKey("jpeg_quality")
-        val APP_MODE = stringPreferencesKey("app_mode")
-        val RECEIVER_PORT = intPreferencesKey("receiver_port")
-        val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
-        val GEMINI_PROMPT = stringPreferencesKey("gemini_prompt")
-        val HAS_COMPLETED_WELCOME = androidx.datastore.preferences.core.booleanPreferencesKey("has_completed_welcome")
+        val PROVIDER = stringPreferencesKey("provider")
+        val FALLBACK_PROVIDER = stringPreferencesKey("fallback_provider")
+        val GEMINI_MODEL = stringPreferencesKey("gemini_model")
+        val CLAUDE_MODEL = stringPreferencesKey("claude_model")
+        val GEMINI_KEY = stringPreferencesKey("gemini_key")
+        val CLAUDE_KEY = stringPreferencesKey("claude_key")
+        val ACTIVE_PROMPT_ID = stringPreferencesKey("active_prompt_id")
+        val ANSWER_MODE = stringPreferencesKey("answer_mode")
+        val SAVE_TO_GALLERY = booleanPreferencesKey("save_to_gallery")
+        val PAUSE_AI = booleanPreferencesKey("pause_ai")
+        val REQUEST_TIMEOUT_SEC = intPreferencesKey("request_timeout_sec")
+        val SIM_HOST = stringPreferencesKey("sim_host")
+        val SIM_PORT = intPreferencesKey("sim_port")
+        val SIM_LOOPBACK = booleanPreferencesKey("sim_loopback")
+        val SIM_RESOLUTION = stringPreferencesKey("sim_resolution")
+        val SIM_JPEG_QUALITY = intPreferencesKey("sim_jpeg_quality")
     }
 
     val settingsFlow: Flow<AppSettings> = context.dataStore.data
@@ -44,62 +42,67 @@ class SettingsRepository(private val context: Context) {
             }
         }
         .map { preferences ->
-            val ip = preferences[PreferencesKeys.SERVER_IP] ?: AppSettings.DEFAULT_SERVER_IP
-            val port = preferences[PreferencesKeys.SERVER_PORT] ?: AppSettings.DEFAULT_SERVER_PORT
-            val resLabel = preferences[PreferencesKeys.RESOLUTION_LABEL] ?: Ov3660Resolution.DEFAULT.name
-            val resolution = Ov3660Resolution.fromLabel(resLabel)
-            val quality = preferences[PreferencesKeys.JPEG_QUALITY] ?: JpegQualityPreset.DEFAULT.qualityPercentage
-            val modeStr = preferences[PreferencesKeys.APP_MODE] ?: AppMode.CAMERA_TWIN.name
-            val mode = runCatching { AppMode.valueOf(modeStr) }.getOrDefault(AppMode.CAMERA_TWIN)
-            val recPort = preferences[PreferencesKeys.RECEIVER_PORT] ?: AppSettings.DEFAULT_RECEIVER_PORT
-            val apiKey = preferences[PreferencesKeys.GEMINI_API_KEY] ?: ""
-            val prompt = preferences[PreferencesKeys.GEMINI_PROMPT] ?: AppSettings.DEFAULT_GEMINI_PROMPT
-            val completedWelcome = preferences[PreferencesKeys.HAS_COMPLETED_WELCOME] ?: false
-
             AppSettings(
-                serverIp = ip,
-                serverPort = port,
-                resolution = resolution,
-                jpegQuality = quality,
-                appMode = mode,
-                receiverPort = recPort,
-                geminiApiKey = apiKey,
-                geminiPrompt = prompt,
-                hasCompletedWelcome = completedWelcome
+                serverPort = preferences[PreferencesKeys.SERVER_PORT] ?: 5000,
+                provider = try { AiProvider.valueOf(preferences[PreferencesKeys.PROVIDER] ?: "GEMINI") } catch (e: Exception) { AiProvider.GEMINI },
+                fallbackProvider = try { AiProvider.valueOf(preferences[PreferencesKeys.FALLBACK_PROVIDER] ?: "NONE") } catch (e: Exception) { AiProvider.NONE },
+                geminiModel = preferences[PreferencesKeys.GEMINI_MODEL] ?: "gemini-1.5-flash",
+                claudeModel = preferences[PreferencesKeys.CLAUDE_MODEL] ?: "claude-sonnet-5-5",
+                geminiKey = preferences[PreferencesKeys.GEMINI_KEY] ?: "",
+                claudeKey = preferences[PreferencesKeys.CLAUDE_KEY] ?: "",
+                activePromptId = preferences[PreferencesKeys.ACTIVE_PROMPT_ID] ?: "default",
+                answerMode = try { AnswerMode.valueOf(preferences[PreferencesKeys.ANSWER_MODE] ?: "REPLACE") } catch (e: Exception) { AnswerMode.REPLACE },
+                saveToGallery = preferences[PreferencesKeys.SAVE_TO_GALLERY] ?: true,
+                pauseAi = preferences[PreferencesKeys.PAUSE_AI] ?: false,
+                requestTimeoutSec = preferences[PreferencesKeys.REQUEST_TIMEOUT_SEC] ?: 40,
+                simHost = preferences[PreferencesKeys.SIM_HOST] ?: "127.0.0.1",
+                simPort = preferences[PreferencesKeys.SIM_PORT] ?: 5000,
+                simLoopback = preferences[PreferencesKeys.SIM_LOOPBACK] ?: false,
+                simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
+                simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80
             )
         }
 
-    suspend fun updateSettings(
-        serverIp: String,
-        serverPort: Int,
-        resolution: Ov3660Resolution,
-        jpegQuality: Int = JpegQualityPreset.DEFAULT.qualityPercentage
-    ) {
+    suspend fun updateSettings(update: (AppSettings) -> AppSettings) {
         context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SERVER_IP] = serverIp.trim()
-            preferences[PreferencesKeys.SERVER_PORT] = serverPort
-            preferences[PreferencesKeys.RESOLUTION_LABEL] = resolution.name
-            preferences[PreferencesKeys.JPEG_QUALITY] = jpegQuality.coerceIn(1, 100)
-        }
-    }
-
-    suspend fun updateAppMode(mode: AppMode) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.APP_MODE] = mode.name
-        }
-    }
-
-    suspend fun updateGeminiConfig(apiKey: String, prompt: String, receiverPort: Int) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.GEMINI_API_KEY] = apiKey.trim()
-            preferences[PreferencesKeys.GEMINI_PROMPT] = prompt.trim()
-            preferences[PreferencesKeys.RECEIVER_PORT] = receiverPort
-        }
-    }
-
-    suspend fun setCompletedWelcome(completed: Boolean = true) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.HAS_COMPLETED_WELCOME] = completed
+            val current = AppSettings(
+                serverPort = preferences[PreferencesKeys.SERVER_PORT] ?: 5000,
+                provider = try { AiProvider.valueOf(preferences[PreferencesKeys.PROVIDER] ?: "GEMINI") } catch (e: Exception) { AiProvider.GEMINI },
+                fallbackProvider = try { AiProvider.valueOf(preferences[PreferencesKeys.FALLBACK_PROVIDER] ?: "NONE") } catch (e: Exception) { AiProvider.NONE },
+                geminiModel = preferences[PreferencesKeys.GEMINI_MODEL] ?: "gemini-1.5-flash",
+                claudeModel = preferences[PreferencesKeys.CLAUDE_MODEL] ?: "claude-sonnet-5-5",
+                geminiKey = preferences[PreferencesKeys.GEMINI_KEY] ?: "",
+                claudeKey = preferences[PreferencesKeys.CLAUDE_KEY] ?: "",
+                activePromptId = preferences[PreferencesKeys.ACTIVE_PROMPT_ID] ?: "default",
+                answerMode = try { AnswerMode.valueOf(preferences[PreferencesKeys.ANSWER_MODE] ?: "REPLACE") } catch (e: Exception) { AnswerMode.REPLACE },
+                saveToGallery = preferences[PreferencesKeys.SAVE_TO_GALLERY] ?: true,
+                pauseAi = preferences[PreferencesKeys.PAUSE_AI] ?: false,
+                requestTimeoutSec = preferences[PreferencesKeys.REQUEST_TIMEOUT_SEC] ?: 40,
+                simHost = preferences[PreferencesKeys.SIM_HOST] ?: "127.0.0.1",
+                simPort = preferences[PreferencesKeys.SIM_PORT] ?: 5000,
+                simLoopback = preferences[PreferencesKeys.SIM_LOOPBACK] ?: false,
+                simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
+                simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80
+            )
+            
+            val updated = update(current)
+            preferences[PreferencesKeys.SERVER_PORT] = updated.serverPort
+            preferences[PreferencesKeys.PROVIDER] = updated.provider.name
+            preferences[PreferencesKeys.FALLBACK_PROVIDER] = updated.fallbackProvider.name
+            preferences[PreferencesKeys.GEMINI_MODEL] = updated.geminiModel
+            preferences[PreferencesKeys.CLAUDE_MODEL] = updated.claudeModel
+            preferences[PreferencesKeys.GEMINI_KEY] = updated.geminiKey
+            preferences[PreferencesKeys.CLAUDE_KEY] = updated.claudeKey
+            preferences[PreferencesKeys.ACTIVE_PROMPT_ID] = updated.activePromptId
+            preferences[PreferencesKeys.ANSWER_MODE] = updated.answerMode.name
+            preferences[PreferencesKeys.SAVE_TO_GALLERY] = updated.saveToGallery
+            preferences[PreferencesKeys.PAUSE_AI] = updated.pauseAi
+            preferences[PreferencesKeys.REQUEST_TIMEOUT_SEC] = updated.requestTimeoutSec
+            preferences[PreferencesKeys.SIM_HOST] = updated.simHost
+            preferences[PreferencesKeys.SIM_PORT] = updated.simPort
+            preferences[PreferencesKeys.SIM_LOOPBACK] = updated.simLoopback
+            preferences[PreferencesKeys.SIM_RESOLUTION] = updated.simResolution
+            preferences[PreferencesKeys.SIM_JPEG_QUALITY] = updated.simJpegQuality
         }
     }
 }

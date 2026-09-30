@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.receiver.GeminiVisionClientTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:32:05.675Z" hostname="MR-ROBOT" time="0.028">
+  <properties/>
+  <testcase name="testAnalyzeImage_successResponse_parsesText" classname="com.antigravity.virtual32.receiver.GeminiVisionClientTest" time="0.023"/>
+  <testcase name="testAnalyzeImage_apiError_returnsErrorResult" classname="com.antigravity.virtual32.receiver.GeminiVisionClientTest" time="0.004"/>
+  <testcase name="testAnalyzeImage_blankKey_returnsError" classname="com.antigravity.virtual32.receiver.GeminiVisionClientTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

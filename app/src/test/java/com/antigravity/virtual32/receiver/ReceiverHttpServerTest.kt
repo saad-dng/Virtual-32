@@ -49,7 +49,7 @@ class ReceiverHttpServerTest {
         client.newCall(request).execute().use { response ->
             assertEquals(200, response.code)
             val body = response.body?.string().orEmpty()
-            assertTrue(body.contains("Phone 1 Earbud Brain"))
+            assertTrue(body.contains("Receiver"))
         }
     }
 

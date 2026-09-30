@@ -7,8 +7,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.*
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 
@@ -51,28 +50,24 @@ class GeminiVisionClient(
             val base64Image = Base64.getEncoder().encodeToString(jpegBytes)
 
             // Build Gemini generateContent payload
-            val rootJson = JSONObject().apply {
-                val contentsArray = JSONArray().apply {
-                    val contentObj = JSONObject().apply {
-                        val partsArray = JSONArray().apply {
+            val rootJson = buildJsonObject {
+                put("contents", buildJsonArray {
+                    add(buildJsonObject {
+                        put("parts", buildJsonArray {
                             // Text prompt part
-                            put(JSONObject().apply {
+                            add(buildJsonObject {
                                 put("text", prompt)
                             })
                             // Inline image part
-                            put(JSONObject().apply {
-                                val inlineData = JSONObject().apply {
+                            add(buildJsonObject {
+                                put("inline_data", buildJsonObject {
                                     put("mime_type", "image/jpeg")
                                     put("data", base64Image)
-                                }
-                                put("inline_data", inlineData)
+                                })
                             })
-                        }
-                        put("parts", partsArray)
-                    }
-                    put(contentObj)
-                }
-                put("contents", contentsArray)
+                        })
+                    })
+                })
             }
 
             val requestUrl = "$baseUrl?key=${apiKey.trim()}"
@@ -91,23 +86,26 @@ class GeminiVisionClient(
 
                 if (!response.isSuccessful) {
                     val errorMessage = runCatching {
-                        JSONObject(bodyString).getJSONObject("error").getString("message")
+                        val json = Json.parseToJsonElement(bodyString).jsonObject
+                        json["error"]?.jsonObject?.get("message")?.jsonPrimitive?.content ?: "HTTP $code: $bodyString"
                     }.getOrDefault("HTTP $code: $bodyString")
                     Log.e(TAG, "Gemini API error: $errorMessage")
                     return@withContext GeminiResult.Error(errorMessage, code)
                 }
 
-                val responseJson = JSONObject(bodyString)
-                val candidates = responseJson.optJSONArray("candidates")
-                if (candidates == null || candidates.length() == 0) {
+                val responseJson = Json.parseToJsonElement(bodyString).jsonObject
+                val candidates = responseJson["candidates"]?.jsonArray
+                if (candidates == null || candidates.isEmpty()) {
                     return@withContext GeminiResult.Error("No candidates returned from Gemini Vision", code)
                 }
 
-                val candidate = candidates.getJSONObject(0)
-                val parts = candidate.getJSONObject("content").getJSONArray("parts")
+                val candidate = candidates[0].jsonObject
+                val parts = candidate["content"]?.jsonObject?.get("parts")?.jsonArray
                 val textBuilder = StringBuilder()
-                for (i in 0 until parts.length()) {
-                    textBuilder.append(parts.getJSONObject(i).optString("text"))
+                if (parts != null) {
+                    for (i in 0 until parts.size) {
+                        textBuilder.append(parts[i].jsonObject["text"]?.jsonPrimitive?.content.orEmpty())
+                    }
                 }
 
                 val generatedText = textBuilder.toString().trim()

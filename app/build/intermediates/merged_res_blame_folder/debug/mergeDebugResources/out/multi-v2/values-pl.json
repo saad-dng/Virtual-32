@@ -4,41 +4,24 @@
             "outputFile": "com.antigravity.virtual32.app-mergeDebugResources-2:/values-pl/values-pl.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\72e4aa2ba7103d7b2bff8b9a7a7bae4b\\transformed\\core-1.15.0\\res\\values-pl\\values-pl.xml",
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\40e2100ef64d951f8a031db79843b76e\\transformed\\foundation-release\\res\\values-pl\\values-pl.xml",
                     "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,152,254,352,451,565,670,792",
-                        "endColumns": "96,101,97,98,113,104,121,100",
-                        "endOffsets": "147,249,347,446,560,665,787,888"
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,143",
+                        "endColumns": "87,87",
+                        "endOffsets": "138,226"
                     },
                     "to": {
-                        "startLines": "29,30,31,32,33,34,35,109",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "2817,2914,3016,3114,3213,3327,3432,11173",
-                        "endColumns": "96,101,97,98,113,104,121,100",
-                        "endOffsets": "2909,3011,3109,3208,3322,3427,3549,11269"
+                        "startLines": "113,114",
+                        "startColumns": "4,4",
+                        "startOffsets": "11544,11632",
+                        "endColumns": "87,87",
+                        "endOffsets": "11627,11715"
                     }
                 },
                 {
-                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\0d4581f721d2c7453d17ffc05b9ae6a3\\transformed\\ui-release\\res\\values-pl\\values-pl.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,200,285,394,499,576,653,746,836,919,1002,1089,1161,1237,1315,1391,1473,1541",
-                        "endColumns": "94,84,108,104,76,76,92,89,82,82,86,71,75,77,75,81,67,119",
-                        "endOffsets": "195,280,389,494,571,648,741,831,914,997,1084,1156,1232,1310,1386,1468,1536,1656"
-                    },
-                    "to": {
-                        "startLines": "36,37,38,39,40,41,42,100,101,102,103,105,106,107,108,110,111,112",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "3554,3649,3734,3843,3948,4025,4102,10446,10536,10619,10702,10871,10943,11019,11097,11274,11356,11424",
-                        "endColumns": "94,84,108,104,76,76,92,89,82,82,86,71,75,77,75,81,67,119",
-                        "endOffsets": "3644,3729,3838,3943,4020,4097,4190,10531,10614,10697,10784,10938,11014,11092,11168,11351,11419,11539"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\5d920c1ccf378043ad0d959d44799f75\\transformed\\appcompat-1.1.0\\res\\values-pl\\values-pl.xml",
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\b0911677bacb42e0462e7dc7481a69e9\\transformed\\appcompat-1.1.0\\res\\values-pl\\values-pl.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -55,7 +38,24 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\cfd5cb23740d6ba204eed64f2e9a31e0\\transformed\\material3-release\\res\\values-pl\\values-pl.xml",
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\7cd4043fb9c03eac03fb1426a58dd119\\transformed\\ui-release\\res\\values-pl\\values-pl.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,200,285,394,499,576,653,746,836,919,1002,1089,1161,1237,1315,1391,1473,1541",
+                        "endColumns": "94,84,108,104,76,76,92,89,82,82,86,71,75,77,75,81,67,119",
+                        "endOffsets": "195,280,389,494,571,648,741,831,914,997,1084,1156,1232,1310,1386,1468,1536,1656"
+                    },
+                    "to": {
+                        "startLines": "36,37,38,39,40,41,42,100,101,102,103,105,106,107,108,110,111,112",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "3554,3649,3734,3843,3948,4025,4102,10446,10536,10619,10702,10871,10943,11019,11097,11274,11356,11424",
+                        "endColumns": "94,84,108,104,76,76,92,89,82,82,86,71,75,77,75,81,67,119",
+                        "endOffsets": "3644,3729,3838,3943,4020,4097,4190,10531,10614,10697,10784,10938,11014,11092,11168,11351,11419,11539"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\2fabd9e64cc4e6de5649f992a5c7f8dd\\transformed\\material3-release\\res\\values-pl\\values-pl.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -72,20 +72,20 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\8cb4b4837872a69e9784abd4818847f6\\transformed\\foundation-release\\res\\values-pl\\values-pl.xml",
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\75adf1b6b4c664e8b088694026629cfd\\transformed\\core-1.15.0\\res\\values-pl\\values-pl.xml",
                     "from": {
-                        "startLines": "2,3",
-                        "startColumns": "4,4",
-                        "startOffsets": "55,143",
-                        "endColumns": "87,87",
-                        "endOffsets": "138,226"
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,152,254,352,451,565,670,792",
+                        "endColumns": "96,101,97,98,113,104,121,100",
+                        "endOffsets": "147,249,347,446,560,665,787,888"
                     },
                     "to": {
-                        "startLines": "113,114",
-                        "startColumns": "4,4",
-                        "startOffsets": "11544,11632",
-                        "endColumns": "87,87",
-                        "endOffsets": "11627,11715"
+                        "startLines": "29,30,31,32,33,34,35,109",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "2817,2914,3016,3114,3213,3327,3432,11173",
+                        "endColumns": "96,101,97,98,113,104,121,100",
+                        "endOffsets": "2909,3011,3109,3208,3322,3427,3549,11269"
                     }
                 }
             ]

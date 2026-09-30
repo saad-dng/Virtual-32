@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.receiver.ReceiverHttpServerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-30T13:32:04.618Z" hostname="MR-ROBOT" time="0.505">
+  <properties/>
+  <testcase name="testServer_uploadMultipart_extractsJpegAndReturns200" classname="com.antigravity.virtual32.receiver.ReceiverHttpServerTest" time="0.253"/>
+  <testcase name="testServer_statusEndpoint_returns200" classname="com.antigravity.virtual32.receiver.ReceiverHttpServerTest" time="0.127"/>
+  <testcase name="testServer_uploadWithoutImage_returns422" classname="com.antigravity.virtual32.receiver.ReceiverHttpServerTest" time="0.124"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

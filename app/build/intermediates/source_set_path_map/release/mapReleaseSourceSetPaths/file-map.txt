@@ -1,0 +1,66 @@
+com.antigravity.virtual32.app-resValues-0 C:\Projects\Virtual 32\app\build\generated\res\resValues\release
+com.antigravity.virtual32.app-updated_navigation_xml-1 C:\Projects\Virtual 32\app\build\generated\updated_navigation_xml\release
+com.antigravity.virtual32.app-packageReleaseResources-2 C:\Projects\Virtual 32\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.antigravity.virtual32.app-packageReleaseResources-3 C:\Projects\Virtual 32\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.antigravity.virtual32.app-release-4 C:\Projects\Virtual 32\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.antigravity.virtual32.app-main-5 C:\Projects\Virtual 32\app\src\main\res
+com.antigravity.virtual32.app-release-6 C:\Projects\Virtual 32\app\src\release\res
+com.antigravity.virtual32.app-lifecycle-viewmodel-savedstate-2.8.7-7 C:\Users\saad\.gradle\caches\8.13\transforms\0b010de79569dbe094ee528010eb0a42\transformed\lifecycle-viewmodel-savedstate-2.8.7\res
+com.antigravity.virtual32.app-lifecycle-runtime-release-8 C:\Users\saad\.gradle\caches\8.13\transforms\0df4312773ad84002297ab0ca2c8eed5\transformed\lifecycle-runtime-release\res
+com.antigravity.virtual32.app-ui-tooling-preview-release-9 C:\Users\saad\.gradle\caches\8.13\transforms\0ecc0d3a6a6c30a8adf38d1e5d488c0f\transformed\ui-tooling-preview-release\res
+com.antigravity.virtual32.app-ui-graphics-release-10 C:\Users\saad\.gradle\caches\8.13\transforms\10c2ce94554df468f8b575263c259ae2\transformed\ui-graphics-release\res
+com.antigravity.virtual32.app-camera-video-1.4.1-11 C:\Users\saad\.gradle\caches\8.13\transforms\137b2f19bcc4754db4736a9c86a5044b\transformed\camera-video-1.4.1\res
+com.antigravity.virtual32.app-material-icons-extended-release-12 C:\Users\saad\.gradle\caches\8.13\transforms\17f28dc4344a75c34a9fb5067889ff66\transformed\material-icons-extended-release\res
+com.antigravity.virtual32.app-room-ktx-2.6.1-13 C:\Users\saad\.gradle\caches\8.13\transforms\1844257473d337582cea4ba6a0e3ce7c\transformed\room-ktx-2.6.1\res
+com.antigravity.virtual32.app-core-runtime-2.2.0-14 C:\Users\saad\.gradle\caches\8.13\transforms\1b8f3b345c7794bb76223a02f2c5174a\transformed\core-runtime-2.2.0\res
+com.antigravity.virtual32.app-animation-release-15 C:\Users\saad\.gradle\caches\8.13\transforms\26785e80b418a9f9ca05b920420d227e\transformed\animation-release\res
+com.antigravity.virtual32.app-lifecycle-livedata-core-2.8.7-16 C:\Users\saad\.gradle\caches\8.13\transforms\2d3e46bd100990a5e5e4c9262e67e9bf\transformed\lifecycle-livedata-core-2.8.7\res
+com.antigravity.virtual32.app-material3-release-17 C:\Users\saad\.gradle\caches\8.13\transforms\2fabd9e64cc4e6de5649f992a5c7f8dd\transformed\material3-release\res
+com.antigravity.virtual32.app-runtime-saveable-release-18 C:\Users\saad\.gradle\caches\8.13\transforms\32b972ca727a0fb39a0f55da2357df72\transformed\runtime-saveable-release\res
+com.antigravity.virtual32.app-lifecycle-runtime-ktx-release-19 C:\Users\saad\.gradle\caches\8.13\transforms\33dfd0feaf916642b254eef38c1091a1\transformed\lifecycle-runtime-ktx-release\res
+com.antigravity.virtual32.app-sqlite-framework-2.4.0-20 C:\Users\saad\.gradle\caches\8.13\transforms\37f0d72caa2e122be8d473bc733dbedb\transformed\sqlite-framework-2.4.0\res
+com.antigravity.virtual32.app-runtime-release-21 C:\Users\saad\.gradle\caches\8.13\transforms\3dab693f4f2c27a3e5be31bfb774ec62\transformed\runtime-release\res
+com.antigravity.virtual32.app-foundation-release-22 C:\Users\saad\.gradle\caches\8.13\transforms\40e2100ef64d951f8a031db79843b76e\transformed\foundation-release\res
+com.antigravity.virtual32.app-camera-view-1.4.1-23 C:\Users\saad\.gradle\caches\8.13\transforms\485e9ea53a7b0a1b9cb3bb3b8c12f1bc\transformed\camera-view-1.4.1\res
+com.antigravity.virtual32.app-lifecycle-livedata-2.8.7-24 C:\Users\saad\.gradle\caches\8.13\transforms\4d2abb878e461ab22c1ff23ea5957418\transformed\lifecycle-livedata-2.8.7\res
+com.antigravity.virtual32.app-lifecycle-viewmodel-compose-release-25 C:\Users\saad\.gradle\caches\8.13\transforms\4d7938258a76d2f2f8295ede532534e6\transformed\lifecycle-viewmodel-compose-release\res
+com.antigravity.virtual32.app-savedstate-1.2.1-26 C:\Users\saad\.gradle\caches\8.13\transforms\4e52e0591648d514245bd11bad0f6cb7\transformed\savedstate-1.2.1\res
+com.antigravity.virtual32.app-lifecycle-viewmodel-release-27 C:\Users\saad\.gradle\caches\8.13\transforms\5b62e7702734233478802475432ff4d2\transformed\lifecycle-viewmodel-release\res
+com.antigravity.virtual32.app-activity-1.9.3-28 C:\Users\saad\.gradle\caches\8.13\transforms\5c46da1dd4d63bcb0a8f638eba14d2b1\transformed\activity-1.9.3\res
+com.antigravity.virtual32.app-camera-core-1.4.1-29 C:\Users\saad\.gradle\caches\8.13\transforms\6212b2807b886522989f30fa34d198f2\transformed\camera-core-1.4.1\res
+com.antigravity.virtual32.app-emoji2-1.3.0-30 C:\Users\saad\.gradle\caches\8.13\transforms\6bf3183aeba4b0158c08591aa07c41f9\transformed\emoji2-1.3.0\res
+com.antigravity.virtual32.app-lifecycle-viewmodel-ktx-2.8.7-31 C:\Users\saad\.gradle\caches\8.13\transforms\70a366ed1a8919d581de21a260611c58\transformed\lifecycle-viewmodel-ktx-2.8.7\res
+com.antigravity.virtual32.app-material-icons-core-release-32 C:\Users\saad\.gradle\caches\8.13\transforms\73666ddcb548b8e56f192e5c45e425ea\transformed\material-icons-core-release\res
+com.antigravity.virtual32.app-core-1.15.0-33 C:\Users\saad\.gradle\caches\8.13\transforms\75adf1b6b4c664e8b088694026629cfd\transformed\core-1.15.0\res
+com.antigravity.virtual32.app-material-ripple-release-34 C:\Users\saad\.gradle\caches\8.13\transforms\7bf394be5ae9f5a66c1b493de0ad3e8e\transformed\material-ripple-release\res
+com.antigravity.virtual32.app-ui-release-35 C:\Users\saad\.gradle\caches\8.13\transforms\7cd4043fb9c03eac03fb1426a58dd119\transformed\ui-release\res
+com.antigravity.virtual32.app-tracing-1.2.0-36 C:\Users\saad\.gradle\caches\8.13\transforms\84604ab40229001bbbb4b64abc437114\transformed\tracing-1.2.0\res
+com.antigravity.virtual32.app-customview-poolingcontainer-1.0.0-37 C:\Users\saad\.gradle\caches\8.13\transforms\89cab4789d839896e7d0324d0e429687\transformed\customview-poolingcontainer-1.0.0\res
+com.antigravity.virtual32.app-sqlite-2.4.0-38 C:\Users\saad\.gradle\caches\8.13\transforms\94a45fab991c15c0a0817f637dc9b17f\transformed\sqlite-2.4.0\res
+com.antigravity.virtual32.app-lifecycle-service-2.8.7-39 C:\Users\saad\.gradle\caches\8.13\transforms\9cd6dc8bd885c26d0d09d7ff6e8a5c10\transformed\lifecycle-service-2.8.7\res
+com.antigravity.virtual32.app-lifecycle-livedata-core-ktx-2.8.7-40 C:\Users\saad\.gradle\caches\8.13\transforms\9fdad5edaa675a759d344c4df800d543\transformed\lifecycle-livedata-core-ktx-2.8.7\res
+com.antigravity.virtual32.app-profileinstaller-1.3.1-41 C:\Users\saad\.gradle\caches\8.13\transforms\a1d690e3639832676e021030204d3f91\transformed\profileinstaller-1.3.1\res
+com.antigravity.virtual32.app-camera-camera2-1.4.1-42 C:\Users\saad\.gradle\caches\8.13\transforms\aa600aaddc4d858c77265d1fafad62d8\transformed\camera-camera2-1.4.1\res
+com.antigravity.virtual32.app-core-ktx-1.15.0-43 C:\Users\saad\.gradle\caches\8.13\transforms\ad2eb2a3a161614f5b94f712236de459\transformed\core-ktx-1.15.0\res
+com.antigravity.virtual32.app-appcompat-1.1.0-44 C:\Users\saad\.gradle\caches\8.13\transforms\b0911677bacb42e0462e7dc7481a69e9\transformed\appcompat-1.1.0\res
+com.antigravity.virtual32.app-datastore-core-release-45 C:\Users\saad\.gradle\caches\8.13\transforms\b1dc0a810c4ffb4c3d6ff31863f060a1\transformed\datastore-core-release\res
+com.antigravity.virtual32.app-datastore-preferences-release-46 C:\Users\saad\.gradle\caches\8.13\transforms\b21c4d21a0559be6698c6ea914bca188\transformed\datastore-preferences-release\res
+com.antigravity.virtual32.app-activity-compose-1.9.3-47 C:\Users\saad\.gradle\caches\8.13\transforms\b46ba70395c6e3491a047efa76e97e33\transformed\activity-compose-1.9.3\res
+com.antigravity.virtual32.app-annotation-experimental-1.4.1-48 C:\Users\saad\.gradle\caches\8.13\transforms\b5dc15dff5a0e3eb4adcf1e0e27ff6ea\transformed\annotation-experimental-1.4.1\res
+com.antigravity.virtual32.app-foundation-layout-release-49 C:\Users\saad\.gradle\caches\8.13\transforms\ba3146f59fdb47fc0e6effcc05117b9c\transformed\foundation-layout-release\res
+com.antigravity.virtual32.app-room-runtime-2.6.1-50 C:\Users\saad\.gradle\caches\8.13\transforms\c468463cb0799de4e884c8c598554179\transformed\room-runtime-2.6.1\res
+com.antigravity.virtual32.app-ui-unit-release-51 C:\Users\saad\.gradle\caches\8.13\transforms\c5353d4cfc97518592f086495b96562e\transformed\ui-unit-release\res
+com.antigravity.virtual32.app-tracing-ktx-1.2.0-52 C:\Users\saad\.gradle\caches\8.13\transforms\cd21ac60b2bdb2ed1505d7f9586077a4\transformed\tracing-ktx-1.2.0\res
+com.antigravity.virtual32.app-camera-lifecycle-1.4.1-53 C:\Users\saad\.gradle\caches\8.13\transforms\d5402b79db2e79b8e01315d69c68adee\transformed\camera-lifecycle-1.4.1\res
+com.antigravity.virtual32.app-activity-ktx-1.9.3-54 C:\Users\saad\.gradle\caches\8.13\transforms\dc1a7aaaadf513cef8c62caecf5bbc5b\transformed\activity-ktx-1.9.3\res
+com.antigravity.virtual32.app-datastore-release-55 C:\Users\saad\.gradle\caches\8.13\transforms\dfd5c1320d47c176ee6753383fc299e4\transformed\datastore-release\res
+com.antigravity.virtual32.app-ui-geometry-release-56 C:\Users\saad\.gradle\caches\8.13\transforms\e291cd6b72d552c9602aaa191c9a280d\transformed\ui-geometry-release\res
+com.antigravity.virtual32.app-startup-runtime-1.1.1-57 C:\Users\saad\.gradle\caches\8.13\transforms\e5eb7809f6f26d86734c37d0ea8bc864\transformed\startup-runtime-1.1.1\res
+com.antigravity.virtual32.app-ui-text-release-58 C:\Users\saad\.gradle\caches\8.13\transforms\efac01aaf76b572389ac56f1b02c85d2\transformed\ui-text-release\res
+com.antigravity.virtual32.app-ui-util-release-59 C:\Users\saad\.gradle\caches\8.13\transforms\f0133bad056305544cba507ae847b533\transformed\ui-util-release\res
+com.antigravity.virtual32.app-lifecycle-runtime-compose-release-60 C:\Users\saad\.gradle\caches\8.13\transforms\f1d6c02777819438ef524f351e305698\transformed\lifecycle-runtime-compose-release\res
+com.antigravity.virtual32.app-appcompat-resources-1.1.0-61 C:\Users\saad\.gradle\caches\8.13\transforms\f926f974913946ff0ca75c2b26ca076c\transformed\appcompat-resources-1.1.0\res
+com.antigravity.virtual32.app-lifecycle-process-2.8.7-62 C:\Users\saad\.gradle\caches\8.13\transforms\f9a0ae79b70b3cea1cf2cb42aa1a67c7\transformed\lifecycle-process-2.8.7\res
+com.antigravity.virtual32.app-savedstate-ktx-1.2.1-63 C:\Users\saad\.gradle\caches\8.13\transforms\f9b5bd764f094aadb9dd7535d8fcb525\transformed\savedstate-ktx-1.2.1\res
+com.antigravity.virtual32.app-graphics-path-1.0.1-64 C:\Users\saad\.gradle\caches\8.13\transforms\fa9efa7308eb19426b2b4b5b8f17cb95\transformed\graphics-path-1.0.1\res
+com.antigravity.virtual32.app-animation-core-release-65 C:\Users\saad\.gradle\caches\8.13\transforms\fc0df249d321136da9f9ca5e1980dac7\transformed\animation-core-release\res
