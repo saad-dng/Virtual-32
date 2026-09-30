@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.2" type="conditional_incidents">
+
+    <incident
+        id="NewApi"
+        severity="error"
+        message="">
+        <fix-data minSdk="26-∞" requiresApi="29-∞"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/receiver/service/ReceiverService.kt"
+            line="76"
+            column="9"
+            startOffset="2804"
+            endLine="76"
+            endColumn="24"
+            endOffset="2819"/>
+        <map>
+            <entry
+                name="desc"
+                string="(ILandroid.app.Notification;I)"/>
+            <entry
+                name="message"
+                string="Call requires API level 29 (current min is %1$s): `android.app.Service#startForeground`"/>
+            <api-levels id="minSdk"
+                value="26-∞"/>
+            <entry
+                name="name"
+                string="startForeground"/>
+            <entry
+                name="owner"
+                string="android.app.Service"/>
+            <api-levels id="requiresApi"
+                value="29-∞"/>
+        </map>
+    </incident>
+
+    <incident
+        id="NotificationPermission"
+        severity="error"
+        message="When targeting Android 13 or higher, posting a permission requires holding the `POST_NOTIFICATIONS` permission">
+        <fix-data missing="android.permission.POST_NOTIFICATIONS"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/receiver/service/ReceiverService.kt"
+            line="272"
+            column="9"
+            startOffset="10793"
+            endLine="272"
+            endColumn="61"
+            endOffset="10845"/>
+    </incident>
+
+    <incident
+        id="BatteryLife"
+        severity="warning"
+        message="Use of `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+            line="438"
+            column="58"
+            startOffset="19003"
+            endLine="438"
+            endColumn="101"
+            endOffset="19046"/>
+        <map>
+            <condition targetGE="23"/>
+        </map>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 35">
+        <fix-replace
+            description="Delete tools:targetApi"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*manifest*0}"
+                startOffset="1700"
+                endOffset="1720"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*manifest*0}"
+            line="32"
+            column="9"
+            startOffset="1700"
+            endLine="32"
+            endColumn="29"
+            endOffset="1720"/>
+        <map>
+            <condition minGE="35-∞"/>
+        </map>
+    </incident>
+
+</incidents>

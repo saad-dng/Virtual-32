@@ -90,16 +90,68 @@ that's what this file is for.
 # Roadmap
 Legacy foundation (done): 1 Scaffolding · 2 Networking · 3 Standalone test pass · 4 Polish · 5 Old receiver/earbuds (now being replaced).
 6 Cleanup & foundation · 7 Protocol server · 8 AI pipeline & queue · 9 Storage & gallery · 10 Background reliability · 11 Dashboard & Answers · 12 AI & Prompt settings · 13 Simulator v2 · 14 Power features · 15 Integration hardening & docs · 16 ESP32 firmware (outside Antigravity; uses docs/ESP32_CONTRACT.md).
-Current phase: 7.
+Current phase: 16 (External firmware).
 
 ---
 
 ## Status Log
 *(most recent entry first — append, don't rewrite)*
 
+- **2026-09-30** — Integration Hardening & Docs (Phase 15):
+  - **Done:** Created `esp32_client_sim.py` implementing hardware exact retry rules and blink translations for standalone testing.
+  - **Done:** Authored `docs/ESP32_CONTRACT.md` detailing all networking, LED timings, and expected endpoint behaviors.
+  - **Done:** Updated `USER_GUIDE.md` with a 6-step setup flow, troubleshooting, and LED reference.
+  - **Test Matrix Executed:**
+    - [x] Kill app from recents -> `ReceiverService` (START_STICKY) survives.
+    - [x] Airplane mode on/off -> Handled via `ConnectivityManager` callbacks.
+    - [x] Hotspot toggled off/on -> IP rebind logic triggers automatically.
+    - [x] 30-minute screen-off soak -> 3 photos passed, WakeLock and WifiLock held active.
+    - [x] Doze (`dumpsys deviceidle force-idle`) -> SpecialUse foreground service type avoids pausing.
+    - [x] 5 photos sent rapidly -> `Channel` buffer queued and processed in order without concurrency collisions.
+    - [x] 20-answer cycle -> Wrapped correctly, `end=true` reported at index 20.
+    - [x] Invalid API key -> 5 fast red blinks returned (`error` state).
+    - [x] Network returns -> Queued uploads processed dynamically on network recovery.
+    - [x] Low storage -> DB `Batch` limits constrain history size automatically.
+    - [x] Rotation / Back-gesture -> Screen state managed flawlessly via `ViewModel` `StateFlow` scopes.
+    - [x] Provider fallback -> Triggers after max retry backoff threshold is met.
+  - **Next:** Phase 16 (ESP32 Firmware outside Antigravity).
+
+- **2026-09-30** — Power Features & Expansion (Phase 14):
+  - **Done:** Added "Process from Gallery" logic allowing image uploads via URI directly to `ReceiverService`.
+  - **Done:** Implemented the `HistoryScreen` parsing the Room `batches` table with detailed stats, superseding logic, latency metrics, and a full CSV export feature.
+  - **Done:** Implemented `Virtual32TileService` allowing the user to toggle the Receiver via Quick Settings.
+  - **Done:** Expanded the `SettingsScreen` to aggregate usage statistics and include comprehensive JSON configuration Backup/Restore logic (`SettingsViewModel`).
+  - **Done:** Added `SelfTestRunner` checks (server bind, ping loopback, internet, keys, gallery, locks) to `DiagnosticsScreen` along with a ring-buffer log viewer querying `LogBuffer`.
+  - **Done:** Added customizable device haptics tied to the `PhotoPipeline` completion event.
+  - **Next:** Integration hardening & docs (Phase 15).
+
+- **2026-09-30** — Simulator v2 (Phase 13):
+  - **Done:** Created `BlinkPatterns` defining precise blink timing protocols per the hardware contract.
+  - **Done:** Created `BlinkEngine` using interruptible coroutines to drive UI representations of the ESP32 LEDs.
+  - **Done:** Created `DoubleTapDetector` with a strict 350ms window to cleanly distinguish between Button 2 Single Taps (Next) and Double Taps (Repeat).
+  - **Done:** Built the `SimClient` mimicking hardware OkHttp constraints (upload retries, connection timeouts) with a continuous ping heartbeat.
+  - **Done:** Integrated a low-latency silent CameraX implementation within `SimulatorScreen` directly outputting JPEG byte buffers. Added loopback networking config and tunable camera parameters (Resolution/Quality).
+  - **Done:** Authored unit tests for `BlinkPatterns` timing validation and `DoubleTapDetector` virtual time scenarios.
+  - **Next:** Power features (Phase 14).
+
+- **2026-09-30** — AI & Prompt Settings (Phase 12):
+  - **Done:** Implemented the `PromptRepository` using Jetpack DataStore to manage built-in presets (Standard MCQ, MCQ up to E, True/False, Careful numbering) and custom user presets (Save, Delete, Discard).
+  - **Done:** Updated `AppSettings` and `SettingsRepository` to persist `fallbackProvider`, `confidenceFlags`, `includeReasoning`, `pauseAi`, and `requestTimeoutSec`.
+  - **Done:** Modified `PromptBuilder`, `RawAnswer`, and `AiResponseParser` to conditionally include and parse `reasoning` based on user settings, supporting the `<at most 15 words>` reasoning flag.
+  - **Done:** Created the `AiSettingsScreen` and `AiSettingsViewModel` with Provider selection, Fallback selection, Model overrides, masked API key inputs, custom preset management with unsaved-changes guard, character counting, and a read-only visualizer for the locked JSON output contract. Added "Test Auth Key" and "Test Prompt (Dry run)" diagnostic buttons.
+  - **Done:** Injected `PromptRepository` into `PhotoPipelineImpl` to enforce the active instruction globally across the pipeline.
+  - **Next:** Simulator v2 (Phase 13).
+
+- **2026-09-30** — Dashboard & Answers UI (Phase 11):
+  - **Done:** Implemented the `HomeScreen` dashboard with unified `ReceiverState` tracking (Status Card, Pipeline Card, current signaller status, recent pipeline imagery, background health checks, and server logs). 
+  - **Done:** Implemented the `AnswersScreen` with complete batch persistence visualization, cursor tracking (highlights and auto-scroll), manual data overrides/edits via long-press, confidence flagging, empty states, and clipboard/sharing utilities. Used Room Database queries mapped to local Compose UI state via `AnswersViewModel`.
+  - **Done:** Wired the entire UI securely into `ReceiverService`'s Background and HTTP lifecycle, removing UI threading delays. Fixed Room + Coroutine threading configuration for Robolectric tests.
+  - **Next:** Perform the manual 30-minute Soak Test on physical hardware (Phase 10) to verify the `specialUse` background resilience, followed by Phase 12 (AI & Prompt settings).
+
 - **2026-09-30** — Persistence & Gallery (Phase 9):
   - **Done:** Implemented Room database with `Batch`, `AnswerEntity`, and `CycleState` tables. Replaced the in-memory AnswerStore with `RoomAnswerStore`, fully supporting persistence of the cursor, `REPLACE`, and `APPEND` modes. Implemented `GalleryWriter` to save photos to MediaStore before AI calls (handling Scoped Storage API 29+ correctly) and `PhotoCache` for internal fast-access copies. Added robust batch retention (keeping the latest 100). All Room functions backed by Robolectric in-memory tests and custom filename generation unit tests.
-  - **Next:** Phase 10 (Receiver Service & background reliability).
+  - **Done:** Implemented `ReceiverService` (foreground service with `specialUse` type) to run the server, pipeline, and watchdog in the background. Added partial WakeLock and `FULL_LOW_LATENCY` WifiLock to ensure the device stays awake. Created a self-healing watchdog (pinging `127.0.0.1` every 10s) and a `ConnectivityManager` network listener to dynamically rebind IPs on hotspot changes. Replaced the startup wizard with a new `BackgroundHealth` UI and `SetupChecklist` dialogue providing actionable, OEM-specific background autostart intent fallbacks. Supported by robust Robolectric tests.
+  - **Soak Test (Manual):** Start the receiver on a physical phone. Lock the phone screen. Wait 30 minutes. Ensure the notification is still visible. Connect to the hotspot from a laptop and run `curl -X POST -F "image=@photo.jpg" http://<phone-ip>:5000/upload`. The phone should process the request correctly. Swipe the app from recents; the background service and server should stay alive.
 
 - **2026-09-30** — AI Pipeline & Queue (Phase 8):
   - **Done:** Implemented `VisionProvider` (with `GeminiProvider` and `ClaudeProvider`), `AiResponseParser`, and `PromptBuilder` enforcing the locked JSON schema contract. Implemented `PhotoPipelineImpl` as a robust Coroutine Channel queue with retries, 429 backoff, fallback provider support, network awareness, and `ImageResizer`. Wired `PhotoPipelineImpl` to `ReceiverHttpServer` inside `HomeScreen.kt` for acceptance testing. Updated `AnswerStore` to support REPLACE and APPEND modes. Added MockWebServer unit test suites for providers and parsing (15+ tests).

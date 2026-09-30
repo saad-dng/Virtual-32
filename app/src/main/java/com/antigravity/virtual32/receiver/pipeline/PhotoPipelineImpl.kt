@@ -13,6 +13,7 @@ import com.antigravity.virtual32.receiver.ai.VisionProvider
 import com.antigravity.virtual32.settings.AiProvider
 import com.antigravity.virtual32.settings.AnswerMode
 import com.antigravity.virtual32.settings.SettingsRepository
+import com.antigravity.virtual32.settings.PromptRepository
 import com.antigravity.virtual32.util.GalleryWriter
 import com.antigravity.virtual32.util.ImageResizer
 import com.antigravity.virtual32.util.PhotoCache
@@ -23,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -30,17 +32,24 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import okhttp3.OkHttpClient
+import android.content.Context
+import android.os.Vibrator
+import android.os.VibrationEffect
+import android.os.Build
 
 data class PipelineState(
     val queueLength: Int = 0,
     val isAnalyzing: Boolean = false,
     val currentStatus: String? = null,
     val lastLatencyMs: Long = 0L,
-    val isPaused: Boolean = false
+    val isPaused: Boolean = false,
+    val lastPhotoPath: String? = null
 )
 
 class PhotoPipelineImpl(
+    private val context: Context,
     private val settingsRepo: SettingsRepository,
+    private val promptRepo: PromptRepository,
     private val answerStore: RoomAnswerStore,
     private val okHttpClient: OkHttpClient,
     private val galleryWriter: GalleryWriter,
@@ -56,6 +65,7 @@ class PhotoPipelineImpl(
     
     data class QueueItem(
         val jpeg: ByteArray,
+        val source: String,
         val resultChannel: Channel<String>
     )
 
@@ -65,14 +75,14 @@ class PhotoPipelineImpl(
         }
     }
 
-    override suspend fun processPhoto(jpeg: ByteArray): String {
+    override suspend fun processPhoto(jpeg: ByteArray, source: String): String {
         val settings = settingsRepo.getSettings()
         if (settings.pauseAi) {
             return buildJsonObject { put("status", "error"); put("reason", "paused") }.toString()
         }
 
         val resultChannel = Channel<String>(1)
-        val item = QueueItem(jpeg, resultChannel)
+        val item = QueueItem(jpeg, source, resultChannel)
         
         val added = queue.trySend(item).isSuccess
         if (!added) {
@@ -92,7 +102,7 @@ class PhotoPipelineImpl(
             val startTime = System.currentTimeMillis()
             
             val resultJson = try {
-                processItemWithRetries(item.jpeg)
+                processItemWithRetries(item.jpeg, item.source)
             } catch (e: Exception) {
                 Log.e("PhotoPipeline", "Worker failed", e)
                 buildJsonObject { put("status", "error"); put("reason", "ai_failed") }.toString()
@@ -105,7 +115,8 @@ class PhotoPipelineImpl(
         }
     }
 
-    private suspend fun processItemWithRetries(jpeg: ByteArray): String {
+    private suspend fun processItemWithRetries(jpeg: ByteArray, source: String): String {
+        val startTime = System.currentTimeMillis()
         while (!isNetworkAvailable()) {
             updateState { it.copy(currentStatus = "Waiting for network", isPaused = true) }
             delay(1000)
@@ -117,7 +128,7 @@ class PhotoPipelineImpl(
         val batchIdStr = java.util.UUID.randomUUID().toString().substring(0, 8)
         var galleryUri: String? = null
         if (settings.saveToGallery) {
-            galleryUri = galleryWriter.savePhoto(jpeg, "ESP", batchIdStr)
+            galleryUri = galleryWriter.savePhoto(jpeg, source, batchIdStr)
         }
         val cachePath = photoCache.saveInternal(jpeg, "b${batchIdStr}.jpg")
 
@@ -134,12 +145,15 @@ class PhotoPipelineImpl(
         } else null
 
         val resizedJpeg = ImageResizer.downscaleIfNeeded(jpeg)
-        var instruction = PromptBuilder.build("")
+        
+        val prompts = promptRepo.presetsFlow.first()
+        val preset = prompts.find { it.id == settings.activePromptId } ?: promptRepo.defaultPresets.first()
+        var instruction = PromptBuilder.build(preset.instruction, includeReasoning = settings.includeReasoning)
 
         // Attempt 1
         var res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
         if (res.isParseError) {
-            instruction = PromptBuilder.build("", isRetry = true)
+            instruction = PromptBuilder.build(preset.instruction, includeReasoning = settings.includeReasoning, isRetry = true)
             res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
         }
 
@@ -159,24 +173,41 @@ class PhotoPipelineImpl(
             res = attemptAnalyze(fallbackProvider, resizedJpeg, instruction)
         }
 
+        val batch = Batch(
+            source = source,
+            photoPath = cachePath,
+            galleryUri = galleryUri,
+            status = res.status,
+            provider = settings.provider.name,
+            model = if (settings.provider == AiProvider.GEMINI) settings.geminiModel else settings.claudeModel,
+            promptName = settings.activePromptId,
+            promptHash = instruction.hashCode().toString(),
+            latencyMs = System.currentTimeMillis() - startTime,
+            rawResponse = res.reason // We store error reason in rawResponse for stats
+        )
+
         if (res.status == "ok") {
-            val batch = Batch(
-                source = "ESP",
-                photoPath = cachePath,
-                galleryUri = galleryUri,
-                status = res.status,
-                provider = settings.provider.name,
-                model = if (settings.provider == AiProvider.GEMINI) settings.geminiModel else settings.claudeModel,
-                promptName = settings.activePromptId,
-                promptHash = instruction.hashCode().toString(),
-                latencyMs = 0L, // Handled outside or we can measure here
-                rawResponse = null // If we want to store it, we need to pass it from parser. Skip for now.
-            )
             if (settings.answerMode == AnswerMode.REPLACE) {
                 answerStore.applyBatch(batch, res.answers, "REPLACE")
             } else {
                 answerStore.applyBatch(batch, res.answers, "APPEND")
             }
+            if (settings.enableHaptics) {
+                try {
+                    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vibrator?.vibrate(100)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            // Still insert the batch to track history
+            answerStore.applyBatch(batch, emptyList(), "APPEND")
         }
 
         return encodeResult(res)

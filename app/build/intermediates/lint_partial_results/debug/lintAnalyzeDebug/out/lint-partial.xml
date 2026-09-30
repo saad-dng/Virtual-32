@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.2" type="partial_results">
+    <map id="NotificationPermission">
+        <entry
+            name="source"
+            boolean="true"/>
+    </map>
+    <map id="UnsafeImplicitIntentLaunch">
+            <map id="actionsSent">
+                    <map id="android.intent.action.MEDIA_SCANNER_SCAN_FILE (used to send a broadcast)">
+                        <location id="0"
+                            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/GalleryWriter.kt"
+                            line="63"
+                            column="30"
+                            startOffset="2476"
+                            endLine="63"
+                            endColumn="107"
+                            endOffset="2553"/>
+                    </map>
+                    <map id="android.settings.APPLICATION_DETAILS_SETTINGS (used to start an activity)">
+                        <location id="0"
+                            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/OemUtils.kt"
+                            line="65"
+                            column="30"
+                            startOffset="3625"
+                            endLine="65"
+                            endColumn="82"
+                            endOffset="3677"/>
+                    </map>
+                    <map id="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS (used to start an activity)">
+                        <location id="0"
+                            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+                            line="438"
+                            column="42"
+                            startOffset="18987"
+                            endLine="438"
+                            endColumn="102"
+                            endOffset="19047"/>
+                    </map>
+            </map>
+    </map>
+    <map id="UnsafeIntentLaunch">
+            <map id="unprotected">
+                <entry
+                    name="com.antigravity.virtual32.MainActivity"
+                    boolean="true"/>
+                <entry
+                    name="com.antigravity.virtual32.receiver.service.BootReceiver"
+                    boolean="true"/>
+            </map>
+    </map>
+    <map id="UnusedResources">
+        <location id="R.color.bg_cozy"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="3"
+            column="12"
+            startOffset="62"
+            endLine="3"
+            endColumn="26"
+            endOffset="76"/>
+        <location id="R.color.dot_color"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="4"
+            column="12"
+            startOffset="104"
+            endLine="4"
+            endColumn="28"
+            endOffset="120"/>
+        <location id="R.color.hardware_dark"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="5"
+            column="12"
+            startOffset="148"
+            endLine="5"
+            endColumn="32"
+            endOffset="168"/>
+        <location id="R.color.hardware_gray"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="6"
+            column="12"
+            startOffset="196"
+            endLine="6"
+            endColumn="32"
+            endOffset="216"/>
+        <location id="R.color.led_idle"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="7"
+            column="12"
+            startOffset="244"
+            endLine="7"
+            endColumn="27"
+            endOffset="259"/>
+        <location id="R.color.led_red"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="8"
+            column="12"
+            startOffset="287"
+            endLine="8"
+            endColumn="26"
+            endOffset="301"/>
+        <location id="R.drawable.app_logo"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/app_logo.jpg"/>
+        <location id="R.string.camera_permission_required"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="10"
+            column="13"
+            startOffset="445"
+            endLine="10"
+            endColumn="46"
+            endOffset="478"/>
+        <location id="R.string.led_indicator"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="4"
+            column="13"
+            startOffset="132"
+            endLine="4"
+            endColumn="33"
+            endOffset="152"/>
+        <location id="R.string.resolution"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="8"
+            column="13"
+            startOffset="341"
+            endLine="8"
+            endColumn="30"
+            endOffset="358"/>
+        <location id="R.string.save"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="9"
+            column="13"
+            startOffset="398"
+            endLine="9"
+            endColumn="24"
+            endOffset="409"/>
+        <location id="R.string.server_ip"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="6"
+            column="13"
+            startOffset="233"
+            endLine="6"
+            endColumn="29"
+            endOffset="249"/>
+        <location id="R.string.server_port"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="7"
+            column="13"
+            startOffset="289"
+            endLine="7"
+            endColumn="31"
+            endOffset="307"/>
+        <location id="R.string.settings"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="5"
+            column="13"
+            startOffset="187"
+            endLine="5"
+            endColumn="28"
+            endOffset="202"/>
+        <location id="R.string.trigger_button"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="3"
+            column="13"
+            startOffset="72"
+            endLine="3"
+            endColumn="34"
+            endOffset="93"/>
+        <entry
+            name="model"
+            string="color[bg_cozy(D),dot_color(D),hardware_dark(D),hardware_gray(D),led_idle(D),led_red(D)],drawable[app_logo(D)],mipmap[ic_launcher(U),ic_launcher_round(U)],string[app_name(U),trigger_button(D),led_indicator(D),settings(D),server_ip(D),server_port(D),resolution(D),save(D),camera_permission_required(D)],style[Theme_Virtual32(U)],xml[data_extraction_rules(U),backup_rules(U),network_security_config(U)];;;;"/>
+    </map>
+
+</incidents>

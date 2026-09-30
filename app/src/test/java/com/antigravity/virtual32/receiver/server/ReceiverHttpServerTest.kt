@@ -57,7 +57,7 @@ class ReceiverHttpServerTest {
         logBuffer = LogBuffer()
         
         val fakePipeline = object : PhotoPipeline {
-            override suspend fun processPhoto(jpeg: ByteArray): String {
+            override suspend fun processPhoto(jpeg: ByteArray, source: String): String {
                 delay(50)
                 return "{\"status\":\"ok\",\"count\":3}"
             }

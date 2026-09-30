@@ -17,6 +17,7 @@ import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketTimeoutException
+import com.antigravity.virtual32.receiver.service.ReceiverState
 
 class ReceiverHttpServer(
     private var port: Int = 5000,
@@ -170,7 +171,7 @@ class ReceiverHttpServer(
         } finally {
             val duration = System.currentTimeMillis() - startTime
             if (reqMethod.isNotEmpty()) {
-                logBuffer.addLog(reqMethod, reqPath, resStatus, duration)
+                logBuffer.addHttpLog(reqMethod, reqPath, resStatus, duration)
             }
             runCatching { socket.close() }
         }
@@ -198,16 +199,19 @@ class ReceiverHttpServer(
                 }
                 "/next" -> {
                     val res = answerStore.next()
+                    ReceiverState.updateLastResult(res)
                     sendJsonResponse(output, 200, encodeNextResult(res))
                     200
                 }
                 "/repeat" -> {
                     val res = answerStore.repeat()
+                    ReceiverState.updateLastResult(res)
                     sendJsonResponse(output, 200, encodeNextResult(res))
                     200
                 }
                 "/reset" -> {
                     val res = answerStore.reset()
+                    ReceiverState.updateLastResult(res)
                     sendJsonResponse(output, 200, encodeNextResult(res))
                     200
                 }

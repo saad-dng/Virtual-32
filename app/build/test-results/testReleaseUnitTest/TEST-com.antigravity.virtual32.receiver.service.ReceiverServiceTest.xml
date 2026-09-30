@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.receiver.service.ReceiverServiceTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:44:51.376Z" hostname="MR-ROBOT" time="1.375">
+  <properties/>
+  <testcase name="testServiceStartsAndAcquiresLocks" classname="com.antigravity.virtual32.receiver.service.ReceiverServiceTest" time="1.375"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+Sep 30, 2026 8:44:52 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] SQLite: cannot set library path, library already loaded
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+]]></system-err>
+</testsuite>

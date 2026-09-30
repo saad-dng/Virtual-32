@@ -16,7 +16,7 @@ abstract class AppDatabase : RoomDatabase() {
         fun getDatabase(context: Context, useInMemory: Boolean = false): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val builder = if (useInMemory) {
-                    Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+                    Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).allowMainThreadQueries()
                 } else {
                     Room.databaseBuilder(
                         context.applicationContext,

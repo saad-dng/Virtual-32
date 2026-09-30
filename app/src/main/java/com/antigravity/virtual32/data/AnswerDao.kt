@@ -42,4 +42,31 @@ interface AnswerDao {
 
     @Query("DELETE FROM batches WHERE id NOT IN (:retentionIds)")
     suspend fun deleteOldBatches(retentionIds: List<Long>)
+
+    @Query("SELECT * FROM batches ORDER BY id DESC LIMIT 10")
+    suspend fun getRecentBatches(): List<Batch>
+    
+    @Query("SELECT * FROM batches ORDER BY id DESC LIMIT 10")
+    fun getRecentBatchesFlow(): Flow<List<Batch>>
+
+    @Query("SELECT * FROM batches ORDER BY id DESC")
+    fun getAllBatchesFlow(): Flow<List<Batch>>
+
+    @Query("SELECT COUNT(*) FROM batches WHERE createdAt >= :startTime")
+    suspend fun getPhotosSince(startTime: Long): Int
+
+    @Query("SELECT COUNT(*) FROM batches WHERE status = :status")
+    suspend fun getCountByStatus(status: String): Int
+
+    @Query("SELECT AVG(latencyMs) FROM batches WHERE status = 'ok' AND latencyMs > 0")
+    suspend fun getAverageLatency(): Long?
+
+    @Query("SELECT COUNT(*) FROM batches WHERE provider = :provider")
+    suspend fun getCountByProvider(provider: String): Int
+
+    @Query("SELECT COUNT(*) FROM batches WHERE rawResponse LIKE '%429%' OR rawResponse LIKE '%rate limit%'")
+    suspend fun getRateLimitCount(): Int
+    
+    @Query("DELETE FROM batches WHERE id IN (:batchIds)")
+    suspend fun deleteBatches(batchIds: List<Long>)
 }

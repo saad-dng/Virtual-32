@@ -448,6 +448,167 @@ public final class AnswerDao_Impl implements AnswerDao {
   }
 
   @Override
+  public Object getRecentBatches(final Continuation<? super List<Batch>> $completion) {
+    final String _sql = "SELECT * FROM batches ORDER BY id DESC LIMIT 10";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<Batch>>() {
+      @Override
+      @NonNull
+      public List<Batch> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
+          final int _cursorIndexOfSource = CursorUtil.getColumnIndexOrThrow(_cursor, "source");
+          final int _cursorIndexOfPhotoPath = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPath");
+          final int _cursorIndexOfGalleryUri = CursorUtil.getColumnIndexOrThrow(_cursor, "galleryUri");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfProvider = CursorUtil.getColumnIndexOrThrow(_cursor, "provider");
+          final int _cursorIndexOfModel = CursorUtil.getColumnIndexOrThrow(_cursor, "model");
+          final int _cursorIndexOfPromptName = CursorUtil.getColumnIndexOrThrow(_cursor, "promptName");
+          final int _cursorIndexOfPromptHash = CursorUtil.getColumnIndexOrThrow(_cursor, "promptHash");
+          final int _cursorIndexOfLatencyMs = CursorUtil.getColumnIndexOrThrow(_cursor, "latencyMs");
+          final int _cursorIndexOfRawResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "rawResponse");
+          final int _cursorIndexOfSuperseded = CursorUtil.getColumnIndexOrThrow(_cursor, "superseded");
+          final List<Batch> _result = new ArrayList<Batch>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final Batch _item;
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final String _tmpSource;
+            _tmpSource = _cursor.getString(_cursorIndexOfSource);
+            final String _tmpPhotoPath;
+            if (_cursor.isNull(_cursorIndexOfPhotoPath)) {
+              _tmpPhotoPath = null;
+            } else {
+              _tmpPhotoPath = _cursor.getString(_cursorIndexOfPhotoPath);
+            }
+            final String _tmpGalleryUri;
+            if (_cursor.isNull(_cursorIndexOfGalleryUri)) {
+              _tmpGalleryUri = null;
+            } else {
+              _tmpGalleryUri = _cursor.getString(_cursorIndexOfGalleryUri);
+            }
+            final String _tmpStatus;
+            _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
+            final String _tmpProvider;
+            _tmpProvider = _cursor.getString(_cursorIndexOfProvider);
+            final String _tmpModel;
+            _tmpModel = _cursor.getString(_cursorIndexOfModel);
+            final String _tmpPromptName;
+            _tmpPromptName = _cursor.getString(_cursorIndexOfPromptName);
+            final String _tmpPromptHash;
+            _tmpPromptHash = _cursor.getString(_cursorIndexOfPromptHash);
+            final long _tmpLatencyMs;
+            _tmpLatencyMs = _cursor.getLong(_cursorIndexOfLatencyMs);
+            final String _tmpRawResponse;
+            if (_cursor.isNull(_cursorIndexOfRawResponse)) {
+              _tmpRawResponse = null;
+            } else {
+              _tmpRawResponse = _cursor.getString(_cursorIndexOfRawResponse);
+            }
+            final boolean _tmpSuperseded;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfSuperseded);
+            _tmpSuperseded = _tmp != 0;
+            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Flow<List<Batch>> getRecentBatchesFlow() {
+    final String _sql = "SELECT * FROM batches ORDER BY id DESC LIMIT 10";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"batches"}, new Callable<List<Batch>>() {
+      @Override
+      @NonNull
+      public List<Batch> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
+          final int _cursorIndexOfSource = CursorUtil.getColumnIndexOrThrow(_cursor, "source");
+          final int _cursorIndexOfPhotoPath = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPath");
+          final int _cursorIndexOfGalleryUri = CursorUtil.getColumnIndexOrThrow(_cursor, "galleryUri");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfProvider = CursorUtil.getColumnIndexOrThrow(_cursor, "provider");
+          final int _cursorIndexOfModel = CursorUtil.getColumnIndexOrThrow(_cursor, "model");
+          final int _cursorIndexOfPromptName = CursorUtil.getColumnIndexOrThrow(_cursor, "promptName");
+          final int _cursorIndexOfPromptHash = CursorUtil.getColumnIndexOrThrow(_cursor, "promptHash");
+          final int _cursorIndexOfLatencyMs = CursorUtil.getColumnIndexOrThrow(_cursor, "latencyMs");
+          final int _cursorIndexOfRawResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "rawResponse");
+          final int _cursorIndexOfSuperseded = CursorUtil.getColumnIndexOrThrow(_cursor, "superseded");
+          final List<Batch> _result = new ArrayList<Batch>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final Batch _item;
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final String _tmpSource;
+            _tmpSource = _cursor.getString(_cursorIndexOfSource);
+            final String _tmpPhotoPath;
+            if (_cursor.isNull(_cursorIndexOfPhotoPath)) {
+              _tmpPhotoPath = null;
+            } else {
+              _tmpPhotoPath = _cursor.getString(_cursorIndexOfPhotoPath);
+            }
+            final String _tmpGalleryUri;
+            if (_cursor.isNull(_cursorIndexOfGalleryUri)) {
+              _tmpGalleryUri = null;
+            } else {
+              _tmpGalleryUri = _cursor.getString(_cursorIndexOfGalleryUri);
+            }
+            final String _tmpStatus;
+            _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
+            final String _tmpProvider;
+            _tmpProvider = _cursor.getString(_cursorIndexOfProvider);
+            final String _tmpModel;
+            _tmpModel = _cursor.getString(_cursorIndexOfModel);
+            final String _tmpPromptName;
+            _tmpPromptName = _cursor.getString(_cursorIndexOfPromptName);
+            final String _tmpPromptHash;
+            _tmpPromptHash = _cursor.getString(_cursorIndexOfPromptHash);
+            final long _tmpLatencyMs;
+            _tmpLatencyMs = _cursor.getLong(_cursorIndexOfLatencyMs);
+            final String _tmpRawResponse;
+            if (_cursor.isNull(_cursorIndexOfRawResponse)) {
+              _tmpRawResponse = null;
+            } else {
+              _tmpRawResponse = _cursor.getString(_cursorIndexOfRawResponse);
+            }
+            final boolean _tmpSuperseded;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfSuperseded);
+            _tmpSuperseded = _tmp != 0;
+            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
   public Object markBatchesSuperseded(final List<Long> batchIds,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {

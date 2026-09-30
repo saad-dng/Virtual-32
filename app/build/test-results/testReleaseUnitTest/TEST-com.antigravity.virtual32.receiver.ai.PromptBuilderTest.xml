@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.receiver.ai.PromptBuilderTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:44:49.588Z" hostname="MR-ROBOT" time="0.0">
+  <properties/>
+  <testcase name="build appends locked contract by default" classname="com.antigravity.virtual32.receiver.ai.PromptBuilderTest" time="0.0"/>
+  <testcase name="build appends retry note if isRetry is true" classname="com.antigravity.virtual32.receiver.ai.PromptBuilderTest" time="0.0"/>
+  <testcase name="build appends reasoning locked contract when reasoning enabled" classname="com.antigravity.virtual32.receiver.ai.PromptBuilderTest" time="0.0"/>
+  <testcase name="build uses default instruction if input is blank" classname="com.antigravity.virtual32.receiver.ai.PromptBuilderTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

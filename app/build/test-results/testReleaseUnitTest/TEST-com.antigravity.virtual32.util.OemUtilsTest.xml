@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.util.OemUtilsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:44:52.993Z" hostname="MR-ROBOT" time="0.025">
+  <properties/>
+  <testcase name="testUnknownDevice" classname="com.antigravity.virtual32.util.OemUtilsTest" time="0.01"/>
+  <testcase name="testXiaomiDetection" classname="com.antigravity.virtual32.util.OemUtilsTest" time="0.008"/>
+  <testcase name="testSamsungDetection" classname="com.antigravity.virtual32.util.OemUtilsTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

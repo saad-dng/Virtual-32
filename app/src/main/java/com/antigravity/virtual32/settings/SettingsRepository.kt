@@ -25,6 +25,8 @@ open class SettingsRepository(private val context: Context?) {
         val ACTIVE_PROMPT_ID = stringPreferencesKey("active_prompt_id")
         val ANSWER_MODE = stringPreferencesKey("answer_mode")
         val SAVE_TO_GALLERY = booleanPreferencesKey("save_to_gallery")
+        val CONFIDENCE_FLAGS = booleanPreferencesKey("confidence_flags")
+        val INCLUDE_REASONING = booleanPreferencesKey("include_reasoning")
         val PAUSE_AI = booleanPreferencesKey("pause_ai")
         val REQUEST_TIMEOUT_SEC = intPreferencesKey("request_timeout_sec")
         val SIM_HOST = stringPreferencesKey("sim_host")
@@ -33,6 +35,7 @@ open class SettingsRepository(private val context: Context?) {
         val SIM_RESOLUTION = stringPreferencesKey("sim_resolution")
         val SIM_JPEG_QUALITY = intPreferencesKey("sim_jpeg_quality")
         val START_ON_BOOT = booleanPreferencesKey("start_on_boot")
+        val ENABLE_HAPTICS = booleanPreferencesKey("enable_haptics")
     }
 
     open val settingsFlow: Flow<AppSettings>
@@ -56,6 +59,8 @@ open class SettingsRepository(private val context: Context?) {
                 activePromptId = preferences[PreferencesKeys.ACTIVE_PROMPT_ID] ?: "default",
                 answerMode = try { AnswerMode.valueOf(preferences[PreferencesKeys.ANSWER_MODE] ?: "REPLACE") } catch (e: Exception) { AnswerMode.REPLACE },
                 saveToGallery = preferences[PreferencesKeys.SAVE_TO_GALLERY] ?: true,
+                confidenceFlags = preferences[PreferencesKeys.CONFIDENCE_FLAGS] ?: true,
+                includeReasoning = preferences[PreferencesKeys.INCLUDE_REASONING] ?: false,
                 pauseAi = preferences[PreferencesKeys.PAUSE_AI] ?: false,
                 requestTimeoutSec = preferences[PreferencesKeys.REQUEST_TIMEOUT_SEC] ?: 40,
                 simHost = preferences[PreferencesKeys.SIM_HOST] ?: "127.0.0.1",
@@ -63,7 +68,8 @@ open class SettingsRepository(private val context: Context?) {
                 simLoopback = preferences[PreferencesKeys.SIM_LOOPBACK] ?: false,
                 simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
                 simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80,
-                startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false
+                startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false,
+                enableHaptics = preferences[PreferencesKeys.ENABLE_HAPTICS] ?: false
             )
         }
 
@@ -82,6 +88,8 @@ open class SettingsRepository(private val context: Context?) {
                 activePromptId = preferences[PreferencesKeys.ACTIVE_PROMPT_ID] ?: "default",
                 answerMode = try { AnswerMode.valueOf(preferences[PreferencesKeys.ANSWER_MODE] ?: "REPLACE") } catch (e: Exception) { AnswerMode.REPLACE },
                 saveToGallery = preferences[PreferencesKeys.SAVE_TO_GALLERY] ?: true,
+                confidenceFlags = preferences[PreferencesKeys.CONFIDENCE_FLAGS] ?: true,
+                includeReasoning = preferences[PreferencesKeys.INCLUDE_REASONING] ?: false,
                 pauseAi = preferences[PreferencesKeys.PAUSE_AI] ?: false,
                 requestTimeoutSec = preferences[PreferencesKeys.REQUEST_TIMEOUT_SEC] ?: 40,
                 simHost = preferences[PreferencesKeys.SIM_HOST] ?: "127.0.0.1",
@@ -89,7 +97,8 @@ open class SettingsRepository(private val context: Context?) {
                 simLoopback = preferences[PreferencesKeys.SIM_LOOPBACK] ?: false,
                 simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
                 simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80,
-                startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false
+                startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false,
+                enableHaptics = preferences[PreferencesKeys.ENABLE_HAPTICS] ?: false
             )
             
             val updated = update(current)
@@ -103,6 +112,8 @@ open class SettingsRepository(private val context: Context?) {
             preferences[PreferencesKeys.ACTIVE_PROMPT_ID] = updated.activePromptId
             preferences[PreferencesKeys.ANSWER_MODE] = updated.answerMode.name
             preferences[PreferencesKeys.SAVE_TO_GALLERY] = updated.saveToGallery
+            preferences[PreferencesKeys.CONFIDENCE_FLAGS] = updated.confidenceFlags
+            preferences[PreferencesKeys.INCLUDE_REASONING] = updated.includeReasoning
             preferences[PreferencesKeys.PAUSE_AI] = updated.pauseAi
             preferences[PreferencesKeys.REQUEST_TIMEOUT_SEC] = updated.requestTimeoutSec
             preferences[PreferencesKeys.SIM_HOST] = updated.simHost
@@ -111,6 +122,7 @@ open class SettingsRepository(private val context: Context?) {
             preferences[PreferencesKeys.SIM_RESOLUTION] = updated.simResolution
             preferences[PreferencesKeys.SIM_JPEG_QUALITY] = updated.simJpegQuality
             preferences[PreferencesKeys.START_ON_BOOT] = updated.startOnBoot
+            preferences[PreferencesKeys.ENABLE_HAPTICS] = updated.enableHaptics
         }
     }
 }

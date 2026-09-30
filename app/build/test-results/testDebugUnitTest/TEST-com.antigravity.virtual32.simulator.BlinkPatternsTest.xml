@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.simulator.BlinkPatternsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T15:03:30.885Z" hostname="MR-ROBOT" time="0.0">
+  <properties/>
+  <testcase name="cycleComplete has 2 medium blinks" classname="com.antigravity.virtual32.simulator.BlinkPatternsTest" time="0.0"/>
+  <testcase name="answerBlinks generates correct number of blinks" classname="com.antigravity.virtual32.simulator.BlinkPatternsTest" time="0.0"/>
+  <testcase name="processingPulse is correct" classname="com.antigravity.virtual32.simulator.BlinkPatternsTest" time="0.0"/>
+  <testcase name="serverError has 5 fast blinks" classname="com.antigravity.virtual32.simulator.BlinkPatternsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -40,7 +40,7 @@ class PhotoPipelineTest {
         var callCount = 0
 
         val pipeline = object : PhotoPipeline {
-            override suspend fun processPhoto(jpeg: ByteArray): String {
+            override suspend fun processPhoto(jpeg: ByteArray, source: String): String {
                 delay(100)
                 callCount++
                 return "{\"status\":\"ok\",\"count\":$callCount}"
@@ -48,8 +48,8 @@ class PhotoPipelineTest {
         }
 
         // Just checking basic pipeline fake works
-        val res1 = pipeline.processPhoto(byteArrayOf())
-        val res2 = pipeline.processPhoto(byteArrayOf())
+        val res1 = pipeline.processPhoto(byteArrayOf(), "ESP")
+        val res2 = pipeline.processPhoto(byteArrayOf(), "ESP")
         
         assertTrue(res1.contains("\"count\":1"))
         assertTrue(res2.contains("\"count\":2"))

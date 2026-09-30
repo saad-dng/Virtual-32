@@ -22,6 +22,8 @@ data class AppSettings(
     val activePromptId: String = "default",
     val answerMode: AnswerMode = AnswerMode.REPLACE,
     val saveToGallery: Boolean = true,
+    val confidenceFlags: Boolean = true,
+    val includeReasoning: Boolean = false,
     val pauseAi: Boolean = false,
     val requestTimeoutSec: Int = 40,
     val simHost: String = "127.0.0.1",
@@ -29,5 +31,6 @@ data class AppSettings(
     val simLoopback: Boolean = false,
     val simResolution: String = "UXGA",
     val simJpegQuality: Int = 80,
-    val startOnBoot: Boolean = false
+    val startOnBoot: Boolean = false,
+    val enableHaptics: Boolean = false
 )

@@ -25,6 +25,7 @@ import com.antigravity.virtual32.receiver.pipeline.PhotoPipelineImpl
 import com.antigravity.virtual32.receiver.server.LogBuffer
 import com.antigravity.virtual32.receiver.server.ReceiverHttpServer
 import com.antigravity.virtual32.settings.SettingsRepository
+import com.antigravity.virtual32.settings.PromptRepository
 import com.antigravity.virtual32.util.GalleryWriter
 import com.antigravity.virtual32.util.IpDiscovery
 import com.antigravity.virtual32.util.PhotoCache
@@ -51,6 +52,7 @@ class ReceiverService : Service() {
     
     private lateinit var answerStore: RoomAnswerStore
     private lateinit var settingsRepo: SettingsRepository
+    private lateinit var promptRepo: PromptRepository
     private lateinit var pipeline: PhotoPipelineImpl
     private var server: ReceiverHttpServer? = null
     private val logBuffer = LogBuffer()
@@ -82,9 +84,25 @@ class ReceiverService : Service() {
         scope.launch {
             val port = settingsRepo.getSettings().serverPort
             ReceiverState.update { it.copy(serverPort = port) }
-            val ip = IpDiscovery.getIpAddress(this@ReceiverService).first
+            val ip = IpDiscovery.getBestIpAddress()
             ReceiverState.update { it.copy(currentIp = ip) }
             startServer(port)
+            
+            // Run self test on startup
+            val runner = SelfTestRunner(this@ReceiverService)
+            val results = runner.runTests(port, wakeLock, wifiLock)
+            val failed = results.filter { !it.passed }
+            if (failed.isNotEmpty()) {
+                logBuffer.addAppLog("E", "SelfTest", "Failed: ${failed.joinToString { it.name }}")
+            } else {
+                logBuffer.addAppLog("I", "SelfTest", "All tests passed")
+            }
+        }
+        
+        scope.launch {
+            pipeline.state.collect { state ->
+                ReceiverState.updatePipeline(state)
+            }
         }
         
         scope.launch {
@@ -96,11 +114,11 @@ class ReceiverService : Service() {
         }
         
         scope.launch {
-            // Check logs for last ESP activity
-            logBuffer.logs.collect { logs ->
-                val lastEsp = logs.lastOrNull { it.path == "/upload" || it.path == "/ping" }
-                val lastTime = lastEsp?.timestamp ?: -1L
+            while (isActive) {
+                delay(5000)
+                val lastTime = logBuffer.lastActivityMs
                 ReceiverState.update { it.copy(lastEspSeenMs = lastTime) }
+                ReceiverState.updateLogs(logBuffer.getLogs())
                 updateNotification()
             }
         }
@@ -110,9 +128,12 @@ class ReceiverService : Service() {
         val db = AppDatabase.getDatabase(this)
         answerStore = RoomAnswerStore(db.answerDao())
         settingsRepo = SettingsRepository(this)
+        promptRepo = PromptRepository(this)
         
         pipeline = PhotoPipelineImpl(
+            context = this,
             settingsRepo = settingsRepo,
+            promptRepo = promptRepo,
             answerStore = answerStore,
             okHttpClient = okHttpClient,
             galleryWriter = GalleryWriter(this),
@@ -180,6 +201,10 @@ class ReceiverService : Service() {
                     // Rebind
                     startServer(ReceiverState.health.value.serverPort)
                 }
+                
+                // Also update logs periodically
+                ReceiverState.updateLogs(logBuffer.getLogs())
+                
                 updateNotification()
             }
         }
@@ -211,7 +236,7 @@ class ReceiverService : Service() {
     }
     
     private fun recomputeIp() {
-        val ip = IpDiscovery.getIpAddress(this@ReceiverService).first
+        val ip = IpDiscovery.getBestIpAddress()
         if (ip != ReceiverState.health.value.currentIp) {
             ReceiverState.update { it.copy(currentIp = ip) }
             startServer(ReceiverState.health.value.serverPort)
@@ -263,6 +288,37 @@ class ReceiverService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_PROCESS_GALLERY) {
+            val uriStr = intent.getStringExtra(EXTRA_URI)
+            if (uriStr != null) {
+                scope.launch {
+                    try {
+                        val uri = android.net.Uri.parse(uriStr)
+                        contentResolver.openInputStream(uri)?.use { stream ->
+                            val bytes = stream.readBytes()
+                            pipeline.processPhoto(bytes, "GALLERY")
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        } else if (intent?.action == ACTION_REPROCESS) {
+            val photoPath = intent.getStringExtra(EXTRA_PHOTO_PATH)
+            val batchId = intent.getLongExtra(EXTRA_BATCH_ID, -1L)
+            if (photoPath != null && batchId != -1L) {
+                scope.launch {
+                    try {
+                        val db = AppDatabase.getDatabase(this@ReceiverService)
+                        db.answerDao().markBatchesSuperseded(listOf(batchId))
+                        val bytes = java.io.File(photoPath).readBytes()
+                        pipeline.processPhoto(bytes, "GALLERY")
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
         return START_STICKY
     }
 
@@ -279,4 +335,15 @@ class ReceiverService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+    
+    companion object {
+        private const val CHANNEL_ID = "ReceiverServiceChannel"
+        private const val NOTIFICATION_ID = 1
+        
+        const val ACTION_PROCESS_GALLERY = "com.antigravity.virtual32.PROCESS_GALLERY"
+        const val ACTION_REPROCESS = "com.antigravity.virtual32.REPROCESS"
+        const val EXTRA_URI = "extra_uri"
+        const val EXTRA_PHOTO_PATH = "extra_photo_path"
+        const val EXTRA_BATCH_ID = "extra_batch_id"
+    }
 }

@@ -17,10 +17,13 @@ import com.antigravity.virtual32.ui.screens.HomeScreen
 import com.antigravity.virtual32.ui.screens.AnswersScreen
 import com.antigravity.virtual32.ui.screens.SimulatorScreen
 import com.antigravity.virtual32.ui.screens.SettingsScreen
+import com.antigravity.virtual32.ui.screens.AiSettingsScreen
+import com.antigravity.virtual32.ui.screens.DiagnosticsScreen
+import com.antigravity.virtual32.ui.screens.HistoryScreen
 import com.antigravity.virtual32.ui.theme.Virtual32Theme
 
 enum class Screen {
-    Home, Answers, Simulator, Settings
+    Home, Answers, Simulator, Settings, AiSettings, Diagnostics, History
 }
 
 class MainActivity : ComponentActivity() {
@@ -68,9 +71,16 @@ class MainActivity : ComponentActivity() {
                     ) {
                         when (currentScreen) {
                             Screen.Home -> HomeScreen()
-                            Screen.Answers -> AnswersScreen(onBack = { currentScreen = Screen.Home })
+                            Screen.Answers -> AnswersScreen(onNavigateToHistory = { currentScreen = Screen.History })
+                            Screen.History -> HistoryScreen(onBack = { currentScreen = Screen.Answers })
                             Screen.Simulator -> SimulatorScreen(onBack = { currentScreen = Screen.Home })
-                            Screen.Settings -> SettingsScreen(onBack = { currentScreen = Screen.Home })
+                            Screen.Settings -> SettingsScreen(
+                                onNavigateToAiSettings = { currentScreen = Screen.AiSettings },
+                                onNavigateToDiagnostics = { currentScreen = Screen.Diagnostics },
+                                onBack = { currentScreen = Screen.Home }
+                            )
+                            Screen.AiSettings -> AiSettingsScreen(onBack = { currentScreen = Screen.Settings })
+                            Screen.Diagnostics -> DiagnosticsScreen(onBack = { currentScreen = Screen.Settings })
                         }
                     }
                 }

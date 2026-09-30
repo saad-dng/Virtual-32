@@ -50,30 +50,30 @@
 ## Files in this project
 - `guide.md` — Product spec, protocol contract, session protocol, and status log.
 - `agent.md` — Engineering conventions, architecture rules, and file inventory.
+- `USER_GUIDE.md` — Setup instructions and LED cheat sheet.
 - `build.gradle.kts` (root and app) — KSP, Room, and serialization configured.
-- `app/src/main/AndroidManifest.xml`
+- `app/src/main/AndroidManifest.xml` — Declares permissions, Foreground Service (specialUse), and Quick Settings Tile.
 - `app/src/main/java/com/antigravity/virtual32/`:
   - `MainActivity.kt` — App entry point and bottom navigation.
-  - `data/` — Data layer, `AnswerStore.kt`.
+  - `data/` — Room DB (`AppDatabase`), DAOs (`AnswerDao`), `AnswerStore`, `GalleryWriter`, `PhotoCache`, `Entities.kt`.
   - `receiver/`:
-    - `ai/GeminiVisionClient.kt` — Gemini API integration.
-    - `pipeline/PhotoPipeline.kt` — Processing queue interface.
-    - `server/ReceiverHttpServer.kt` — Coroutine HTTP socket server.
-    - `server/ServerState.kt`, `LogBuffer.kt` — Server state and logs.
-    - `service/` — Future foreground service.
-  - `settings/`:
-    - `AppSettings.kt` — Settings data model.
-    - `SettingsRepository.kt` — DataStore settings repository.
-  - `simulator/` — Future simulator logic.
+    - `ai/` — `VisionProvider`, `GeminiProvider`, `ClaudeProvider`, `AiResponseParser`, `PromptBuilder`, `PromptRepository`.
+    - `pipeline/` — `PhotoPipelineImpl.kt` (Queue worker), `AnswerMode.kt`.
+    - `server/` — `ReceiverHttpServer.kt` (Coroutine HTTP server), `LogBuffer.kt`.
+    - `service/` — `ReceiverService.kt` (Watchdog, locks), `ReceiverState.kt`, `SelfTestRunner.kt`, `Virtual32TileService.kt`.
+  - `settings/` — `AppSettings.kt`, `SettingsRepository.kt`.
+  - `simulator/` — `BlinkPatterns.kt`, `BlinkEngine.kt`, `DoubleTapDetector.kt`, `SimClient.kt`.
   - `ui/`:
-    - `components/DottedBackgroundBox.kt` — Cozy dotted canvas background.
-    - `screens/HomeScreen.kt`, `AnswersScreen.kt`, `SimulatorScreen.kt`, `SettingsScreen.kt` — App screens.
-    - `theme/Color.kt`, `Theme.kt`, `Type.kt` — Design tokens and typography.
-  - `util/IpDiscovery.kt` — IP resolution helper.
+    - `components/` — `DottedBackgroundBox.kt`.
+    - `screens/` — `HomeScreen`, `AnswersScreen`, `SimulatorScreen`, `SettingsScreen`, `AiSettingsScreen`, `DiagnosticsScreen`, `HistoryScreen`.
+    - `theme/` — `Color.kt`, `Theme.kt`, `Type.kt`.
+  - `util/` — `IpDiscovery.kt`.
 - `app/src/test/java/com/antigravity/virtual32/`:
-  - `receiver/server/ReceiverHttpServerTest.kt` — HTTP server request parsing tests.
-  - `settings/SettingsSmokeTest.kt`
-- `docs/ESP32_CONTRACT.md` — Blink language contract.
+  - `receiver/` — Tests for `ReceiverHttpServer`, `PhotoPipeline`, `VisionProviders`, `AiResponseParser`.
+  - `simulator/` — Tests for `BlinkPatterns`, `DoubleTapDetector`.
+  - `data/` — Tests for `RoomAnswerStore`, `GalleryWriter`.
+- `tools/esp32_client_sim.py` — Python client simulator for firmware dev testing.
+- `docs/ESP32_CONTRACT.md` — Complete HTTP and Blink language contract for firmware.
 
 ---
 

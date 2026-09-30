@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.2" type="incidents">
+
+    <incident
+        id="OldTargetApi"
+        severity="warning"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details.">
+        <fix-replace
+            description="Update targetSdkVersion to 36"
+            oldString="35"
+            replacement="36"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="16"
+            column="9"
+            startOffset="393"
+            endLine="16"
+            endColumn="23"
+            endOffset="407"/>
+    </incident>
+
+    <incident
+        id="AndroidGradlePluginVersion"
+        severity="warning"
+        message="A newer version of Gradle than 8.13 is available: 8.14.5">
+        <fix-replace
+            description="Update to 8.14.5"
+            oldString="8.13"
+            replacement="8.14.5"
+            priority="0"/>
+        <location
+            file="../gradle/wrapper/gradle-wrapper.properties"
+            line="3"
+            column="17"
+            startOffset="81"
+            endLine="3"
+            endColumn="79"
+            endOffset="143"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of `compileSdkVersion` than 35 is available: 36">
+        <fix-replace
+            description="Set compileSdkVersion to 36"
+            oldString="35"
+            replacement="36"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="11"
+            column="5"
+            startOffset="276"
+            endLine="11"
+            endColumn="20"
+            endOffset="291"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.19.1">
+        <fix-replace
+            description="Change to 1.19.1"
+            family="Update versions"
+            oldString="1.15.0"
+            replacement="1.19.1"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="65"
+            column="20"
+            startOffset="1370"
+            endLine="65"
+            endColumn="51"
+            endOffset="1401"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="66"
+            column="20"
+            startOffset="1422"
+            endLine="66"
+            endColumn="68"
+            endOffset="1470"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="67"
+            column="20"
+            startOffset="1491"
+            endLine="67"
+            endColumn="72"
+            endOffset="1543"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="68"
+            column="20"
+            startOffset="1564"
+            endLine="68"
+            endColumn="74"
+            endOffset="1618"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.13.0">
+        <fix-replace
+            description="Change to 1.13.0"
+            family="Update versions"
+            oldString="1.9.3"
+            replacement="1.13.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="69"
+            column="20"
+            startOffset="1639"
+            endLine="69"
+            endColumn="62"
+            endOffset="1681"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-core than 1.4.1 is available: 1.6.2">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="83"
+            column="20"
+            startOffset="2190"
+            endLine="83"
+            endColumn="65"
+            endOffset="2235"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-camera2 than 1.4.1 is available: 1.6.2">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="84"
+            column="20"
+            startOffset="2256"
+            endLine="84"
+            endColumn="68"
+            endOffset="2304"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-lifecycle than 1.4.1 is available: 1.6.2">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="85"
+            column="20"
+            startOffset="2325"
+            endLine="85"
+            endColumn="70"
+            endOffset="2375"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.camera:camera-view than 1.4.1 is available: 1.6.2">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="86"
+            column="20"
+            startOffset="2396"
+            endLine="86"
+            endColumn="65"
+            endOffset="2441"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.2.1">
+        <fix-replace
+            description="Change to 1.2.1"
+            family="Update versions"
+            oldString="1.1.1"
+            replacement="1.2.1"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="89"
+            column="20"
+            startOffset="2500"
+            endLine="89"
+            endColumn="68"
+            endOffset="2548"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.room:room-runtime than 2.6.1 is available: 2.8.5">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="102"
+            column="20"
+            startOffset="3000"
+            endLine="102"
+            endColumn="61"
+            endOffset="3041"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.room:room-ktx than 2.6.1 is available: 2.8.5">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="103"
+            column="20"
+            startOffset="3062"
+            endLine="103"
+            endColumn="57"
+            endOffset="3099"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.room:room-compiler than 2.6.1 is available: 2.8.5">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="104"
+            column="9"
+            startOffset="3109"
+            endLine="104"
+            endColumn="51"
+            endOffset="3151"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-service than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="108"
+            column="20"
+            startOffset="3282"
+            endLine="108"
+            endColumn="64"
+            endOffset="3326"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.test:core-ktx than 1.5.0 is available: 1.7.0">
+        <fix-replace
+            description="Change to 1.7.0"
+            family="Update versions"
+            oldString="1.5.0"
+            replacement="1.7.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="115"
+            column="24"
+            startOffset="3532"
+            endLine="115"
+            endColumn="54"
+            endOffset="3562"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of com.squareup.okhttp3:okhttp than 4.12.0 is available: 5.5.0">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="93"
+            column="20"
+            startOffset="2643"
+            endLine="93"
+            endColumn="64"
+            endOffset="2687"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of com.squareup.okhttp3:logging-interceptor than 4.12.0 is available: 5.5.0">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="94"
+            column="20"
+            startOffset="2708"
+            endLine="94"
+            endColumn="77"
+            endOffset="2765"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-android than 1.9.0 is available: 1.11.0">
+        <fix-replace
+            description="Change to 1.11.0"
+            family="Update versions"
+            oldString="1.9.0"
+            replacement="1.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="97"
+            column="20"
+            startOffset="2805"
+            endLine="97"
+            endColumn="76"
+            endOffset="2861"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-guava than 1.9.0 is available: 1.11.0">
+        <fix-replace
+            description="Change to 1.11.0"
+            family="Update versions"
+            oldString="1.9.0"
+            replacement="1.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="98"
+            column="20"
+            startOffset="2882"
+            endLine="98"
+            endColumn="74"
+            endOffset="2936"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.7.3 is available: 1.11.0">
+        <fix-replace
+            description="Change to 1.11.0"
+            family="Update versions"
+            oldString="1.7.3"
+            replacement="1.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="107"
+            column="20"
+            startOffset="3205"
+            endLine="107"
+            endColumn="76"
+            endOffset="3261"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of io.coil-kt:coil-compose than 2.5.0 is available: 2.7.0">
+        <fix-replace
+            description="Change to 2.7.0"
+            family="Update versions"
+            oldString="2.5.0"
+            replacement="2.7.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="111"
+            column="20"
+            startOffset="3369"
+            endLine="111"
+            endColumn="51"
+            endOffset="3400"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of org.robolectric:robolectric than 4.11.1 is available: 4.17">
+        <fix-replace
+            description="Change to 4.17"
+            family="Update versions"
+            oldString="4.11.1"
+            replacement="4.17"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="114"
+            column="24"
+            startOffset="3471"
+            endLine="114"
+            endColumn="60"
+            endOffset="3507"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of com.squareup.okhttp3:mockwebserver than 4.12.0 is available: 5.5.0">
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="116"
+            column="24"
+            startOffset="3587"
+            endLine="116"
+            endColumn="75"
+            endOffset="3638"/>
+    </incident>
+
+    <incident
+        id="AcceptsUserCertificates"
+        severity="warning"
+        message="The Network Security Configuration allows the use of user certificates in the release version of your app">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/xml/network_security_config.xml"
+            line="7"
+            column="13"
+            startOffset="280"
+            endLine="7"
+            endColumn="40"
+            endOffset="307"/>
+    </incident>
+
+    <incident
+        id="InsecureBaseConfiguration"
+        severity="warning"
+        message="Insecure Base Configuration">
+        <fix-replace
+            description="Replace with false"
+            replacement="false"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/xml/network_security_config.xml"
+                startOffset="195"
+                endOffset="199"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/xml/network_security_config.xml"
+            line="4"
+            column="45"
+            startOffset="195"
+            endLine="4"
+            endColumn="49"
+            endOffset="199"/>
+    </incident>
+
+    <incident
+        id="WakelockTimeout"
+        severity="warning"
+        message="Provide a timeout when requesting a wakelock with `PowerManager.Wakelock.acquire(long timeout)`. This will ensure the OS will cleanup any wakelocks that last longer than you intend, and will save your user&apos;s battery.">
+        <fix-replace
+            description="Set timeout to 10 minutes"
+            oldPattern="acquire\s*\(()\s*\)"
+            replacement="10*60*1000L /*10 minutes*/"
+            priority="0"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/receiver/service/ReceiverService.kt"
+            line="138"
+            column="17"
+            startOffset="5114"
+            endLine="138"
+            endColumn="26"
+            endOffset="5123"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 26">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/receiver/service/BootReceiver.kt"
+            line="16"
+            column="21"
+            startOffset="697"
+            endLine="16"
+            endColumn="89"
+            endOffset="765"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 26">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+            line="193"
+            column="33"
+            startOffset="7949"
+            endLine="193"
+            endColumn="79"
+            endOffset="7995"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 26">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+            line="375"
+            column="9"
+            startOffset="16326"
+            endLine="375"
+            endColumn="55"
+            endOffset="16372"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 26">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/receiver/service/ReceiverService.kt"
+            line="233"
+            column="13"
+            startOffset="8647"
+            endLine="233"
+            endColumn="59"
+            endOffset="8693"/>
+    </incident>
+
+    <incident
+        id="AutoboxingStateCreation"
+        severity="informational"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`">
+        <fix-replace
+            description="Replace with mutableFloatStateOf"
+            replacement="androidx.compose.runtime.mutableFloatStateOf"
+            shortenNames="true"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/SimulatorScreen.kt"
+                startOffset="2615"
+                endOffset="2629"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/SimulatorScreen.kt"
+            line="61"
+            column="45"
+            startOffset="2615"
+            endLine="61"
+            endColumn="59"
+            endOffset="2629"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLocation"
+        severity="warning"
+        message="Found bitmap drawable `res/drawable/app_logo.jpg` in densityless folder">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/app_logo.jpg"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `String.toUri` instead?">
+        <fix-replace
+            description="Replace with the toUri extension function"
+            family="Replace with the toUri extension function"
+            robot="true"
+            independent="true"
+            oldString="Uri.parse(&quot;package:${context.packageName}&quot;)"
+            replacement="&quot;package:${context.packageName}&quot;.toUri()"
+            reformat="value"
+            imports="androidx.core.net.toUri"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+                startOffset="19095"
+                endOffset="19138"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+            line="439"
+            column="40"
+            startOffset="19095"
+            endLine="439"
+            endColumn="83"
+            endOffset="19138"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `String.toUri` instead?">
+        <fix-replace
+            description="Replace with the toUri extension function"
+            family="Replace with the toUri extension function"
+            robot="true"
+            independent="true"
+            oldString="Uri.parse(&quot;package:${context.packageName}&quot;)"
+            replacement="&quot;package:${context.packageName}&quot;.toUri()"
+            reformat="value"
+            imports="androidx.core.net.toUri"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+                startOffset="19095"
+                endOffset="19138"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/ui/screens/HomeScreen.kt"
+            line="439"
+            column="40"
+            startOffset="19095"
+            endLine="439"
+            endColumn="83"
+            endOffset="19138"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `Bitmap.scale` instead?">
+        <fix-replace
+            description="Replace with the scale extension function"
+            family="Replace with the scale extension function"
+            robot="true"
+            independent="true"
+            oldString="Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)"
+            replacement="bitmap.scale(newWidth, newHeight)"
+            reformat="value"
+            imports="androidx.core.graphics.scale"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/ImageResizer.kt"
+                startOffset="1064"
+                endOffset="1124"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/ImageResizer.kt"
+            line="31"
+            column="22"
+            startOffset="1064"
+            endLine="31"
+            endColumn="82"
+            endOffset="1124"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `String.toUri` instead?">
+        <fix-replace
+            description="Replace with the toUri extension function"
+            family="Replace with the toUri extension function"
+            robot="true"
+            independent="true"
+            oldString="Uri.parse(&quot;package:${context.packageName}&quot;)"
+            replacement="&quot;package:${context.packageName}&quot;.toUri()"
+            reformat="value"
+            imports="androidx.core.net.toUri"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/OemUtils.kt"
+                startOffset="3713"
+                endOffset="3756"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/OemUtils.kt"
+            line="66"
+            column="28"
+            startOffset="3713"
+            endLine="66"
+            endColumn="71"
+            endOffset="3756"/>
+    </incident>
+
+    <incident
+        id="UseKtx"
+        severity="warning"
+        message="Use the KTX extension function `String.toUri` instead?">
+        <fix-replace
+            description="Replace with the toUri extension function"
+            family="Replace with the toUri extension function"
+            robot="true"
+            independent="true"
+            oldString="Uri.parse(&quot;package:${context.packageName}&quot;)"
+            replacement="&quot;package:${context.packageName}&quot;.toUri()"
+            reformat="value"
+            imports="androidx.core.net.toUri"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/OemUtils.kt"
+                startOffset="3713"
+                endOffset="3756"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/antigravity/virtual32/util/OemUtils.kt"
+            line="66"
+            column="28"
+            startOffset="3713"
+            endLine="66"
+            endColumn="71"
+            endOffset="3756"/>
+    </incident>
+
+</incidents>

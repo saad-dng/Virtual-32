@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.simulator.DoubleTapDetectorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-30T15:03:30.886Z" hostname="MR-ROBOT" time="0.029">
+  <properties/>
+  <testcase name="single tap fires after window" classname="com.antigravity.virtual32.simulator.DoubleTapDetectorTest" time="0.026"/>
+  <testcase name="double tap fires immediately when second tap arrives within window" classname="com.antigravity.virtual32.simulator.DoubleTapDetectorTest" time="0.002"/>
+  <testcase name="slow double tap is two single taps" classname="com.antigravity.virtual32.simulator.DoubleTapDetectorTest" time="0.0"/>
+  <testcase name="triple tap within window triggers double then single" classname="com.antigravity.virtual32.simulator.DoubleTapDetectorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

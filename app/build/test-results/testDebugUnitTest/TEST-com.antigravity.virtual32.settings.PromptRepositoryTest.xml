@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.settings.PromptRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-30T15:03:30.682Z" hostname="MR-ROBOT" time="0.2">
+  <properties/>
+  <testcase name="built-in presets cannot be overwritten" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.086"/>
+  <testcase name="custom preset can be deleted" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.078"/>
+  <testcase name="default presets are loaded initially" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.01"/>
+  <testcase name="custom preset can be saved and loaded" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.014"/>
+  <testcase name="true false preset has correct mapping" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

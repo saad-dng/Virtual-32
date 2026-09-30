@@ -14,7 +14,8 @@ data class RawAiResult(
 data class RawAnswer(
     val q: Int,
     val choice: String, // "A" - "E"
-    val conf: String // "high", "low"
+    val conf: String, // "high", "low"
+    val reasoning: String? = null
 )
 
 interface VisionProvider {

@@ -7,9 +7,14 @@ object PromptBuilder {
 Return ONLY JSON: {"status":"ok"|"unclear","answers":[{"q":<int>,"choice":"A"-"E","conf":"high"|"low"}],"reason":"<short, only when unclear>"}. Use status unclear if the text is blurry, cropped, dark, unreadable, or contains no multiple-choice questions. Never guess.
 """.trim()
 
-    fun build(userInstruction: String, isRetry: Boolean = false): String {
+    val LOCKED_CONTRACT_WITH_REASONING = """
+Return ONLY JSON: {"status":"ok"|"unclear","answers":[{"q":<int>,"choice":"A"-"E","conf":"high"|"low","reasoning":"<at most 15 words>"}],"reason":"<short, only when unclear>"}. Use status unclear if the text is blurry, cropped, dark, unreadable, or contains no multiple-choice questions. Never guess.
+""".trim()
+
+    fun build(userInstruction: String, includeReasoning: Boolean = false, isRetry: Boolean = false): String {
         val instruction = if (userInstruction.isBlank()) DEFAULT_INSTRUCTION else userInstruction
-        var prompt = "$instruction\n\n$LOCKED_CONTRACT"
+        val contract = if (includeReasoning) LOCKED_CONTRACT_WITH_REASONING else LOCKED_CONTRACT
+        var prompt = "$instruction\n\n$contract"
         if (isRetry) {
             prompt += "\n\nReturn valid JSON only. Previous output failed to parse."
         }

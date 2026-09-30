@@ -50,8 +50,9 @@ object AiResponseParser {
                 
                 val conf = obj["conf"]?.jsonPrimitive?.content?.lowercase() ?: "low"
                 val normalizedConf = if (conf == "high") "high" else "low"
+                val reasoning = obj["reasoning"]?.jsonPrimitive?.content
                 
-                parsedAnswers.add(RawAnswer(q, choice, normalizedConf))
+                parsedAnswers.add(RawAnswer(q, choice, normalizedConf, reasoning))
             }
 
             // Dedupe and sort by q

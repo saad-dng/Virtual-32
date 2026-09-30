@@ -2,6 +2,8 @@ package com.antigravity.virtual32.receiver.service
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.antigravity.virtual32.receiver.pipeline.PipelineState
+import com.antigravity.virtual32.data.NextResult
 
 data class BackgroundHealth(
     val isServiceRunning: Boolean = false,
@@ -19,8 +21,29 @@ data class BackgroundHealth(
 object ReceiverState {
     private val _health = MutableStateFlow(BackgroundHealth())
     val health: StateFlow<BackgroundHealth> = _health
+    
+    private val _pipelineState = MutableStateFlow<PipelineState?>(null)
+    val pipelineState: StateFlow<PipelineState?> = _pipelineState
+
+    private val _lastResult = MutableStateFlow<NextResult?>(null)
+    val lastResult: StateFlow<NextResult?> = _lastResult
+
+    private val _logs = MutableStateFlow<List<String>>(emptyList())
+    val logs: StateFlow<List<String>> = _logs
 
     fun update(updater: (BackgroundHealth) -> BackgroundHealth) {
         _health.value = updater(_health.value)
+    }
+
+    fun updatePipeline(state: PipelineState) {
+        _pipelineState.value = state
+    }
+    
+    fun updateLastResult(res: NextResult) {
+        _lastResult.value = res
+    }
+    
+    fun updateLogs(newLogs: List<String>) {
+        _logs.value = newLogs
     }
 }
