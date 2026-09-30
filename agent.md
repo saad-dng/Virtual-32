@@ -8,84 +8,92 @@
 
 ---
 
-## Tech stack — ASSUMED, confirm or change before scaffolding
+## Tech stack (locked for this direction)
+- Native Android, Kotlin, Jetpack Compose, Material 3, cozy dotted theme (keep).
+- CameraX (Simulator only), OkHttp (AI calls + simulator upload), kotlinx-serialization-json (replaces org.json), Coroutines/Flow, Room (KSP) for answers/history, DataStore for settings.
+- Embedded HTTP server: keep our own coroutine socket server in receiver/server/ (no extra web framework).
+- Foreground service type: specialUse (NOT dataSync — Android 15 caps dataSync at ~6 h).
+- minSdk stays as is; target latest stable SDK.
 
-Nothing was locked in during planning, so this is a default, not a
-decision. If it's wrong, correct this section first — everything below
-depends on it.
+## Package layout (app/src/main/java/com/antigravity/virtual32/)
+- receiver/server/ (ReceiverHttpServer, routes, ServerState, LogBuffer)
+- receiver/ai/ (VisionProvider, GeminiProvider, ClaudeProvider, PromptBuilder, AiResponseParser)
+- receiver/pipeline/ (PhotoPipeline queue/worker, AnswerMode)
+- receiver/service/ (ReceiverService, watchdog, locks, notification, QS tile)
+- data/ (Room DB, entities, DAOs, AnswerStore, GalleryWriter, PhotoCache)
+- simulator/ (SimulatorScreen, BlinkPatterns, BlinkEngine, DoubleTapDetector, SimClient)
+- settings/ (AppSettings, SettingsRepository, backup)
+- ui/ (components, screens: Home, Answers, History, Simulator, Settings, PromptEditor, Diagnostics, SetupChecklist; theme)
+- util/ (IpDiscovery, Oem helpers, TimeSource)
+- tools/ (esp32_client_sim.py) and docs/ (ESP32_CONTRACT.md)
 
-- **Platform:** Native Android, Kotlin
-- **UI:** Jetpack Compose (chosen over XML views — easier to hit the
-  "cozy, dotted background" custom look from the spec without fighting
-  a layout system)
-- **Camera:** CameraX — supports silent single-frame JPEG capture without
-  the shutter sound/animation that `MediaStore`/intent-based capture
-  forces on you
-- **Networking:** OkHttp (or Retrofit if the server side grows past a
-  single endpoint) for the multipart JPEG POST
-- **Vibration:** Android `Vibrator` / `VibratorManager` API for the 1s
-  buzz on HTTP 422
+## Hard rules
+- No TTS, no Bluetooth audio, no sound of any kind anywhere in the app.
+- The protocol in guide.md §3 and blink language in §4 are a contract. Any change must update guide.md, docs/ESP32_CONTRACT.md and BlinkPatterns.kt in the same task.
+- Blink timings exist only in BlinkPatterns.kt. No magic numbers elsewhere.
+- Never block the server thread on an AI call; the pipeline is a queue with one worker.
+- All AI output passes through AiResponseParser; nothing else parses model text.
+- Save every incoming photo to the gallery BEFORE calling the AI.
+- Never log or display full API keys (show last 4 chars only).
+- The service must not depend on the Activity being alive; UI only observes shared StateFlows.
+- No decorative-only UI. Every element must show state or do something.
+- Silent capture in the Simulator (no shutter sound/animation).
 
-## Repo conventions (fill in as scaffolding happens)
-- Keep three concerns in separate packages: `camera/`, `network/`, `ui/`.
-- All LED-state + vibration logic for a given HTTP response lives in
-  **one place** (e.g. a `ResponseStatusHandler`), not scattered across
-  UI callbacks — this is what makes it easy to add the extra error cases
-  guide.md §2 calls for without hunting through the UI layer.
-- Settings (server IP/port) persisted via `DataStore` (not raw
-  `SharedPreferences`) — minor, but avoids a later migration.
-
-## Hard rules — don't violate these even if it seems convenient
-- **No shutter sound, no capture animation, no viewfinder freeze-frame
-  flash.** The whole point is that this mimics a silent hardware
-  trigger, not a camera app. If CameraX's default capture path adds any
-  of that, suppress it — don't leave it "for now."
-- **Keep Phone 1 and Phone 2 modular.** Phone 2 lives in `camera/` and `network/`.
-  Phone 1 receiver logic lives in `receiver/` (`ReceiverHttpServer`, `GeminiVisionClient`, `TtsManager`).
-  A single APK supports switching between both roles seamlessly.
-- **Don't hardcode the OV3660 capture resolution.** Make it a tunable
-  value (settings or a constants file) — real-hardware parity is a
-  moving target until the actual sensor is in hand.
-- When the final LED/vibration mapping for the extra error cases
-  (timeout, no network, 5xx, malformed response) is implemented, **update
-  the table in `guide.md` §2** with the final mapping — don't let it live
-  only as code comments, or the next session starts blind.
+## Definition of Done (applies to EVERY task)
+1. Add/update unit tests for new logic; run the unit test task; all must pass.
+2. Assemble the debug APK successfully.
+3. Update guide.md: mark the phase in the Roadmap and append a Status Log entry at the TOP (date, done, decisions, Next).
+4. Update the "Files in this project" inventory below to match the real repo (add new files, remove deleted ones).
+5. If a requirement conflicts with reality (API changed, library missing), stop and ask ONE short question instead of guessing.
+6. Final reply: max 5 lines: what changed, what to test manually. No spec recap.
 
 ## Files in this project
-- `guide.md` — product spec + session protocol. Read first, always.
-- `agent.md` — this file (engineering conventions & architecture).
-- `.agent/skills/` — project-only skills (workspace scope).
+- `guide.md` — Product spec, protocol contract, session protocol, and status log.
+- `agent.md` — Engineering conventions, architecture rules, and file inventory.
+- `app/src/main/AndroidManifest.xml`
 - `app/src/main/java/com/antigravity/virtual32/`:
+  - `MainActivity.kt` — App entry point, role switching & layout.
   - `camera/`:
-    - `CameraCaptureManager.kt` — CameraX lifecycle controller, silent in-memory JPEG capture (no shutter sound, no flash, no capture freeze).
-    - `SensorSpecs.kt` — OV3660 sensor specs, default 4:3 resolutions (UXGA 1600x1200 default, SVGA 800x600, VGA 640x480).
+    - `CameraCaptureManager.kt` — CameraX silent JPEG capture controller.
+    - `SensorSpecs.kt` — OV3660 sensor specs and resolution presets.
   - `network/`:
-    - `NetworkResult.kt` — Sealed class hierarchy representing Success(200), ClientError(422), Timeout, NoNetwork, ServerError(5xx), MalformedResponse, and UnknownError.
-    - `ImageUploader.kt` — OkHttp multipart/form-data POST (`image` field) with 5s connect and 10s read/write timeouts.
-    - `ResponseStatusHandler.kt` — Single source of truth mapping network results to 6 distinct LED colors and Android `Vibrator`/`VibratorManager` haptic patterns.
+    - `ImageUploader.kt` — OkHttp multipart POST client.
+    - `NetworkResult.kt` — Network response sealed class hierarchy.
+    - `ResponseStatusHandler.kt` — LED status and vibration mappings.
   - `receiver/`:
-    - `ReceiverHttpServer.kt` — Embedded coroutine-based HTTP server listening on port 5000/8080 at `/upload`.
-    - `GeminiVisionClient.kt` — OkHttp client sending prompt + Base64 image to Google Gemini 1.5 Flash (`generateContent`).
-    - `TtsManager.kt` — Android `TextToSpeech` manager streaming voice responses to Bluetooth earbuds / media audio.
+    - `GeminiVisionClient.kt` — Gemini 1.5 Flash Vision client.
+    - `ReceiverHttpServer.kt` — Coroutine HTTP socket server.
+    - `TtsManager.kt` — Text-to-speech manager (to be retired in Phase 6).
   - `settings/`:
-    - `AppSettings.kt` — Data class for server IP, port, resolution, quality, app mode, and Gemini API key.
-    - `SettingsRepository.kt` — Persistent preferences via Jetpack DataStore Preferences.
+    - `AppSettings.kt` — Settings data model.
+    - `SettingsRepository.kt` — DataStore settings repository.
   - `ui/`:
-    - `components/`: `DottedBackground.kt`, `Ov3660Viewfinder.kt`, `TriggerButton.kt` (GPIO 1), `LedIndicator.kt` (GPIO 2).
-    - `screens/`: `CameraScreen.kt` (Phone 2), `SettingsScreen.kt`, `ReceiverScreen.kt` (Phone 1), `WelcomeScreen.kt` (Opening Page / Role Wizard).
-    - `theme/`: Design tokens, colors, typography.
-  - `MainActivity.kt` — Main entry point, mode switcher (Camera Twin vs Earbud Brain), screen navigation.
-- `app/src/test/java/com/antigravity/virtual32/network/ResponseStatusHandlerTest.kt` — Unit test suite verifying all 6 response feedback mappings.
-- `app/src/test/java/com/antigravity/virtual32/network/OkHttpImageUploaderTest.kt` — MockWebServer tests verifying HTTP multipart POST and network error transitions.
-- `app/src/test/java/com/antigravity/virtual32/camera/SensorSpecsTest.kt` — Unit test suite verifying OV3660 4:3 aspect ratios, resolution labels, and JPEG quality presets.
-- `app/src/test/java/com/antigravity/virtual32/receiver/ReceiverHttpServerTest.kt` — Unit test suite verifying embedded HTTP server `/status` and `/upload` multipart handling.
-- `app/src/test/java/com/antigravity/virtual32/receiver/GeminiVisionClientTest.kt` — Unit test suite verifying Gemini 1.5 Flash Vision client payload serialization, API key validation, and response parsing.
+    - `components/`:
+      - `DottedBackground.kt` — Cozy dotted canvas background.
+      - `LedIndicator.kt` — Glowing diode LED indicator.
+      - `Ov3660Viewfinder.kt` — Viewfinder with sensor framing overlay.
+      - `TriggerButton.kt` — Tactile trigger button.
+    - `screens/`:
+      - `CameraScreen.kt` — Phone 2 camera twin screen.
+      - `ReceiverScreen.kt` — Phone 1 receiver screen.
+      - `SettingsScreen.kt` — App settings and connectivity diagnostics.
+      - `WelcomeScreen.kt` — Onboarding wizard and role selector.
+    - `theme/`:
+      - `Color.kt`, `Theme.kt`, `Type.kt` — Design tokens and typography.
+- `app/src/test/java/com/antigravity/virtual32/`:
+  - `camera/SensorSpecsTest.kt` — OV3660 resolution & preset tests.
+  - `network/OkHttpImageUploaderTest.kt` — MockWebServer upload tests.
+  - `network/ResponseStatusHandlerTest.kt` — Status and haptic feedback tests.
+  - `receiver/GeminiVisionClientTest.kt` — Gemini API client tests.
+  - `receiver/ReceiverHttpServerTest.kt` — HTTP server request parsing tests.
 - `tools/`:
-  - `mock_server.py` — Standalone Python HTTP mock server supporting dynamic mode switching (`cycle`, `200`, `422`, `500`, `malformed`, `timeout`), Web UI, and JPEG frame recording in `tools/captured_frames/`.
-  - `test_mock_server.py` — Automated integration test suite verifying mock server responses.
-  - `README.md` — Connection and test guide for testing Phone 2 via Wi-Fi/hotspot or ADB reverse port forwarding.
+  - `mock_server.py` — Python HTTP mock server.
+  - `test_mock_server.py` — Mock server automated tests.
+  - `README.md` — Testing instructions.
 
-## Status & Progression
+---
+
+## Legacy phases (done)
 - **Phase 1 [COMPLETED]** — Scaffolding & silent capture:
   - Clean Architecture packages (`camera/`, `network/`, `settings/`, `ui/`).
   - CameraX silent single-frame JPEG capture matching OV3660 framing (zero shutter sound, zero capture flash).
@@ -113,5 +121,3 @@ depends on it.
   - Built `ReceiverScreen` dashboard with live server toggle, endpoint address indicator, Gemini prompt/key setup, received JPEG frame preview, scene description readout, and "Replay in Earbuds" button.
   - Updated `MainActivity` and `SettingsScreen` with instant operating mode switching between Phone 2 (Camera Twin) and Phone 1 (Earbud Brain).
   - Created unit tests in `ReceiverHttpServerTest.kt` and `GeminiVisionClientTest.kt`. All 21 JVM unit tests passing (`BUILD SUCCESSFUL`), and debug APK assembled cleanly.
-- **Phase 6 [NEXT]** — End-to-end dual-phone integration test on local Wi-Fi / hotspot.
-
