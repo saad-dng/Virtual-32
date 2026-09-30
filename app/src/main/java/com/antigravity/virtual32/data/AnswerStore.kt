@@ -1,6 +1,7 @@
 package com.antigravity.virtual32.data
 
 import kotlinx.serialization.Serializable
+import com.antigravity.virtual32.receiver.ai.RawAnswer
 
 @Serializable
 data class NextResult(
@@ -22,6 +23,8 @@ interface AnswerStore {
     fun next(): NextResult
     fun repeat(): NextResult
     fun reset(): NextResult
+    fun replace(newAnswers: List<RawAnswer>)
+    fun append(newAnswers: List<RawAnswer>)
 }
 
 class InMemoryAnswerStore : AnswerStore {
@@ -35,6 +38,30 @@ class InMemoryAnswerStore : AnswerStore {
     fun setAnswers(newAnswers: List<Answer>) {
         answers = newAnswers
         _cursor = 0
+    }
+
+    override fun replace(newAnswers: List<RawAnswer>) {
+        answers = newAnswers.map { Answer(it.q, it.choice, confToBlinks(it.choice)) }
+        _cursor = 0
+    }
+
+    override fun append(newAnswers: List<RawAnswer>) {
+        val currentMap = answers.associateBy { it.q }.toMutableMap()
+        for (ans in newAnswers) {
+            currentMap[ans.q] = Answer(ans.q, ans.choice, confToBlinks(ans.choice))
+        }
+        answers = currentMap.values.sortedBy { it.q }
+    }
+
+    private fun confToBlinks(choice: String): Int {
+        return when (choice) {
+            "A" -> 1
+            "B" -> 2
+            "C" -> 3
+            "D" -> 4
+            "E" -> 5
+            else -> 1
+        }
     }
 
     override fun next(): NextResult {

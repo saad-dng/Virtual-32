@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -62,6 +63,8 @@ class SettingsRepository(private val context: Context) {
                 simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80
             )
         }
+
+    suspend fun getSettings(): AppSettings = kotlinx.coroutines.flow.first(settingsFlow)
 
     suspend fun updateSettings(update: (AppSettings) -> AppSettings) {
         context.dataStore.edit { preferences ->
