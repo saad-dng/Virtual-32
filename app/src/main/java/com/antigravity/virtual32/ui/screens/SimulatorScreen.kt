@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -23,6 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -44,12 +51,42 @@ fun SimulatorScreen(
     
     val lamps by viewModel.lamps.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
+    val photosInSession by viewModel.photosInSession.collectAsState()
     
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
     
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
+
+    var holdProgress by remember { mutableStateOf(0f) }
+    var isHolding by remember { mutableStateOf(false) }
+    var holdJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+    val longPressDetector = remember {
+        com.antigravity.virtual32.simulator.LongPressDetector(
+            thresholdMs = com.antigravity.virtual32.simulator.BlinkPatterns.LONG_PRESS_MS,
+            onShortPress = {
+                val ic = imageCapture ?: return@LongPressDetector
+                ic.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
+                    override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                        val buffer = imageProxy.planes[0].buffer
+                        val bytes = ByteArray(buffer.remaining())
+                        buffer.get(bytes)
+                        imageProxy.close()
+                        viewModel.onButton1ShortPress(bytes)
+                    }
+                    override fun onError(exception: ImageCaptureException) {
+                        exception.printStackTrace()
+                    }
+                })
+            },
+            onLongPress = {
+                viewModel.onButton1LongPress()
+            }
+        )
+    }
 
     val settingsRepo = remember { SettingsRepository(context) }
     val settings by settingsRepo.settingsFlow.collectAsState(initial = null)
@@ -119,6 +156,21 @@ fun SimulatorScreen(
                     modifier = Modifier.fillMaxSize()
                 )
     
+                // Session status badge overlay (top-start)
+                Surface(
+                    modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Black.copy(alpha = 0.65f)
+                ) {
+                    Text(
+                        text = "Photos in session: $photosInSession",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+
                 // Lamps overlay
                 Row(
                     modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),
@@ -135,30 +187,73 @@ fun SimulatorScreen(
                 // Buttons overlay
                 Row(
                     modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(
-                        onClick = {
-                            val ic = imageCapture ?: return@Button
-                            ic.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
-                                override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                                    val buffer = imageProxy.planes[0].buffer
-                                    val bytes = ByteArray(buffer.remaining())
-                                    buffer.get(bytes)
-                                    imageProxy.close()
-                                    viewModel.onButton1(bytes)
+                    // Button 1: Short = Capture/Add, Long = Finish with visual hold indicator
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                            .pointerInput(Unit) {
+                                awaitEachGesture {
+                                    val down = awaitFirstDown()
+                                    longPressDetector.onDown(down.position.x, down.position.y)
+                                    isHolding = true
+                                    holdProgress = 0f
+                                    holdJob?.cancel()
+                                    holdJob = scope.launch {
+                                        val start = System.currentTimeMillis()
+                                        while (isActive) {
+                                            val elapsed = System.currentTimeMillis() - start
+                                            holdProgress = (elapsed.toFloat() / com.antigravity.virtual32.simulator.BlinkPatterns.LONG_PRESS_MS).coerceIn(0f, 1f)
+                                            if (elapsed >= com.antigravity.virtual32.simulator.BlinkPatterns.LONG_PRESS_MS) break
+                                            delay(16L)
+                                        }
+                                    }
+
+                                    var pointerUp = false
+                                    while (!pointerUp) {
+                                        val event = awaitPointerEvent()
+                                        val change = event.changes.firstOrNull() ?: break
+                                        if (change.pressed) {
+                                            if (longPressDetector.onMove(change.position.x, change.position.y)) {
+                                                isHolding = false
+                                                holdProgress = 0f
+                                                holdJob?.cancel()
+                                            }
+                                        } else {
+                                            pointerUp = true
+                                            holdJob?.cancel()
+                                            longPressDetector.onUp(change.position.x, change.position.y)
+                                            isHolding = false
+                                            holdProgress = 0f
+                                        }
+                                    }
                                 }
-                                override fun onError(exception: ImageCaptureException) {
-                                    exception.printStackTrace()
-                                }
-                            })
-                        }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("BTN 1 (Capture)")
+                        if (isHolding && holdProgress > 0f) {
+                            CircularProgressIndicator(
+                                progress = { holdProgress },
+                                modifier = Modifier.matchParentSize(),
+                                color = MaterialTheme.colorScheme.inversePrimary,
+                                strokeWidth = 3.dp
+                            )
+                        }
+                        Text(
+                            text = if (isHolding && holdProgress >= 1f) "FINISH..." else "BTN 1 (Add/Hold)",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
     
                     Button(
-                        onClick = { viewModel.onButton2() }
+                        onClick = { viewModel.onButton2() },
+                        modifier = Modifier.height(48.dp)
                     ) {
                         Text("BTN 2 (Next/Rep)")
                     }

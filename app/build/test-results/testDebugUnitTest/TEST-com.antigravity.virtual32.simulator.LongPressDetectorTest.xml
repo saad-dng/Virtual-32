@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.antigravity.virtual32.simulator.LongPressDetectorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:31.960Z" hostname="MR-ROBOT" time="0.001">
+  <properties/>
+  <testcase name="testExactlyAtTheLimit" classname="com.antigravity.virtual32.simulator.LongPressDetectorTest" time="0.0"/>
+  <testcase name="testCancelledByMovingAway" classname="com.antigravity.virtual32.simulator.LongPressDetectorTest" time="0.001"/>
+  <testcase name="testLongPress" classname="com.antigravity.virtual32.simulator.LongPressDetectorTest" time="0.0"/>
+  <testcase name="testShortPress" classname="com.antigravity.virtual32.simulator.LongPressDetectorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

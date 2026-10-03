@@ -13,7 +13,6 @@ import com.antigravity.virtual32.simulator.SimClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
@@ -28,6 +27,9 @@ class SimulatorViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
+    private val _photosInSession = MutableStateFlow(0)
+    val photosInSession: StateFlow<Int> = _photosInSession.asStateFlow()
 
     private val doubleTapDetector = DoubleTapDetector(
         scope = viewModelScope,
@@ -51,27 +53,62 @@ class SimulatorViewModel(application: Application) : AndroidViewModel(applicatio
             while (true) {
                 val up = simClient?.ping() ?: false
                 _isConnected.value = up
+                if (up) {
+                    val sessionInfo = simClient?.getSession()
+                    if (sessionInfo != null) {
+                        val open = sessionInfo["open"]?.jsonPrimitive?.booleanOrNull ?: false
+                        val pages = sessionInfo["pages"]?.jsonPrimitive?.intOrNull ?: 0
+                        _photosInSession.value = if (open) pages else 0
+                    }
+                }
                 kotlinx.coroutines.delay(10000)
             }
         }
     }
 
     fun onButton1(jpeg: ByteArray) {
+        onButton1ShortPress(jpeg)
+    }
+
+    fun onButton1ShortPress(jpeg: ByteArray) {
+        viewModelScope.launch {
+            val (code, res) = simClient?.postSessionPhoto(jpeg) ?: Pair(-1, null)
+            if (code == 200 && res != null) {
+                val pages = res["pages"]?.jsonPrimitive?.intOrNull ?: (_photosInSession.value + 1)
+                _photosInSession.value = pages
+                blinkEngine.play(LedColor.BLUE, BlinkPatterns.PHOTO_ADDED)
+            } else {
+                blinkEngine.play(LedColor.RED, BlinkPatterns.serverError)
+            }
+        }
+    }
+
+    fun onButton1LongPress() {
         viewModelScope.launch {
             blinkEngine.play(LedColor.BLUE, BlinkPatterns.processingPulse, loop = true)
-            val res = simClient?.uploadWithRetries(jpeg)
+            val (code, res) = simClient?.postSessionFinish() ?: Pair(-1, null)
             blinkEngine.stop()
-            if (res == null) {
+            if (code == -1 || res == null) {
                 blinkEngine.play(LedColor.RED, BlinkPatterns.serverUnreachable)
-            } else {
-                val status = res["status"]?.jsonPrimitive?.content
-                if (status == "ok") {
-                    blinkEngine.play(LedColor.BLUE, BlinkPatterns.readyUploadOk)
-                } else if (status == "unclear") {
-                    blinkEngine.play(LedColor.RED, BlinkPatterns.photoUnclear)
+                return@launch
+            }
+            val status = res["status"]?.jsonPrimitive?.content
+            if (status == "error") {
+                val reason = res["reason"]?.jsonPrimitive?.content
+                if (reason == "empty_session") {
+                    _photosInSession.value = 0
+                    blinkEngine.play(LedColor.RED, BlinkPatterns.noAnswersYet)
                 } else {
                     blinkEngine.play(LedColor.RED, BlinkPatterns.serverError)
                 }
+            } else if (status == "ok") {
+                _photosInSession.value = 0
+                blinkEngine.play(LedColor.BLUE, BlinkPatterns.readyUploadOk)
+            } else if (status == "unclear") {
+                _photosInSession.value = 0
+                blinkEngine.play(LedColor.RED, BlinkPatterns.photoUnclear)
+            } else {
+                blinkEngine.play(LedColor.RED, BlinkPatterns.serverError)
             }
         }
     }

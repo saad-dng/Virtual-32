@@ -55,24 +55,26 @@
 - `app/src/main/AndroidManifest.xml` — Declares permissions, Foreground Service (specialUse), and Quick Settings Tile.
 - `app/src/main/java/com/antigravity/virtual32/`:
   - `MainActivity.kt` — App entry point and bottom navigation.
-  - `data/` — Room DB (`AppDatabase`), DAOs (`AnswerDao`), `AnswerStore`, `GalleryWriter`, `PhotoCache`, `Entities.kt`.
+  - `data/` — Room DB (`AppDatabase`), DAOs (`AnswerDao`), `AnswerStore`, `RoomAnswerStore`, `GalleryWriter`, `PhotoCache`, `Entities.kt`.
   - `receiver/`:
     - `ai/` — `VisionProvider`, `GeminiProvider`, `ClaudeProvider`, `AiResponseParser`, `PromptBuilder`, `PromptRepository`.
-    - `pipeline/` — `PhotoPipelineImpl.kt` (Queue worker), `AnswerMode.kt`.
+    - `pipeline/` — `PhotoPipelineImpl.kt` (Queue worker), `SessionManager.kt` (Multi-photo session state), `AnswerMode.kt`.
     - `server/` — `ReceiverHttpServer.kt` (Coroutine HTTP server), `LogBuffer.kt`.
     - `service/` — `ReceiverService.kt` (Watchdog, locks), `ReceiverState.kt`, `SelfTestRunner.kt`, `Virtual32TileService.kt`.
   - `settings/` — `AppSettings.kt`, `SettingsRepository.kt`.
-  - `simulator/` — `BlinkPatterns.kt`, `BlinkEngine.kt`, `DoubleTapDetector.kt`, `SimClient.kt`.
+  - `simulator/` — `BlinkPatterns.kt`, `BlinkEngine.kt`, `DoubleTapDetector.kt`, `LongPressDetector.kt`, `SimClient.kt`.
   - `ui/`:
     - `components/` — `DottedBackgroundBox.kt`.
-    - `screens/` — `HomeScreen`, `AnswersScreen`, `SimulatorScreen`, `SettingsScreen`, `AiSettingsScreen`, `DiagnosticsScreen`, `HistoryScreen`.
+    - `screens/` — `HomeScreen`, `HomeViewModel`, `AnswersScreen`, `AnswersViewModel`, `SimulatorScreen`, `SimulatorViewModel`, `SettingsScreen`, `SettingsViewModel`, `AiSettingsScreen`, `DiagnosticsScreen`, `HistoryScreen`, `HistoryViewModel`.
     - `theme/` — `Color.kt`, `Theme.kt`, `Type.kt`.
-  - `util/` — `IpDiscovery.kt`.
+  - `util/` — `IpDiscovery.kt`, `ImageResizer.kt`.
 - `app/src/test/java/com/antigravity/virtual32/`:
-  - `receiver/` — Tests for `ReceiverHttpServer`, `PhotoPipeline`, `VisionProviders`, `AiResponseParser`.
-  - `simulator/` — Tests for `BlinkPatterns`, `DoubleTapDetector`.
-  - `data/` — Tests for `RoomAnswerStore`, `GalleryWriter`.
-- `tools/esp32_client_sim.py` — Python client simulator for firmware dev testing.
+  - `receiver/` — Tests for `ReceiverHttpServer`, `SessionFlowSocketTest`, `PhotoPipeline`, `VisionProviders`, `MultiImageProviderRequestShapeTest`, `AiResponseParserTest`.
+  - `simulator/` — Tests for `BlinkPatterns`, `DoubleTapDetector`, `LongPressDetectorTest`.
+  - `ui/` — `HomeViewModelSessionTest`, `AnswersViewModelWarningsTest`.
+  - `settings/` — `SessionsSettingsTest`.
+  - `data/` — Tests for `RoomAnswerStore`, `GalleryWriter`, `MigrationTest`.
+- `tools/esp32_client_sim.py` — Python client simulator for firmware dev testing (supports single upload and multi-photo sessions).
 - `docs/ESP32_CONTRACT.md` — Complete HTTP and Blink language contract for firmware.
 
 ---

@@ -16,6 +16,7 @@ import androidx.room.util.StringUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.Override;
@@ -609,6 +610,241 @@ public final class AnswerDao_Impl implements AnswerDao {
   }
 
   @Override
+  public Flow<List<Batch>> getAllBatchesFlow() {
+    final String _sql = "SELECT * FROM batches ORDER BY id DESC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    return CoroutinesRoom.createFlow(__db, false, new String[] {"batches"}, new Callable<List<Batch>>() {
+      @Override
+      @NonNull
+      public List<Batch> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
+          final int _cursorIndexOfSource = CursorUtil.getColumnIndexOrThrow(_cursor, "source");
+          final int _cursorIndexOfPhotoPath = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPath");
+          final int _cursorIndexOfGalleryUri = CursorUtil.getColumnIndexOrThrow(_cursor, "galleryUri");
+          final int _cursorIndexOfStatus = CursorUtil.getColumnIndexOrThrow(_cursor, "status");
+          final int _cursorIndexOfProvider = CursorUtil.getColumnIndexOrThrow(_cursor, "provider");
+          final int _cursorIndexOfModel = CursorUtil.getColumnIndexOrThrow(_cursor, "model");
+          final int _cursorIndexOfPromptName = CursorUtil.getColumnIndexOrThrow(_cursor, "promptName");
+          final int _cursorIndexOfPromptHash = CursorUtil.getColumnIndexOrThrow(_cursor, "promptHash");
+          final int _cursorIndexOfLatencyMs = CursorUtil.getColumnIndexOrThrow(_cursor, "latencyMs");
+          final int _cursorIndexOfRawResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "rawResponse");
+          final int _cursorIndexOfSuperseded = CursorUtil.getColumnIndexOrThrow(_cursor, "superseded");
+          final List<Batch> _result = new ArrayList<Batch>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final Batch _item;
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final String _tmpSource;
+            _tmpSource = _cursor.getString(_cursorIndexOfSource);
+            final String _tmpPhotoPath;
+            if (_cursor.isNull(_cursorIndexOfPhotoPath)) {
+              _tmpPhotoPath = null;
+            } else {
+              _tmpPhotoPath = _cursor.getString(_cursorIndexOfPhotoPath);
+            }
+            final String _tmpGalleryUri;
+            if (_cursor.isNull(_cursorIndexOfGalleryUri)) {
+              _tmpGalleryUri = null;
+            } else {
+              _tmpGalleryUri = _cursor.getString(_cursorIndexOfGalleryUri);
+            }
+            final String _tmpStatus;
+            _tmpStatus = _cursor.getString(_cursorIndexOfStatus);
+            final String _tmpProvider;
+            _tmpProvider = _cursor.getString(_cursorIndexOfProvider);
+            final String _tmpModel;
+            _tmpModel = _cursor.getString(_cursorIndexOfModel);
+            final String _tmpPromptName;
+            _tmpPromptName = _cursor.getString(_cursorIndexOfPromptName);
+            final String _tmpPromptHash;
+            _tmpPromptHash = _cursor.getString(_cursorIndexOfPromptHash);
+            final long _tmpLatencyMs;
+            _tmpLatencyMs = _cursor.getLong(_cursorIndexOfLatencyMs);
+            final String _tmpRawResponse;
+            if (_cursor.isNull(_cursorIndexOfRawResponse)) {
+              _tmpRawResponse = null;
+            } else {
+              _tmpRawResponse = _cursor.getString(_cursorIndexOfRawResponse);
+            }
+            final boolean _tmpSuperseded;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfSuperseded);
+            _tmpSuperseded = _tmp != 0;
+            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+        }
+      }
+
+      @Override
+      protected void finalize() {
+        _statement.release();
+      }
+    });
+  }
+
+  @Override
+  public Object getPhotosSince(final long startTime,
+      final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM batches WHERE createdAt >= ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, startTime);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmp;
+            _tmp = _cursor.getInt(0);
+            _result = _tmp;
+          } else {
+            _result = 0;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getCountByStatus(final String status,
+      final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM batches WHERE status = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindString(_argIndex, status);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmp;
+            _tmp = _cursor.getInt(0);
+            _result = _tmp;
+          } else {
+            _result = 0;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getAverageLatency(final Continuation<? super Long> $completion) {
+    final String _sql = "SELECT AVG(latencyMs) FROM batches WHERE status = 'ok' AND latencyMs > 0";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Long>() {
+      @Override
+      @Nullable
+      public Long call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Long _result;
+          if (_cursor.moveToFirst()) {
+            final Long _tmp;
+            if (_cursor.isNull(0)) {
+              _tmp = null;
+            } else {
+              _tmp = _cursor.getLong(0);
+            }
+            _result = _tmp;
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getCountByProvider(final String provider,
+      final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM batches WHERE provider = ?";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindString(_argIndex, provider);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmp;
+            _tmp = _cursor.getInt(0);
+            _result = _tmp;
+          } else {
+            _result = 0;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getRateLimitCount(final Continuation<? super Integer> $completion) {
+    final String _sql = "SELECT COUNT(*) FROM batches WHERE rawResponse LIKE '%429%' OR rawResponse LIKE '%rate limit%'";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<Integer>() {
+      @Override
+      @NonNull
+      public Integer call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final Integer _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmp;
+            _tmp = _cursor.getInt(0);
+            _result = _tmp;
+          } else {
+            _result = 0;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
   public Object markBatchesSuperseded(final List<Long> batchIds,
       final Continuation<? super Unit> $completion) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
@@ -655,6 +891,37 @@ public final class AnswerDao_Impl implements AnswerDao {
         final SupportSQLiteStatement _stmt = __db.compileStatement(_sql);
         int _argIndex = 1;
         for (long _item : retentionIds) {
+          _stmt.bindLong(_argIndex, _item);
+          _argIndex++;
+        }
+        __db.beginTransaction();
+        try {
+          _stmt.executeUpdateDelete();
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteBatches(final List<Long> batchIds,
+      final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final StringBuilder _stringBuilder = StringUtil.newStringBuilder();
+        _stringBuilder.append("DELETE FROM batches WHERE id IN (");
+        final int _inputSize = batchIds.size();
+        StringUtil.appendPlaceholders(_stringBuilder, _inputSize);
+        _stringBuilder.append(")");
+        final String _sql = _stringBuilder.toString();
+        final SupportSQLiteStatement _stmt = __db.compileStatement(_sql);
+        int _argIndex = 1;
+        for (long _item : batchIds) {
           _stmt.bindLong(_argIndex, _item);
           _argIndex++;
         }

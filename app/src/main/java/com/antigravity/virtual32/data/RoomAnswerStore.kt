@@ -34,14 +34,15 @@ class RoomAnswerStore(
         _activeAnswersFlow.value = deduplicated.toList()
     }
 
-    suspend fun applyBatch(batch: Batch, answers: List<RawAnswer>, mode: String) = mutex.withLock {
+    suspend fun applyBatch(batch: Batch, answers: List<RawAnswer>, mode: String): Long = mutex.withLock {
         val batchId = dao.insertBatch(batch)
         val entities = answers.map {
             AnswerEntity(
                 batchId = batchId,
                 q = it.q,
                 choice = it.choice,
-                conf = it.conf
+                conf = it.conf,
+                page = it.page
             )
         }
         if (entities.isNotEmpty()) {
@@ -72,6 +73,8 @@ class RoomAnswerStore(
         // Handle retention
         val latestIds = dao.getLatest100BatchIds()
         dao.deleteOldBatches(latestIds)
+
+        return@withLock batchId
     }
 
     suspend fun editAnswer(answerId: Long, newChoice: String) = mutex.withLock {

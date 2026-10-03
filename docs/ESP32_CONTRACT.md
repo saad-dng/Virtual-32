@@ -17,11 +17,11 @@ The phone app acts as an HTTP/1.1 server running on the phone's Hotspot interfac
 - **Interval:** Send roughly every 10 seconds.
 - **Response (200 OK):**
   ```json
-  {"ok":true,"app":"virtual32","answers":20,"cursor":0,"busy":false}
+  {"ok":true,"app":"virtual32","answers":20,"cursor":0,"busy":false,"pages":0}
   ```
 
 #### `POST /upload`
-- **Purpose:** Send a captured JPEG to the phone for AI processing.
+- **Purpose:** Single-photo shortcut (= a 1-photo session + finish). Send a captured JPEG to the phone for AI processing.
 - **Timeout:** 60 seconds (AI processing can be slow).
 - **ESP Retry:** 3 retries with exponential backoff if the server replies with a network error or times out.
 - **Body:** `multipart/form-data` with field name `image` or raw `image/jpeg`.
@@ -37,6 +37,50 @@ The phone app acts as an HTTP/1.1 server running on the phone's Hotspot interfac
 - **Error Response (200 OK or 400/500):**
   ```json
   {"status":"error","reason":"ai_failed"} // reasons: ai_failed, no_key, no_internet, timeout, paused, bad_image
+  ```
+
+#### `POST /session/photo`
+- **Purpose:** Add a photo page to the currently open session (creates an open session if none exists). Saves to gallery immediately.
+- **Timeout:** 10 seconds.
+- **Body:** `multipart/form-data` with field name `image` or raw `image/jpeg`. Same validation as `/upload`.
+- **Success Response (200 OK):**
+  ```json
+  {"ok":true,"pages":1}
+  ```
+- **Session Full Response (409 Conflict):**
+  ```json
+  {"ok":false,"reason":"session_full","max":12}
+  ```
+- **Error Response (400 Bad Request / 413):**
+  ```json
+  {"status":"error","reason":"bad_image"}
+  ```
+
+#### `POST /session/finish`
+- **Purpose:** Freeze open session, enqueue as one pipeline item with N photos, and wait for analysis result.
+- **Timeout:** Dynamic timeout = 45 s + 8 s per photo (max 150 s).
+- **Empty Session Response (200 OK):**
+  ```json
+  {"status":"error","reason":"empty_session"}
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {"status":"ok","count":25,"batch":1235,"pages":3,"warnings":["Q9 missing","Photo 2 unreadable"]}
+  ```
+- **Unclear / Error Response (200 OK):** Same error shape as `/upload` plus `"pages":N` and `"warnings":[...]`.
+
+#### `POST /session/cancel`
+- **Purpose:** Discard the current open session without analysis. Gallery copies remain untouched.
+- **Response (200 OK):**
+  ```json
+  {"ok":true}
+  ```
+
+#### `GET /session`
+- **Purpose:** Inspect state of open session.
+- **Response (200 OK):**
+  ```json
+  {"open":true,"pages":2,"idleMs":4300}
   ```
 
 #### `GET /next`
@@ -75,8 +119,9 @@ The ESP32 communicates exclusively via two LEDs (Blue and Red). There is no disp
 
 | State | LED | Pattern | Timings (ms) |
 |---|---|---|---|
-| Processing /upload | Blue | Slow Pulse | 500 On / 500 Off |
-| Upload OK | Blue | Solid | 1000 On |
+| Photo Added to Session | Blue | 1 Short Flash | 100 On (shorter than an answer blink) |
+| Processing /upload or /session/finish | Blue | Slow Pulse | 500 On / 500 Off |
+| Upload / Session OK | Blue | Solid | 1000 On |
 | Answer A | Blue | 1 Blink | 250 On / 250 Off |
 | Answer B | Blue | 2 Blinks | 250 On / 250 Off |
 | Answer C | Blue | 3 Blinks | 250 On / 250 Off |
@@ -94,9 +139,12 @@ The ESP32 communicates exclusively via two LEDs (Blue and Red). There is no disp
 
 ## 3. Hardware Interactions
 
-### Button 1 (Shutter)
-- **Action:** Captures photo and issues `POST /upload`.
+### Button 1 (Shutter / Session)
+- **Action:**
+  - Short Click -> Captures photo and issues `POST /session/photo` (or single `POST /upload`).
+  - Long Press (>= 1500 ms) -> Issues `POST /session/finish`.
 - **Debounce Advice:** 30 ms hardware/software debounce.
+- **Long-Press Threshold:** 1500 ms (`LONG_PRESS_MS`).
 
 ### Button 2 (Navigation)
 - **Action:** 

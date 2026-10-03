@@ -131,6 +131,37 @@ class ReceiverHttpServerTest {
     }
 
     @Test
+    fun testServer_upload_modelRetired_returnsReason() {
+        val serverPort = 5997
+        val retiredPipeline = object : PhotoPipeline {
+            override suspend fun processPhoto(jpeg: ByteArray, source: String): String {
+                return """{"status":"error","reason":"Model retired - change it in Settings > AI & Prompt"}"""
+            }
+        }
+        val customServer = ReceiverHttpServer(serverPort, retiredPipeline, answerStore, logBuffer)
+        customServer.start()
+        Thread.sleep(100)
+
+        try {
+            val dummyJpeg = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0x12, 0x34, 0xFF.toByte(), 0xD9.toByte())
+            val request = Request.Builder()
+                .url("http://127.0.0.1:$serverPort/upload")
+                .post(dummyJpeg.toRequestBody("image/jpeg".toMediaType()))
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                assertEquals(200, response.code)
+                val body = response.body?.string().orEmpty()
+                val json = Json.parseToJsonElement(body).jsonObject
+                assertEquals("error", json["status"]?.jsonPrimitive?.content)
+                assertEquals("Model retired - change it in Settings > AI & Prompt", json["reason"]?.jsonPrimitive?.content)
+            }
+        } finally {
+            customServer.stop()
+        }
+    }
+
+    @Test
     fun testServer_badImage_returns400() {
         val dummyText = byteArrayOf(0x12, 0x34, 0x56)
         val request = Request.Builder()

@@ -39,6 +39,44 @@ object ImageResizer {
         return out.toByteArray()
     }
 
+    fun downscaleForSession(jpeg: ByteArray, maxSide: Int = 1600, quality: Int = 85): ByteArray {
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size, options)
+        
+        val width = options.outWidth
+        val height = options.outHeight
+        val longest = max(width, height)
+        
+        if (longest <= 0) return jpeg
+        
+        val (newWidth, newHeight) = if (longest > maxSide) {
+            val ratio = maxSide.toFloat() / longest.toFloat()
+            (width * ratio).toInt() to (height * ratio).toInt()
+        } else {
+            width to height
+        }
+        
+        options.inJustDecodeBounds = false
+        options.inSampleSize = calculateInSampleSize(options, newWidth, newHeight)
+        
+        val bitmap = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size, options) ?: return jpeg
+        val scaled = if (bitmap.width != newWidth || bitmap.height != newHeight) {
+            Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        } else {
+            bitmap
+        }
+        
+        val out = ByteArrayOutputStream()
+        scaled.compress(Bitmap.CompressFormat.JPEG, quality, out)
+        
+        bitmap.recycle()
+        if (scaled != bitmap) scaled.recycle()
+        
+        return out.toByteArray()
+    }
+
     private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         val (height: Int, width: Int) = options.outHeight to options.outWidth
         var inSampleSize = 1

@@ -53,7 +53,7 @@ public final class AnswerDao_Impl implements AnswerDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR ABORT INTO `batches` (`id`,`createdAt`,`source`,`photoPath`,`galleryUri`,`status`,`provider`,`model`,`promptName`,`promptHash`,`latencyMs`,`rawResponse`,`superseded`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR ABORT INTO `batches` (`id`,`createdAt`,`source`,`photoPath`,`galleryUri`,`status`,`provider`,`model`,`promptName`,`promptHash`,`latencyMs`,`rawResponse`,`superseded`,`pageCount`,`photoPaths`,`galleryUris`,`warnings`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -85,13 +85,29 @@ public final class AnswerDao_Impl implements AnswerDao {
         }
         final int _tmp = entity.getSuperseded() ? 1 : 0;
         statement.bindLong(13, _tmp);
+        statement.bindLong(14, entity.getPageCount());
+        if (entity.getPhotoPaths() == null) {
+          statement.bindNull(15);
+        } else {
+          statement.bindString(15, entity.getPhotoPaths());
+        }
+        if (entity.getGalleryUris() == null) {
+          statement.bindNull(16);
+        } else {
+          statement.bindString(16, entity.getGalleryUris());
+        }
+        if (entity.getWarnings() == null) {
+          statement.bindNull(17);
+        } else {
+          statement.bindString(17, entity.getWarnings());
+        }
       }
     };
     this.__insertionAdapterOfAnswerEntity = new EntityInsertionAdapter<AnswerEntity>(__db) {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR ABORT INTO `answers` (`id`,`batchId`,`q`,`choice`,`conf`,`edited`,`note`) VALUES (nullif(?, 0),?,?,?,?,?,?)";
+        return "INSERT OR ABORT INTO `answers` (`id`,`batchId`,`q`,`choice`,`conf`,`edited`,`note`,`page`) VALUES (nullif(?, 0),?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -109,6 +125,7 @@ public final class AnswerDao_Impl implements AnswerDao {
         } else {
           statement.bindString(7, entity.getNote());
         }
+        statement.bindLong(8, entity.getPage());
       }
     };
     this.__insertionAdapterOfCycleState = new EntityInsertionAdapter<CycleState>(__db) {
@@ -320,6 +337,7 @@ public final class AnswerDao_Impl implements AnswerDao {
           final int _cursorIndexOfConf = CursorUtil.getColumnIndexOrThrow(_cursor, "conf");
           final int _cursorIndexOfEdited = CursorUtil.getColumnIndexOrThrow(_cursor, "edited");
           final int _cursorIndexOfNote = CursorUtil.getColumnIndexOrThrow(_cursor, "note");
+          final int _cursorIndexOfPage = CursorUtil.getColumnIndexOrThrow(_cursor, "page");
           final List<AnswerEntity> _result = new ArrayList<AnswerEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final AnswerEntity _item_1;
@@ -343,7 +361,9 @@ public final class AnswerDao_Impl implements AnswerDao {
             } else {
               _tmpNote = _cursor.getString(_cursorIndexOfNote);
             }
-            _item_1 = new AnswerEntity(_tmpId,_tmpBatchId,_tmpQ,_tmpChoice,_tmpConf,_tmpEdited,_tmpNote);
+            final int _tmpPage;
+            _tmpPage = _cursor.getInt(_cursorIndexOfPage);
+            _item_1 = new AnswerEntity(_tmpId,_tmpBatchId,_tmpQ,_tmpChoice,_tmpConf,_tmpEdited,_tmpNote,_tmpPage);
             _result.add(_item_1);
           }
           return _result;
@@ -383,6 +403,7 @@ public final class AnswerDao_Impl implements AnswerDao {
           final int _cursorIndexOfConf = CursorUtil.getColumnIndexOrThrow(_cursor, "conf");
           final int _cursorIndexOfEdited = CursorUtil.getColumnIndexOrThrow(_cursor, "edited");
           final int _cursorIndexOfNote = CursorUtil.getColumnIndexOrThrow(_cursor, "note");
+          final int _cursorIndexOfPage = CursorUtil.getColumnIndexOrThrow(_cursor, "page");
           final List<AnswerEntity> _result = new ArrayList<AnswerEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final AnswerEntity _item_1;
@@ -406,7 +427,9 @@ public final class AnswerDao_Impl implements AnswerDao {
             } else {
               _tmpNote = _cursor.getString(_cursorIndexOfNote);
             }
-            _item_1 = new AnswerEntity(_tmpId,_tmpBatchId,_tmpQ,_tmpChoice,_tmpConf,_tmpEdited,_tmpNote);
+            final int _tmpPage;
+            _tmpPage = _cursor.getInt(_cursorIndexOfPage);
+            _item_1 = new AnswerEntity(_tmpId,_tmpBatchId,_tmpQ,_tmpChoice,_tmpConf,_tmpEdited,_tmpNote,_tmpPage);
             _result.add(_item_1);
           }
           return _result;
@@ -472,6 +495,10 @@ public final class AnswerDao_Impl implements AnswerDao {
           final int _cursorIndexOfLatencyMs = CursorUtil.getColumnIndexOrThrow(_cursor, "latencyMs");
           final int _cursorIndexOfRawResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "rawResponse");
           final int _cursorIndexOfSuperseded = CursorUtil.getColumnIndexOrThrow(_cursor, "superseded");
+          final int _cursorIndexOfPageCount = CursorUtil.getColumnIndexOrThrow(_cursor, "pageCount");
+          final int _cursorIndexOfPhotoPaths = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPaths");
+          final int _cursorIndexOfGalleryUris = CursorUtil.getColumnIndexOrThrow(_cursor, "galleryUris");
+          final int _cursorIndexOfWarnings = CursorUtil.getColumnIndexOrThrow(_cursor, "warnings");
           final List<Batch> _result = new ArrayList<Batch>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final Batch _item;
@@ -515,7 +542,27 @@ public final class AnswerDao_Impl implements AnswerDao {
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfSuperseded);
             _tmpSuperseded = _tmp != 0;
-            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded);
+            final int _tmpPageCount;
+            _tmpPageCount = _cursor.getInt(_cursorIndexOfPageCount);
+            final String _tmpPhotoPaths;
+            if (_cursor.isNull(_cursorIndexOfPhotoPaths)) {
+              _tmpPhotoPaths = null;
+            } else {
+              _tmpPhotoPaths = _cursor.getString(_cursorIndexOfPhotoPaths);
+            }
+            final String _tmpGalleryUris;
+            if (_cursor.isNull(_cursorIndexOfGalleryUris)) {
+              _tmpGalleryUris = null;
+            } else {
+              _tmpGalleryUris = _cursor.getString(_cursorIndexOfGalleryUris);
+            }
+            final String _tmpWarnings;
+            if (_cursor.isNull(_cursorIndexOfWarnings)) {
+              _tmpWarnings = null;
+            } else {
+              _tmpWarnings = _cursor.getString(_cursorIndexOfWarnings);
+            }
+            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded,_tmpPageCount,_tmpPhotoPaths,_tmpGalleryUris,_tmpWarnings);
             _result.add(_item);
           }
           return _result;
@@ -550,6 +597,10 @@ public final class AnswerDao_Impl implements AnswerDao {
           final int _cursorIndexOfLatencyMs = CursorUtil.getColumnIndexOrThrow(_cursor, "latencyMs");
           final int _cursorIndexOfRawResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "rawResponse");
           final int _cursorIndexOfSuperseded = CursorUtil.getColumnIndexOrThrow(_cursor, "superseded");
+          final int _cursorIndexOfPageCount = CursorUtil.getColumnIndexOrThrow(_cursor, "pageCount");
+          final int _cursorIndexOfPhotoPaths = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPaths");
+          final int _cursorIndexOfGalleryUris = CursorUtil.getColumnIndexOrThrow(_cursor, "galleryUris");
+          final int _cursorIndexOfWarnings = CursorUtil.getColumnIndexOrThrow(_cursor, "warnings");
           final List<Batch> _result = new ArrayList<Batch>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final Batch _item;
@@ -593,7 +644,27 @@ public final class AnswerDao_Impl implements AnswerDao {
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfSuperseded);
             _tmpSuperseded = _tmp != 0;
-            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded);
+            final int _tmpPageCount;
+            _tmpPageCount = _cursor.getInt(_cursorIndexOfPageCount);
+            final String _tmpPhotoPaths;
+            if (_cursor.isNull(_cursorIndexOfPhotoPaths)) {
+              _tmpPhotoPaths = null;
+            } else {
+              _tmpPhotoPaths = _cursor.getString(_cursorIndexOfPhotoPaths);
+            }
+            final String _tmpGalleryUris;
+            if (_cursor.isNull(_cursorIndexOfGalleryUris)) {
+              _tmpGalleryUris = null;
+            } else {
+              _tmpGalleryUris = _cursor.getString(_cursorIndexOfGalleryUris);
+            }
+            final String _tmpWarnings;
+            if (_cursor.isNull(_cursorIndexOfWarnings)) {
+              _tmpWarnings = null;
+            } else {
+              _tmpWarnings = _cursor.getString(_cursorIndexOfWarnings);
+            }
+            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded,_tmpPageCount,_tmpPhotoPaths,_tmpGalleryUris,_tmpWarnings);
             _result.add(_item);
           }
           return _result;
@@ -632,6 +703,10 @@ public final class AnswerDao_Impl implements AnswerDao {
           final int _cursorIndexOfLatencyMs = CursorUtil.getColumnIndexOrThrow(_cursor, "latencyMs");
           final int _cursorIndexOfRawResponse = CursorUtil.getColumnIndexOrThrow(_cursor, "rawResponse");
           final int _cursorIndexOfSuperseded = CursorUtil.getColumnIndexOrThrow(_cursor, "superseded");
+          final int _cursorIndexOfPageCount = CursorUtil.getColumnIndexOrThrow(_cursor, "pageCount");
+          final int _cursorIndexOfPhotoPaths = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPaths");
+          final int _cursorIndexOfGalleryUris = CursorUtil.getColumnIndexOrThrow(_cursor, "galleryUris");
+          final int _cursorIndexOfWarnings = CursorUtil.getColumnIndexOrThrow(_cursor, "warnings");
           final List<Batch> _result = new ArrayList<Batch>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final Batch _item;
@@ -675,7 +750,27 @@ public final class AnswerDao_Impl implements AnswerDao {
             final int _tmp;
             _tmp = _cursor.getInt(_cursorIndexOfSuperseded);
             _tmpSuperseded = _tmp != 0;
-            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded);
+            final int _tmpPageCount;
+            _tmpPageCount = _cursor.getInt(_cursorIndexOfPageCount);
+            final String _tmpPhotoPaths;
+            if (_cursor.isNull(_cursorIndexOfPhotoPaths)) {
+              _tmpPhotoPaths = null;
+            } else {
+              _tmpPhotoPaths = _cursor.getString(_cursorIndexOfPhotoPaths);
+            }
+            final String _tmpGalleryUris;
+            if (_cursor.isNull(_cursorIndexOfGalleryUris)) {
+              _tmpGalleryUris = null;
+            } else {
+              _tmpGalleryUris = _cursor.getString(_cursorIndexOfGalleryUris);
+            }
+            final String _tmpWarnings;
+            if (_cursor.isNull(_cursorIndexOfWarnings)) {
+              _tmpWarnings = null;
+            } else {
+              _tmpWarnings = _cursor.getString(_cursorIndexOfWarnings);
+            }
+            _item = new Batch(_tmpId,_tmpCreatedAt,_tmpSource,_tmpPhotoPath,_tmpGalleryUri,_tmpStatus,_tmpProvider,_tmpModel,_tmpPromptName,_tmpPromptHash,_tmpLatencyMs,_tmpRawResponse,_tmpSuperseded,_tmpPageCount,_tmpPhotoPaths,_tmpGalleryUris,_tmpWarnings);
             _result.add(_item);
           }
           return _result;

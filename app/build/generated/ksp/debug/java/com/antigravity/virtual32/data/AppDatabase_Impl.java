@@ -32,15 +32,15 @@ public final class AppDatabase_Impl extends AppDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(1) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS `batches` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAt` INTEGER NOT NULL, `source` TEXT NOT NULL, `photoPath` TEXT, `galleryUri` TEXT, `status` TEXT NOT NULL, `provider` TEXT NOT NULL, `model` TEXT NOT NULL, `promptName` TEXT NOT NULL, `promptHash` TEXT NOT NULL, `latencyMs` INTEGER NOT NULL, `rawResponse` TEXT, `superseded` INTEGER NOT NULL)");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `answers` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `batchId` INTEGER NOT NULL, `q` INTEGER NOT NULL, `choice` TEXT NOT NULL, `conf` TEXT NOT NULL, `edited` INTEGER NOT NULL, `note` TEXT, FOREIGN KEY(`batchId`) REFERENCES `batches`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `batches` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAt` INTEGER NOT NULL, `source` TEXT NOT NULL, `photoPath` TEXT, `galleryUri` TEXT, `status` TEXT NOT NULL, `provider` TEXT NOT NULL, `model` TEXT NOT NULL, `promptName` TEXT NOT NULL, `promptHash` TEXT NOT NULL, `latencyMs` INTEGER NOT NULL, `rawResponse` TEXT, `superseded` INTEGER NOT NULL, `pageCount` INTEGER NOT NULL, `photoPaths` TEXT, `galleryUris` TEXT, `warnings` TEXT)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `answers` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `batchId` INTEGER NOT NULL, `q` INTEGER NOT NULL, `choice` TEXT NOT NULL, `conf` TEXT NOT NULL, `edited` INTEGER NOT NULL, `note` TEXT, `page` INTEGER NOT NULL, FOREIGN KEY(`batchId`) REFERENCES `batches`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_answers_batchId` ON `answers` (`batchId`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `cycle_state` (`id` INTEGER NOT NULL, `activeBatchIds` TEXT NOT NULL, `cursor` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd0cab8e54db74b4381c774562a85244d')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fd6c17930bafe8931dbef9a04a3850c3')");
       }
 
       @Override
@@ -92,7 +92,7 @@ public final class AppDatabase_Impl extends AppDatabase {
       @NonNull
       public RoomOpenHelper.ValidationResult onValidateSchema(
           @NonNull final SupportSQLiteDatabase db) {
-        final HashMap<String, TableInfo.Column> _columnsBatches = new HashMap<String, TableInfo.Column>(13);
+        final HashMap<String, TableInfo.Column> _columnsBatches = new HashMap<String, TableInfo.Column>(17);
         _columnsBatches.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsBatches.put("createdAt", new TableInfo.Column("createdAt", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsBatches.put("source", new TableInfo.Column("source", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -106,6 +106,10 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsBatches.put("latencyMs", new TableInfo.Column("latencyMs", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsBatches.put("rawResponse", new TableInfo.Column("rawResponse", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsBatches.put("superseded", new TableInfo.Column("superseded", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsBatches.put("pageCount", new TableInfo.Column("pageCount", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsBatches.put("photoPaths", new TableInfo.Column("photoPaths", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsBatches.put("galleryUris", new TableInfo.Column("galleryUris", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsBatches.put("warnings", new TableInfo.Column("warnings", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysBatches = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesBatches = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoBatches = new TableInfo("batches", _columnsBatches, _foreignKeysBatches, _indicesBatches);
@@ -115,7 +119,7 @@ public final class AppDatabase_Impl extends AppDatabase {
                   + " Expected:\n" + _infoBatches + "\n"
                   + " Found:\n" + _existingBatches);
         }
-        final HashMap<String, TableInfo.Column> _columnsAnswers = new HashMap<String, TableInfo.Column>(7);
+        final HashMap<String, TableInfo.Column> _columnsAnswers = new HashMap<String, TableInfo.Column>(8);
         _columnsAnswers.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsAnswers.put("batchId", new TableInfo.Column("batchId", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsAnswers.put("q", new TableInfo.Column("q", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -123,6 +127,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsAnswers.put("conf", new TableInfo.Column("conf", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsAnswers.put("edited", new TableInfo.Column("edited", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsAnswers.put("note", new TableInfo.Column("note", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsAnswers.put("page", new TableInfo.Column("page", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysAnswers = new HashSet<TableInfo.ForeignKey>(1);
         _foreignKeysAnswers.add(new TableInfo.ForeignKey("batches", "CASCADE", "NO ACTION", Arrays.asList("batchId"), Arrays.asList("id")));
         final HashSet<TableInfo.Index> _indicesAnswers = new HashSet<TableInfo.Index>(1);
@@ -149,7 +154,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "d0cab8e54db74b4381c774562a85244d", "5729d1e81ea4459211645c72633db4c2");
+    }, "fd6c17930bafe8931dbef9a04a3850c3", "0cda2f8a9918fd8341345b6208e75174");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

@@ -50,10 +50,12 @@ class HistoryViewModel(private val application: Application) : AndroidViewModel(
     }
 
     fun reprocess(batch: Batch) {
-        if (batch.photoPath != null) {
+        val paths = batch.getPhotoPathList()
+        if (paths.isNotEmpty()) {
             val intent = Intent(application, ReceiverService::class.java).apply {
                 action = ReceiverService.ACTION_REPROCESS
-                putExtra(ReceiverService.EXTRA_PHOTO_PATH, batch.photoPath)
+                putExtra(ReceiverService.EXTRA_PHOTO_PATH, paths.first())
+                putStringArrayListExtra(ReceiverService.EXTRA_PHOTO_PATHS, ArrayList(paths))
                 putExtra(ReceiverService.EXTRA_BATCH_ID, batch.id)
             }
             application.startService(intent)
@@ -71,5 +73,9 @@ class HistoryViewModel(private val application: Application) : AndroidViewModel(
             sb.append("${ans.batchId},${ans.q},${ans.choice},${ans.conf},${ans.edited}\n")
         }
         return sb.toString()
+    }
+
+    suspend fun getAnswersForBatch(batchId: Long): List<com.antigravity.virtual32.data.AnswerEntity> {
+        return answerDao.getAnswersForBatches(listOf(batchId))
     }
 }

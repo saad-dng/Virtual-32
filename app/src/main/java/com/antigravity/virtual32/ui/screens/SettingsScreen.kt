@@ -96,6 +96,106 @@ fun SettingsScreen(
                 }
             }
 
+            // Sessions Card
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Sessions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+
+                    // Max photos per session (2-20)
+                    Column {
+                        val maxPages = settings?.maxSessionPages ?: 12
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Max photos per session", style = MaterialTheme.typography.bodyMedium)
+                            Text("$maxPages", fontWeight = FontWeight.Bold)
+                        }
+                        Slider(
+                            value = maxPages.toFloat(),
+                            onValueChange = { viewModel.setMaxSessionPages(it.toInt()) },
+                            valueRange = 2f..20f,
+                            steps = 17
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    // Auto-submit after N seconds (Off/10/20/30/60)
+                    Column {
+                        val currentAutoSubmit = settings?.sessionAutoSubmitSec ?: 0
+                        Text("Auto-submit timer", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            listOf(0 to "Off", 10 to "10s", 20 to "20s", 30 to "30s", 60 to "60s").forEach { (sec, label) ->
+                                FilterChip(
+                                    selected = currentAutoSubmit == sec,
+                                    onClick = { viewModel.setSessionAutoSubmitSec(sec) },
+                                    label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+
+                    HorizontalDivider()
+
+                    // Downscale threshold toggle (15 MB downscale to 1600px)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("Downscale large sessions (>15 MB)", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                "Downscales photos to 1600px q85 if total size exceeds 15 MB before AI call. Gallery copies remain full resolution.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = settings?.downscaleSessionPayload ?: true,
+                            onCheckedChange = { viewModel.setDownscaleSessionPayload(it) }
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    // Multi-photo instruction editor
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Multi-photo instruction", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                            TextButton(onClick = { viewModel.resetMultiPhotoInstruction() }) {
+                                Text("Reset to default")
+                            }
+                        }
+                        OutlinedTextField(
+                            value = settings?.multiPhotoInstruction ?: "",
+                            onValueChange = { viewModel.setMultiPhotoInstruction(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3,
+                            maxLines = 6,
+                            textStyle = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Note: The JSON output contract (page mapping, question sorting, and format) remains locked and strictly enforced.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // Navigation Buttons
             Button(
                 onClick = onNavigateToAiSettings,

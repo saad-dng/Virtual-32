@@ -21,6 +21,15 @@ def parse_args():
     parser_photo = subparsers.add_parser("photo", help="Upload a photo")
     parser_photo.add_argument("file", help="Path to photo JPEG")
     
+    parser_add = subparsers.add_parser("add", help="Add a photo to open session")
+    parser_add.add_argument("file", help="Path to photo JPEG")
+    
+    subparsers.add_parser("finish", help="Finish open session")
+    subparsers.add_parser("cancel", help="Cancel open session")
+    
+    parser_session = subparsers.add_parser("session", help="Upload multiple photos in a session and finish")
+    parser_session.add_argument("files", nargs="+", help="Paths to photo JPEGs")
+
     subparsers.add_parser("next", help="Advance to next answer")
     subparsers.add_parser("repeat", help="Repeat current answer")
     
@@ -76,7 +85,13 @@ def print_blink(cmd, data):
         else:
             pattern = "Red: 3 fast (unreachable)"
             
-    elif cmd == "photo":
+    elif cmd == "add":
+        if data.get("ok"):
+            pattern = "Blue: 1 short flash (100ms)"
+        else:
+            pattern = "Red: 5 fast (error)"
+
+    elif cmd in ["photo", "finish"]:
         status = data.get("status")
         if status == "ok":
             pattern = "Blue: solid 1000ms"
@@ -135,6 +150,54 @@ def cmd_photo(base_url, filepath):
     print_blink("photo", data)
     return status, data
 
+def cmd_add(base_url, filepath):
+    print(f"Sending POST /session/photo with {filepath}...")
+    try:
+        with open(filepath, "rb") as f:
+            img_data = f.read()
+    except FileNotFoundError:
+        print("File not found, generating dummy 2KB JPEG bytes...")
+        img_data = b'\xFF\xD8\xFF' + b'\x00' * 2048
+        
+    boundary = "----Esp32Boundary"
+    body = (
+        f"--{boundary}\r\n"
+        f"Content-Disposition: form-data; name=\"image\"; filename=\"photo.jpg\"\r\n"
+        f"Content-Type: image/jpeg\r\n\r\n"
+    ).encode('utf-8') + img_data + f"\r\n--{boundary}--\r\n".encode('utf-8')
+    
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={boundary}"
+    }
+    
+    status, data = do_request(f"{base_url}/session/photo", method="POST", data=body, headers=headers, timeout=15.0, retries=2)
+    print(f"Reply: {status} {data}")
+    print_blink("add", data)
+    return status, data
+
+def cmd_finish(base_url):
+    print("Sending POST /session/finish...")
+    status, data = do_request(f"{base_url}/session/finish", method="POST", timeout=150.0, retries=0)
+    print(f"Reply: {status} {data}")
+    print_blink("finish", data)
+    return status, data
+
+def cmd_cancel(base_url):
+    print("Sending POST /session/cancel...")
+    status, data = do_request(f"{base_url}/session/cancel", method="POST", timeout=10.0, retries=0)
+    print(f"Reply: {status} {data}")
+    return status, data
+
+def cmd_session(base_url, filepaths):
+    print(f"Starting session with {len(filepaths)} photo(s)...")
+    for fp in filepaths:
+        status, data = cmd_add(base_url, fp)
+        if status != 200:
+            print(f"Failed to add {fp}: {status} {data}")
+            return status, data
+        time.sleep(0.5)
+    return cmd_finish(base_url)
+
 def cmd_next(base_url):
     print("Sending GET /next...")
     status, data = do_request(f"{base_url}/next", timeout=5.0, retries=0)
@@ -189,6 +252,14 @@ if __name__ == "__main__":
         cmd_ping(base)
     elif args.command == "photo":
         cmd_photo(base, args.file)
+    elif args.command == "add":
+        cmd_add(base, args.file)
+    elif args.command == "finish":
+        cmd_finish(base)
+    elif args.command == "cancel":
+        cmd_cancel(base)
+    elif args.command == "session":
+        cmd_session(base, args.files)
     elif args.command == "next":
         cmd_next(base)
     elif args.command == "repeat":

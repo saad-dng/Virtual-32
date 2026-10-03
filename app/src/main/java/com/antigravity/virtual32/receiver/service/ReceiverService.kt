@@ -54,6 +54,9 @@ class ReceiverService : Service() {
     private lateinit var settingsRepo: SettingsRepository
     private lateinit var promptRepo: PromptRepository
     private lateinit var pipeline: PhotoPipelineImpl
+    private lateinit var galleryWriter: GalleryWriter
+    private lateinit var photoCache: PhotoCache
+    private lateinit var sessionManager: com.antigravity.virtual32.receiver.pipeline.SessionManager
     private var server: ReceiverHttpServer? = null
     private val logBuffer = LogBuffer()
     
@@ -112,6 +115,12 @@ class ReceiverService : Service() {
                 updateNotification()
             }
         }
+
+        scope.launch {
+            sessionManager.uiState.collect {
+                updateNotification()
+            }
+        }
         
         scope.launch {
             while (isActive) {
@@ -129,17 +138,28 @@ class ReceiverService : Service() {
         answerStore = RoomAnswerStore(db.answerDao())
         settingsRepo = SettingsRepository(this)
         promptRepo = PromptRepository(this)
-        
+        galleryWriter = GalleryWriter(this)
+        photoCache = PhotoCache(this)
+
         pipeline = PhotoPipelineImpl(
             context = this,
             settingsRepo = settingsRepo,
             promptRepo = promptRepo,
             answerStore = answerStore,
             okHttpClient = okHttpClient,
-            galleryWriter = GalleryWriter(this),
-            photoCache = PhotoCache(this),
+            galleryWriter = galleryWriter,
+            photoCache = photoCache,
             isNetworkAvailable = { ReceiverState.health.value.isNetworkUp }
         )
+
+        sessionManager = com.antigravity.virtual32.receiver.pipeline.SessionManager.getInstance(this).apply {
+            setOnAutoSubmit { photos ->
+                val jpegs = photos.map { java.io.File(it.cachePath).readBytes() }
+                val paths = photos.map { it.cachePath }
+                val uris = photos.mapNotNull { it.galleryUri }
+                pipeline.processPhotos(jpegs, "ESP", paths, uris)
+            }
+        }
     }
 
     private fun acquireLocks() {
@@ -177,7 +197,16 @@ class ReceiverService : Service() {
 
     private fun startServer(port: Int) {
         server?.stop()
-        server = ReceiverHttpServer(port, pipeline, answerStore, logBuffer).apply {
+        server = ReceiverHttpServer(
+            port = port,
+            pipeline = pipeline,
+            answerStore = answerStore,
+            logBuffer = logBuffer,
+            sessionManager = sessionManager,
+            galleryWriter = galleryWriter,
+            photoCache = photoCache,
+            settingsRepo = settingsRepo
+        ).apply {
             start()
         }
     }
@@ -260,8 +289,10 @@ class ReceiverService : Service() {
         val port = state.serverPort
         val answers = state.answersCount
         val espTime = if (state.lastEspSeenMs > 0) "${(System.currentTimeMillis() - state.lastEspSeenMs) / 1000}s ago" else "Never"
+        val waitingPhotos = if (::sessionManager.isInitialized) sessionManager.uiState.value.photos.size else 0
+        val waitingPrefix = if (waitingPhotos > 0) "$waitingPhotos photos waiting - " else ""
         
-        val contentText = "Running - $ip:$port - $answers answers - ESP last seen $espTime"
+        val contentText = "${waitingPrefix}Running - $ip:$port - $answers answers - ESP last seen $espTime"
         
         val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
@@ -304,15 +335,16 @@ class ReceiverService : Service() {
                 }
             }
         } else if (intent?.action == ACTION_REPROCESS) {
-            val photoPath = intent.getStringExtra(EXTRA_PHOTO_PATH)
+            val photoPaths = intent.getStringArrayListExtra(EXTRA_PHOTO_PATHS)
+                ?: intent.getStringExtra(EXTRA_PHOTO_PATH)?.let { arrayListOf(it) }
             val batchId = intent.getLongExtra(EXTRA_BATCH_ID, -1L)
-            if (photoPath != null && batchId != -1L) {
+            if (!photoPaths.isNullOrEmpty() && batchId != -1L) {
                 scope.launch {
                     try {
                         val db = AppDatabase.getDatabase(this@ReceiverService)
                         db.answerDao().markBatchesSuperseded(listOf(batchId))
-                        val bytes = java.io.File(photoPath).readBytes()
-                        pipeline.processPhoto(bytes, "GALLERY")
+                        val jpegs = photoPaths.map { java.io.File(it).readBytes() }
+                        pipeline.processPhotos(jpegs, "GALLERY")
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -344,6 +376,7 @@ class ReceiverService : Service() {
         const val ACTION_REPROCESS = "com.antigravity.virtual32.REPROCESS"
         const val EXTRA_URI = "extra_uri"
         const val EXTRA_PHOTO_PATH = "extra_photo_path"
+        const val EXTRA_PHOTO_PATHS = "extra_photo_paths"
         const val EXTRA_BATCH_ID = "extra_batch_id"
     }
 }

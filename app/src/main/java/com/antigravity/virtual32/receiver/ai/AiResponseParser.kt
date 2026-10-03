@@ -33,10 +33,18 @@ object AiResponseParser {
             val status = json["status"]?.jsonPrimitive?.content ?: "unclear"
             val reason = json["reason"]?.jsonPrimitive?.content
             
+            val unreadableArray = json["unreadable_photos"]?.jsonArray
+            val unreadablePhotos = unreadableArray?.mapNotNull { it.jsonPrimitive.intOrNull } ?: emptyList()
+
+            val warnings = mutableListOf<String>()
+            for (p in unreadablePhotos.sorted()) {
+                warnings.add("Photo $p unreadable")
+            }
+
             val answersArray = json["answers"]?.jsonArray
             if (answersArray == null) {
-                if (status == "ok") return RawAiResult("unclear", emptyList(), reason ?: "No answers array")
-                return RawAiResult(status, emptyList(), reason)
+                if (status == "ok") return RawAiResult("unclear", emptyList(), reason ?: "No answers array", unreadablePhotos = unreadablePhotos, warnings = warnings)
+                return RawAiResult(status, emptyList(), reason, unreadablePhotos = unreadablePhotos, warnings = warnings)
             }
 
             val parsedAnswers = mutableListOf<RawAnswer>()
@@ -51,18 +59,45 @@ object AiResponseParser {
                 val conf = obj["conf"]?.jsonPrimitive?.content?.lowercase() ?: "low"
                 val normalizedConf = if (conf == "high") "high" else "low"
                 val reasoning = obj["reasoning"]?.jsonPrimitive?.content
+                val page = obj["page"]?.jsonPrimitive?.intOrNull ?: 1
                 
-                parsedAnswers.add(RawAnswer(q, choice, normalizedConf, reasoning))
+                parsedAnswers.add(RawAnswer(q, choice, normalizedConf, reasoning, page))
             }
 
-            // Dedupe and sort by q
-            val deduplicated = parsedAnswers.distinctBy { it.q }.sortedBy { it.q }
+            // Dedupe by q: keep answer with conf high, else the later photo
+            val deduplicated = parsedAnswers.groupBy { it.q }.map { (_, answers) ->
+                answers.reduce { best, current ->
+                    if (current.conf == "high" && best.conf != "high") {
+                        current
+                    } else if (current.conf != "high" && best.conf == "high") {
+                        best
+                    } else {
+                        // Same confidence: keep later photo (higher page), or later in list if same page
+                        if (current.page >= best.page) current else best
+                    }
+                }
+            }
+
+            // Sort by q
+            val sortedAnswers = deduplicated.sortedBy { it.q }
             
-            if (status == "ok" && deduplicated.isEmpty()) {
-                return RawAiResult("unclear", emptyList(), "ok with zero valid answers")
+            // Detect gaps between min and max q
+            if (sortedAnswers.isNotEmpty()) {
+                val minQ = sortedAnswers.first().q
+                val maxQ = sortedAnswers.last().q
+                val presentQs = sortedAnswers.map { it.q }.toSet()
+                for (q in minQ..maxQ) {
+                    if (q !in presentQs) {
+                        warnings.add("Q$q missing")
+                    }
+                }
+            }
+
+            if (status == "ok" && sortedAnswers.isEmpty()) {
+                return RawAiResult("unclear", emptyList(), "ok with zero valid answers", unreadablePhotos = unreadablePhotos, warnings = warnings)
             }
             
-            return RawAiResult(status, deduplicated, reason)
+            return RawAiResult(status, sortedAnswers, reason, unreadablePhotos = unreadablePhotos, warnings = warnings)
 
         } catch (e: Exception) {
             return RawAiResult("error", isParseError = true, reason = "Failed to parse: ${e.message}")

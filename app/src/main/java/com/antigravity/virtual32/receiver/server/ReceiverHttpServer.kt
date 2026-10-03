@@ -19,11 +19,23 @@ import java.net.Socket
 import java.net.SocketTimeoutException
 import com.antigravity.virtual32.receiver.service.ReceiverState
 
+import com.antigravity.virtual32.receiver.pipeline.SessionManager
+import com.antigravity.virtual32.receiver.pipeline.SessionInfo
+import com.antigravity.virtual32.receiver.pipeline.AddPhotoResult
+import com.antigravity.virtual32.settings.SettingsRepository
+import com.antigravity.virtual32.util.GalleryWriter
+import com.antigravity.virtual32.util.PhotoCache
+import java.io.File
+
 class ReceiverHttpServer(
     private var port: Int = 5000,
     private val pipeline: PhotoPipeline,
     private val answerStore: AnswerStore,
-    private val logBuffer: LogBuffer
+    private val logBuffer: LogBuffer,
+    private val sessionManager: SessionManager? = null,
+    private val galleryWriter: GalleryWriter? = null,
+    private val photoCache: PhotoCache? = null,
+    private val settingsRepo: SettingsRepository? = null
 ) {
     private var serverSocket: ServerSocket? = null
     private var serverJob: Job? = null
@@ -187,12 +199,24 @@ class ReceiverHttpServer(
         if (method == "GET") {
             return when (path) {
                 "/ping", "/status" -> {
+                    val openPages = sessionManager?.getSessionInfoBlocking()?.pages ?: 0
                     val resp = buildJsonObject {
                         put("ok", true)
                         put("app", "virtual32")
                         put("answers", answerStore.count)
                         put("cursor", answerStore.cursor)
-                        put("busy", false) // TODO: actual busy state tracking
+                        put("busy", false)
+                        put("pages", openPages)
+                    }
+                    sendJsonResponse(output, 200, resp)
+                    200
+                }
+                "/session" -> {
+                    val info = sessionManager?.getSessionInfo() ?: SessionInfo(open = false, pages = 0, idleMs = 0L)
+                    val resp = buildJsonObject {
+                        put("open", info.open)
+                        put("pages", info.pages)
+                        put("idleMs", info.idleMs)
                     }
                     sendJsonResponse(output, 200, resp)
                     200
@@ -221,11 +245,15 @@ class ReceiverHttpServer(
                 }
             }
         } else if (method == "POST") {
-            if (path == "/upload") {
-                return handleUpload(headers, input, output)
-            } else {
-                sendJsonResponse(output, 404, buildJsonObject { put("error", "Not found") })
-                return 404
+            return when (path) {
+                "/upload" -> handleUpload(headers, input, output)
+                "/session/photo" -> handleSessionPhoto(headers, input, output)
+                "/session/finish" -> handleSessionFinish(output)
+                "/session/cancel" -> handleSessionCancel(output)
+                else -> {
+                    sendJsonResponse(output, 404, buildJsonObject { put("error", "Not found") })
+                    404
+                }
             }
         } else {
             sendJsonResponse(output, 405, buildJsonObject { put("error", "Method Not Allowed") })
@@ -245,11 +273,11 @@ class ReceiverHttpServer(
         }
     }
 
-    private suspend fun handleUpload(
+    private fun extractJpegBytes(
         headers: Map<String, String>,
         input: BufferedInputStream,
         output: BufferedOutputStream
-    ): Int {
+    ): Pair<ByteArray?, Int> {
         val contentLengthStr = headers["content-length"]
         val contentType = headers["content-type"].orEmpty()
         val isChunked = headers["transfer-encoding"]?.lowercase() == "chunked"
@@ -261,14 +289,14 @@ class ReceiverHttpServer(
             val contentLength = contentLengthStr?.toIntOrNull() ?: 0
             if (contentLength > MAX_BODY_SIZE) {
                 sendJsonResponse(output, 413, buildJsonObject { put("status", "error"); put("reason", "Payload Too Large") })
-                return 413
+                return null to 413
             }
             bodyData = readExact(input, contentLength)
         }
 
         if (bodyData.size > MAX_BODY_SIZE) {
             sendJsonResponse(output, 413, buildJsonObject { put("status", "error"); put("reason", "Payload Too Large") })
-            return 413
+            return null to 413
         }
 
         var jpegBytes: ByteArray? = null
@@ -281,8 +309,19 @@ class ReceiverHttpServer(
 
         if (jpegBytes == null || jpegBytes.size < 2 || jpegBytes[0] != 0xFF.toByte() || jpegBytes[1] != 0xD8.toByte()) {
             sendJsonResponse(output, 400, buildJsonObject { put("status", "error"); put("reason", "bad_image") })
-            return 400
+            return null to 400
         }
+
+        return jpegBytes to 200
+    }
+
+    private suspend fun handleUpload(
+        headers: Map<String, String>,
+        input: BufferedInputStream,
+        output: BufferedOutputStream
+    ): Int {
+        val (jpegBytes, status) = extractJpegBytes(headers, input, output)
+        if (jpegBytes == null) return status
 
         return try {
             val result = withTimeout(45000L) {
@@ -297,6 +336,94 @@ class ReceiverHttpServer(
             sendJsonResponse(output, 200, buildJsonObject { put("status", "error"); put("reason", "ai_failed") })
             200
         }
+    }
+
+    private suspend fun handleSessionPhoto(
+        headers: Map<String, String>,
+        input: BufferedInputStream,
+        output: BufferedOutputStream
+    ): Int {
+        val (jpegBytes, status) = extractJpegBytes(headers, input, output)
+        if (jpegBytes == null) return status
+
+        val settings = settingsRepo?.getSettings()
+        val saveToGallery = settings?.saveToGallery ?: true
+        val batchIdStr = java.util.UUID.randomUUID().toString().substring(0, 8)
+        
+        // Save to gallery BEFORE anything else
+        val galleryUri = if (saveToGallery) galleryWriter?.savePhoto(jpegBytes, "ESP", batchIdStr) else null
+        val cachePath = photoCache?.saveInternal(jpegBytes, "s_${batchIdStr}.jpg") ?: ""
+
+        val maxPages = settings?.maxSessionPages ?: 12
+        val autoSubmitSec = settings?.sessionAutoSubmitSec ?: 0
+
+        val res = sessionManager?.addPhoto(cachePath, galleryUri, maxPages, autoSubmitSec)
+            ?: AddPhotoResult.Success(1)
+
+        return when (res) {
+            is AddPhotoResult.Success -> {
+                sendJsonResponse(output, 200, buildJsonObject {
+                    put("ok", true)
+                    put("pages", res.pages)
+                })
+                200
+            }
+            is AddPhotoResult.SessionFull -> {
+                sendJsonResponse(output, 409, buildJsonObject {
+                    put("ok", false)
+                    put("reason", "session_full")
+                    put("max", res.max)
+                })
+                409
+            }
+        }
+    }
+
+    private suspend fun handleSessionFinish(output: BufferedOutputStream): Int {
+        val frozen = sessionManager?.freezeSession() ?: emptyList()
+        if (frozen.isEmpty()) {
+            sendJsonResponse(output, 200, buildJsonObject {
+                put("status", "error")
+                put("reason", "empty_session")
+            })
+            return 200
+        }
+
+        val n = frozen.size
+        val jpegs = frozen.map { File(it.cachePath).readBytes() }
+        val paths = frozen.map { it.cachePath }
+        val uris = frozen.mapNotNull { it.galleryUri }
+
+        val timeoutMs = minOf(150_000L, 45_000L + 8_000L * n)
+        return try {
+            val result = withTimeout(timeoutMs) {
+                pipeline.processPhotos(jpegs, "ESP", paths, uris)
+            }
+            sendRawJsonResponse(output, 200, result)
+            200
+        } catch (e: TimeoutCancellationException) {
+            sendJsonResponse(output, 200, buildJsonObject {
+                put("status", "error")
+                put("reason", "timeout")
+                put("pages", n)
+                put("warnings", buildJsonArray {})
+            })
+            200
+        } catch (e: Exception) {
+            sendJsonResponse(output, 200, buildJsonObject {
+                put("status", "error")
+                put("reason", "ai_failed")
+                put("pages", n)
+                put("warnings", buildJsonArray {})
+            })
+            200
+        }
+    }
+
+    private suspend fun handleSessionCancel(output: BufferedOutputStream): Int {
+        sessionManager?.cancelSession()
+        sendJsonResponse(output, 200, buildJsonObject { put("ok", true) })
+        return 200
     }
 
     private fun readExact(input: BufferedInputStream, length: Int): ByteArray {

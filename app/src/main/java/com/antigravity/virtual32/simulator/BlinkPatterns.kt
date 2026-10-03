@@ -13,6 +13,13 @@ data class BlinkStep(val on: Boolean, val durationMs: Long)
  */
 object BlinkPatterns {
     val DOUBLE_CLICK_WINDOW_MS = 350L
+    const val LONG_PRESS_MS = 1500L
+
+    // Photo added to session: blue 1 flash of 100 ms (shorter than an answer blink, which is 250 ms)
+    val PHOTO_ADDED = listOf(
+        BlinkStep(true, 100L),
+        BlinkStep(false, 0L)
+    )
 
     // Answer: N blinks (250 ms on / 250 ms off)
     fun answerBlinks(n: Int): List<BlinkStep> {

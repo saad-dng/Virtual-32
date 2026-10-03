@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-65:12
-INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-65:12
-INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-65:12
-INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-65:12
+ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-76:12
+INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-76:12
+INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-76:12
+INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:2:1-76:12
 MERGED from [androidx.camera:camera-video:1.4.1] C:\Users\saad\.gradle\caches\8.13\transforms\137b2f19bcc4754db4736a9c86a5044b\transformed\camera-video-1.4.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.camera:camera-view:1.4.1] C:\Users\saad\.gradle\caches\8.13\transforms\485e9ea53a7b0a1b9cb3bb3b8c12f1bc\transformed\camera-view-1.4.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.camera:camera-lifecycle:1.4.1] C:\Users\saad\.gradle\caches\8.13\transforms\d5402b79db2e79b8e01315d69c68adee\transformed\camera-lifecycle-1.4.1\AndroidManifest.xml:2:1-7:12
@@ -147,8 +147,8 @@ ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:19:5-81
 	android:name
 		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:19:22-78
 application
-ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:21:5-63:19
-INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:21:5-63:19
+ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:21:5-74:19
+INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:21:5-74:19
 MERGED from [androidx.camera:camera-camera2:1.4.1] C:\Users\saad\.gradle\caches\8.13\transforms\aa600aaddc4d858c77265d1fafad62d8\transformed\camera-camera2-1.4.1\AndroidManifest.xml:23:5-34:19
 MERGED from [androidx.camera:camera-camera2:1.4.1] C:\Users\saad\.gradle\caches\8.13\transforms\aa600aaddc4d858c77265d1fafad62d8\transformed\camera-camera2-1.4.1\AndroidManifest.xml:23:5-34:19
 MERGED from [androidx.camera:camera-core:1.4.1] C:\Users\saad\.gradle\caches\8.13\transforms\6212b2807b886522989f30fa34d198f2\transformed\camera-core-1.4.1\AndroidManifest.xml:23:5-34:19
@@ -243,6 +243,24 @@ ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:60:9-62:40
 		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:62:13-37
 	android:name
 		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:61:13-72
+service#com.antigravity.virtual32.receiver.service.Virtual32TileService
+ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:64:9-73:19
+	android:label
+		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:66:13-48
+	android:exported
+		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:69:13-36
+	android:permission
+		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:68:13-77
+	android:icon
+		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:67:13-53
+	android:name
+		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:65:13-66
+intent-filter#action:name:android.service.quicksettings.action.QS_TILE
+ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:70:13-72:29
+action#android.service.quicksettings.action.QS_TILE
+ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:71:17-87
+	android:name
+		ADDED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml:71:25-84
 uses-sdk
 INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Projects\Virtual 32\app\src\main\AndroidManifest.xml

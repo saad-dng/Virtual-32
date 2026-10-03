@@ -4,7 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
 import androidx.room.Index
-import androidx.room.ColumnInfo
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Entity(tableName = "batches")
 data class Batch(
@@ -20,8 +21,45 @@ data class Batch(
     val promptHash: String,
     val latencyMs: Long,
     val rawResponse: String?,
-    val superseded: Boolean = false
-)
+    val superseded: Boolean = false,
+    val pageCount: Int = 1,
+    val photoPaths: String? = null,
+    val galleryUris: String? = null,
+    val warnings: String? = null
+) {
+    fun getPhotoPathList(): List<String> {
+        if (!photoPaths.isNullOrBlank()) {
+            return try {
+                Json.decodeFromString<List<String>>(photoPaths)
+            } catch (e: Exception) {
+                photoPaths.split("|").filter { it.isNotBlank() }
+            }
+        }
+        return photoPath?.let { listOf(it) } ?: emptyList()
+    }
+
+    fun getGalleryUriList(): List<String> {
+        if (!galleryUris.isNullOrBlank()) {
+            return try {
+                Json.decodeFromString<List<String>>(galleryUris)
+            } catch (e: Exception) {
+                galleryUris.split("|").filter { it.isNotBlank() }
+            }
+        }
+        return galleryUri?.let { listOf(it) } ?: emptyList()
+    }
+
+    fun getWarningList(): List<String> {
+        if (!warnings.isNullOrBlank()) {
+            return try {
+                Json.decodeFromString<List<String>>(warnings)
+            } catch (e: Exception) {
+                warnings.split("|").filter { it.isNotBlank() }
+            }
+        }
+        return emptyList()
+    }
+}
 
 @Entity(
     tableName = "answers",
@@ -42,7 +80,8 @@ data class AnswerEntity(
     val choice: String,
     val conf: String,
     val edited: Boolean = false,
-    val note: String? = null
+    val note: String? = null,
+    val page: Int = 1
 )
 
 @Entity(tableName = "cycle_state")

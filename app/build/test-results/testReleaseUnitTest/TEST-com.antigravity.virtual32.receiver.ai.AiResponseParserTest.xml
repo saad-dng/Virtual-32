@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-09-30T14:44:49.569Z" hostname="MR-ROBOT" time="0.018">
+<testsuite name="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-02T10:56:17.530Z" hostname="MR-ROBOT" time="0.02">
   <properties/>
-  <testcase name="testParse_proseWrapped" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.016"/>
+  <testcase name="testParse_proseWrapped" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.017"/>
   <testcase name="testParse_duplicatedQ" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_cleanJson" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_fenced" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.001"/>
@@ -9,10 +9,10 @@
   <testcase name="testParse_extraKeysIgnored" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_malformedJson" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_missingFields" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
-  <testcase name="testParse_invalidChoice" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.001"/>
+  <testcase name="testParse_invalidChoice" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_outOfOrder" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_unclearWithReason" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
-  <testcase name="testParse_qIsString" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
+  <testcase name="testParse_qIsString" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.001"/>
   <testcase name="testParse_missingStatusDefaultsToUnclear" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_noAnswersOk" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>
   <testcase name="testParse_lowercaseChoice" classname="com.antigravity.virtual32.receiver.ai.AiResponseParserTest" time="0.0"/>

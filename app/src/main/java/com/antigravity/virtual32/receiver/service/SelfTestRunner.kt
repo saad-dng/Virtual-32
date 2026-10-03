@@ -67,12 +67,12 @@ class SelfTestRunner(private val context: Context) {
         results.add(SelfTestResult("Internet Reachability", internetPassed, if (!internetPassed) "Check Wi-Fi or Cellular connection" else null))
 
         // 4. API Key Valid
-        val keyValid = if (settings.provider == AiProvider.GEMINI) {
-            settings.geminiKey.isNotBlank() && settings.geminiKey.length > 20
-        } else {
-            settings.claudeKey.isNotBlank() && settings.claudeKey.length > 20
+        val keyValid = when (settings.provider) {
+            AiProvider.GEMINI -> settings.geminiKey.trim().isNotBlank() && settings.geminiKey.trim().length > 10
+            AiProvider.CLAUDE -> settings.claudeKey.trim().isNotBlank() && settings.claudeKey.trim().length > 10
+            AiProvider.NONE -> false
         }
-        results.add(SelfTestResult("API Key Configured", keyValid, if (!keyValid) "Enter a valid API key in Settings" else null))
+        results.add(SelfTestResult("API Key Configured", keyValid, if (!keyValid) "Enter a valid API key for ${settings.provider.name} in Settings" else null))
 
         // 5. Gallery Write
         var galleryPassed = false
@@ -104,7 +104,12 @@ class SelfTestRunner(private val context: Context) {
         // 7. Wake Locks
         val wakeLockHeld = wakeLock?.isHeld == true
         val wifiLockHeld = wifiLock?.isHeld == true
-        val locksPassed = wakeLockHeld && wifiLockHeld
+        val isServiceRunning = ReceiverState.health.value.isServiceRunning
+        val locksPassed = if (wakeLock != null || wifiLock != null) {
+            wakeLockHeld && wifiLockHeld
+        } else {
+            isServiceRunning
+        }
         results.add(SelfTestResult("Wake/WiFi Locks", locksPassed, if (!locksPassed) "Service must be running to hold locks" else null))
 
         results

@@ -123,4 +123,76 @@ class AiResponseParserTest {
         val res = AiResponseParser.parse(input)
         assertEquals("unclear", res.status)
     }
+
+    @Test
+    fun testParse_page_and_unreadablePhotos() {
+        val input = """
+            {
+                "status": "ok",
+                "unreadable_photos": [2],
+                "answers": [
+                    {"q": 1, "choice": "A", "conf": "high", "page": 1},
+                    {"q": 2, "choice": "B", "conf": "low", "page": 3}
+                ]
+            }
+        """.trimIndent()
+        val res = AiResponseParser.parse(input)
+        assertEquals("ok", res.status)
+        assertEquals(listOf(2), res.unreadablePhotos)
+        assertEquals(1, res.answers[0].page)
+        assertEquals(3, res.answers[1].page)
+        assertTrue(res.warnings.contains("Photo 2 unreadable"))
+    }
+
+    @Test
+    fun testParse_duplicatesAcrossOverlappingPhotos_highConfWins() {
+        val input = """
+            {
+                "status": "ok",
+                "answers": [
+                    {"q": 3, "choice": "A", "conf": "low", "page": 1},
+                    {"q": 3, "choice": "C", "conf": "high", "page": 2}
+                ]
+            }
+        """.trimIndent()
+        val res = AiResponseParser.parse(input)
+        assertEquals(1, res.answers.size)
+        assertEquals("C", res.answers[0].choice)
+        assertEquals("high", res.answers[0].conf)
+        assertEquals(2, res.answers[0].page)
+    }
+
+    @Test
+    fun testParse_duplicatesAcrossOverlappingPhotos_sameConf_laterPhotoWins() {
+        val input = """
+            {
+                "status": "ok",
+                "answers": [
+                    {"q": 4, "choice": "A", "conf": "low", "page": 1},
+                    {"q": 4, "choice": "B", "conf": "low", "page": 2}
+                ]
+            }
+        """.trimIndent()
+        val res = AiResponseParser.parse(input)
+        assertEquals(1, res.answers.size)
+        assertEquals("B", res.answers[0].choice)
+        assertEquals(2, res.answers[0].page)
+    }
+
+    @Test
+    fun testParse_gapWarnings() {
+        val input = """
+            {
+                "status": "ok",
+                "answers": [
+                    {"q": 7, "choice": "A", "conf": "high", "page": 1},
+                    {"q": 8, "choice": "B", "conf": "high", "page": 1},
+                    {"q": 10, "choice": "D", "conf": "high", "page": 2}
+                ]
+            }
+        """.trimIndent()
+        val res = AiResponseParser.parse(input)
+        assertEquals(3, res.answers.size)
+        assertTrue(res.warnings.contains("Q9 missing"))
+    }
 }

@@ -39,9 +39,14 @@ Navigation: bottom bar = Home | Answers | Simulator | Settings.
 
 # §3 Protocol contract (source of truth; mirror in docs/ESP32_CONTRACT.md)
 Base URL: http://<phone-ip>:5000 (fallback port 8080). All replies are JSON with header "Connection: close".
-- GET /ping (alias /status) -> {"ok":true,"app":"virtual32","answers":N,"cursor":i,"busy":bool}. Any call updates "ESP last seen". The ESP pings about every 10 s.
-- POST /upload -> body is multipart field "image" OR raw Content-Type image/jpeg. Validate JPEG magic bytes (FF D8) and size 2 KB–8 MB (else 400 {"status":"error","reason":"bad_image"} / 413). Blocks until the AI result is ready (max 45 s), then 200:
+- GET /ping (alias /status) -> {"ok":true,"app":"virtual32","answers":N,"cursor":i,"busy":bool,"pages":N}. Any call updates "ESP last seen". The ESP pings about every 10 s.
+- POST /upload -> body is multipart field "image" OR raw Content-Type image/jpeg. One-photo shortcut (= a one-photo session + finish). Validate JPEG magic bytes (FF D8) and size 2 KB–8 MB (else 400 {"status":"error","reason":"bad_image"} / 413). Blocks until the AI result is ready (max 45 s), then 200:
   {"status":"ok","count":N,"batch":id} | {"status":"unclear","reason":"..."} | {"status":"error","reason":"ai_failed|no_key|no_internet|timeout|paused"}.
+- POST /session/photo -> body is multipart "image" OR raw Content-Type image/jpeg. Validates JPEG magic bytes (FF D8) and size 2 KB–8 MB like /upload. Saves the photo to the gallery BEFORE anything else, appends to open session (creating one if none), returns 200 {"ok":true,"pages":N}. If N would exceed maxSessionPages (setting, default 12, range 2-20): 409 {"ok":false,"reason":"session_full","max":12}.
+- POST /session/finish -> if open session is empty: 200 {"status":"error","reason":"empty_session"}. Otherwise freezes it, enqueues as ONE pipeline item with N photos, waits for result (timeout 45 s + 8 s per photo, max 150 s), replies like /upload plus "pages":N and "warnings":[strings]. A new /session/photo arriving while a frozen session is being analysed starts a fresh session.
+- POST /session/cancel -> discards the open session (gallery copies are never deleted), returns 200 {"ok":true}.
+- GET /session -> 200 {"open":bool,"pages":N,"idleMs":ms}.
+- New setting sessionAutoSubmitSec (0 = off default; options 0/10/20/30/60): when no new photo arrives for that long, finish the open session automatically (the result is stored and shown in the app; no ESP request is waiting).
 - GET /next -> advances the cycle. 200 {"ok":true,"q":7,"of":20,"choice":"C","blinks":3}. After the LAST answer, the next call returns {"ok":true,"end":true,"of":20} (cycle complete) and the following call wraps to the first answer. No answers stored: {"ok":false,"reason":"empty"}.
 - GET /repeat -> same shape as /next for the CURRENT answer without advancing. If nothing is current: {"ok":false,"reason":"empty"}.
 - GET /reset -> cursor back to the start, {"ok":true}.
@@ -50,13 +55,13 @@ Base URL: http://<phone-ip>:5000 (fallback port 8080). All replies are JSON with
 - Every photo is processed the same way, forever (continuous mode). Photos arriving while one is processing are queued FIFO.
 
 # §4 Blink language (identical in Simulator, app docs and future firmware)
-Blue LED: answer = N blinks (250 ms on / 250 ms off) | processing = slow pulse (500/500) until a reply | ready (upload ok) = solid 1000 ms.
+Blue LED: photo added = 1 flash (100 ms on; shorter than an answer blink) | answer = N blinks (250 ms on / 250 ms off) | processing = slow pulse (500/500) until a reply | ready (upload ok) = solid 1000 ms.
 Red LED: photo unclear = 1 long (1200 ms) | cycle complete = 2 medium (500 on / 300 off) | no answers yet = 1 short (150) + 1 long (800), 200 ms gap | server unreachable (ESP-side) = 3 fast (120/120) | server/AI error = 5 fast (120/120).
-A new button press interrupts any pattern in progress. Double-click window = 350 ms. All timings live in one constants object (BlinkPatterns.kt).
+A new button press interrupts any pattern in progress. Double-click window = 350 ms. Button 1 short-press = add photo to session (or /upload), Button 1 long-press = 1500 ms (LONG_PRESS_MS) to finish session. All timings live in one constants object (BlinkPatterns.kt).
 
 # §5 Features
-Core: continuous processing queue; answer list in the app (with cursor mirror, manual edit, low-confidence flag); every photo saved to the gallery (Pictures/Virtual32); editable AI prompt with presets and a locked JSON output contract; Gemini + Claude providers with fallback; runs reliably in the background.
-Extras: process photos from the gallery (test without ESP); reprocess a batch with a new prompt; history + export; diagnostics + self-test; usage stats; settings backup/restore; Quick Settings tile; pause-AI switch.
+Core: continuous processing queue; multi-photo sessions (/session/photo, /session/finish, /session/cancel, auto-submit timer); Session card with thumbnail strip, reordering, and auto-submit countdown; answer list in the app (with cursor mirror, photo k chip, photo filter, warnings banner, manual edit, low-confidence flag); every photo saved to the gallery (Pictures/Virtual32); editable AI prompt with presets, multi-photo instruction editor, and a locked JSON output contract; Gemini + Claude providers with fallback; runs reliably in the background.
+Extras: process photos from the gallery (test without ESP); reprocess a batch with a new prompt (re-sends all photos of a batch); history with batch thumbnail strip and multi-photo detail view + export; diagnostics + self-test; usage stats; settings backup/restore; Quick Settings tile; pause-AI switch; Simulator with Button 1 short/long press and session indicator.
 
 # §6 Failure & backup matrix
 | Failure | Behaviour |
@@ -90,12 +95,37 @@ that's what this file is for.
 # Roadmap
 Legacy foundation (done): 1 Scaffolding · 2 Networking · 3 Standalone test pass · 4 Polish · 5 Old receiver/earbuds (now being replaced).
 6 Cleanup & foundation · 7 Protocol server · 8 AI pipeline & queue · 9 Storage & gallery · 10 Background reliability · 11 Dashboard & Answers · 12 AI & Prompt settings · 13 Simulator v2 · 14 Power features · 15 Integration hardening & docs · 16 ESP32 firmware (outside Antigravity; uses docs/ESP32_CONTRACT.md).
-Current phase: 16 (External firmware).
+17 Sessions: protocol/AI/storage · 18 Sessions: UI/Simulator (done) · 19 Integration & Hardware Rollout.
+Current phase: 18 completed. Next: Phase 19.
 
 ---
 
 ## Status Log
 *(most recent entry first — append, don't rewrite)*
+
+- **2026-10-03** — Multi-Photo Sessions: UI, Simulator & Documentation (Phase 18):
+  - **Done:** Home "Session" Card: visible only when session is open or analyzing; ordered thumbnail strip (1..N, tap fullscreen); Delete and Move earlier/later buttons per photo; Analyze now and Cancel session buttons; auto-submit countdown display; "Analysing N photos... (Xs)" elapsed ticker; foreground notification text updated with photo count ("3 photos waiting").
+  - **Done:** Answers Screen: added "photo k" chip per answer row, "from photo k" filter chips ("All photos", "Photo 1", ...), and dismissible warnings banner for missing question gaps or unreadable pages with concise action hints ("retake photo 2 and send all again").
+  - **Done:** History: batch rows show photo count badge and horizontal thumbnail strip; tap opens batch detail dialog with all photos and answers; Reprocess re-sends all photos of the batch.
+  - **Done:** Settings > Sessions: max photos per session slider (2-20), auto-submit timer selector (Off/10/20/30/60s), multi-photo instruction editor with Reset to default and locked JSON note, and downscale threshold toggle (15 MB downscale to 1600px).
+  - **Done:** Simulator: Button 1 short press captures + `POST /session/photo` (plays `PHOTO_ADDED`, error patterns on failure); Button 1 long press (`LONG_PRESS_MS = 1500L`, animated hold indicator) sends `POST /session/finish` with blue slow pulse and handles `empty_session` with red no-answers pattern. Added "Photos in session: n" overlay. Implemented `LongPressDetector` with unit tests (short, exactly at limit, long, cancelled by moving away).
+  - **Done:** Documentation: updated `guide.md` (§3, §4, §5, Roadmap), `docs/ESP32_CONTRACT.md`, and `USER_GUIDE.md` with "Taking a multi-photo paper" guidelines and troubleshooting.
+  - **Done:** Tests: authored comprehensive unit test suites for session card (`HomeViewModelSessionTest`), warnings banner logic (`AnswersViewModelWarningsTest`), `LongPressDetectorTest`, and settings persistence (`SessionsSettingsTest`).
+  - **Next:** Phase 19 — Integration and hardware testing with ESP32-S3 Sense firmware.
+
+- **2026-10-03** — Multi-Photo Sessions: Protocol, AI Pipeline & Storage (Phase 17):
+  - **Done:** Updated `guide.md` (§3, §4, §5, Roadmap) and `docs/ESP32_CONTRACT.md` with multi-photo session specifications: `POST /session/photo`, `POST /session/finish`, `POST /session/cancel`, `GET /session`, updated `GET /ping` (with `pages`), and `/upload` shortcut.
+  - **Done:** Added `PHOTO_ADDED` (100 ms blue pulse) and `LONG_PRESS_MS = 1500L` constants in `BlinkPatterns.kt` without modifying existing blink patterns.
+  - **Done:** Added `maxSessionPages` (default 12, range 2-20) and `sessionAutoSubmitSec` (default 0) settings to `AppSettings` and `SettingsRepository`.
+  - **Done:** Implemented thread-safe and disk-persisted `SessionManager` (`open_session.json`) handling photo cache, gallery URI tracking, arrival timestamps, session freezing, discarding, and idle auto-submit timer with an injectable clock.
+  - **Done:** Multi-image AI support: extended `VisionProvider` to `analyze(jpegs: List<ByteArray>, instruction: String)`. Implemented multi-part payload formatting for `GeminiProvider` and `ClaudeProvider` with "Photo i of N:" blocks and 15 MB downscale guard (1600 px, q85).
+  - **Done:** Updated `PromptBuilder` to prepend multi-photo instructions and updated the LOCKED output contract for `page` and `unreadable_photos`.
+  - **Done:** Updated `AiResponseParser` to parse `page` and `unreadable_photos`, dedupe by `q` (high conf wins, else later photo), sort by `q`, detect number gaps (`"Q9 missing"`), and emit unreadable warnings.
+  - **Done:** Upgraded Room database to version 2 with `MIGRATION_1_2`, adding `pageCount`, `photoPaths`, `galleryUris`, and `warnings` to `Batch` and `page` to `AnswerEntity`. Updated `HistoryViewModel` reprocess to send all batch photos.
+  - **Done:** Updated `PhotoPipeline` with `PhotoSet`, dynamic timeouts (`base + 8s*N`, max 150s), and batch persistence.
+  - **Done:** Extended `tools/esp32_client_sim.py` with `add`, `finish`, `cancel`, and `session` CLI commands.
+  - **Done:** Authored test suites for socket session flow (`SessionFlowSocketTest`), provider request shape and downscaling (`MultiImageProviderRequestShapeTest`), response parser (`AiResponseParserTest`), and Room migration (`MigrationTest`). All unit tests pass and debug APK assembled cleanly.
+  - **Next:** Phase 18 — Sessions: UI/Simulator.
 
 - **2026-09-30** — Integration Hardening & Docs (Phase 15):
   - **Done:** Created `esp32_client_sim.py` implementing hardware exact retry rules and blink translations for standalone testing.

@@ -25,8 +25,13 @@ data class AiSettingsUiState(
     val activePreset: PromptPreset? = null,
     val editedInstruction: String = "",
     val hasUnsavedChanges: Boolean = false,
+    val geminiTestResult: String? = null,
+    val isTestingGemini: Boolean = false,
+    val claudeTestResult: String? = null,
+    val isTestingClaude: Boolean = false,
     val testKeyResult: String? = null,
     val testPromptResult: String? = null,
+    val isTestingPrompt: Boolean = false,
     val isTesting: Boolean = false
 )
 
@@ -142,25 +147,41 @@ class AiSettingsViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun testKey() {
+    fun testGeminiKey() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isTesting = true, testKeyResult = "Testing...")
-            val settings = settingsRepo.getSettings()
-            val provider = if (settings.provider == AiProvider.GEMINI) {
-                GeminiProvider(okHttpClient, settings.geminiKey)
-            } else {
-                ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel)
-            }
-            
-            // 1x1 black JPEG base64
-            val tinyJpegBase64 = "ffd8ffe000104a46494600010101004800480000ffdb0043000101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010100ffc0000b080001000101011100ffc4001f0000010501010101010100000000000000000102030405060708090a0bffda0008010100003f003f00ffd9"
-            val tinyJpeg = tinyJpegBase64.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+            _uiState.value = _uiState.value.copy(isTestingGemini = true, geminiTestResult = "Testing Gemini connection...")
+            val settings = _uiState.value.settings
+            val provider = GeminiProvider(okHttpClient, settings.geminiKey, settings.geminiModel)
+            val (_, msg) = provider.testConnection()
+            _uiState.value = _uiState.value.copy(
+                isTestingGemini = false,
+                geminiTestResult = msg,
+                testKeyResult = if (settings.provider == AiProvider.GEMINI) msg else _uiState.value.testKeyResult
+            )
+        }
+    }
 
-            try {
-                val res = provider.analyze(tinyJpeg, "Test connection")
-                _uiState.value = _uiState.value.copy(isTesting = false, testKeyResult = "OK (Status: ${res.status})")
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isTesting = false, testKeyResult = "Error: ${e.message}")
+    fun testClaudeKey() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isTestingClaude = true, claudeTestResult = "Testing Claude connection...")
+            val settings = _uiState.value.settings
+            val provider = ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel)
+            val (_, msg) = provider.testConnection()
+            _uiState.value = _uiState.value.copy(
+                isTestingClaude = false,
+                claudeTestResult = msg,
+                testKeyResult = if (settings.provider == AiProvider.CLAUDE) msg else _uiState.value.testKeyResult
+            )
+        }
+    }
+
+    fun testKey() {
+        val settings = _uiState.value.settings
+        when (settings.provider) {
+            AiProvider.GEMINI -> testGeminiKey()
+            AiProvider.CLAUDE -> testClaudeKey()
+            AiProvider.NONE -> {
+                _uiState.value = _uiState.value.copy(testKeyResult = "Primary provider is set to NONE")
             }
         }
     }
@@ -170,12 +191,21 @@ class AiSettingsViewModel(application: Application) : AndroidViewModel(applicati
             _uiState.value = _uiState.value.copy(testPromptResult = "No image selected")
             return
         }
+        val settings = _uiState.value.settings
+        if (settings.provider == AiProvider.NONE) {
+            _uiState.value = _uiState.value.copy(testPromptResult = "Primary provider is set to NONE")
+            return
+        }
+        val key = if (settings.provider == AiProvider.GEMINI) settings.geminiKey else settings.claudeKey
+        if (key.isBlank()) {
+            _uiState.value = _uiState.value.copy(testPromptResult = "Please enter an API key for ${settings.provider.name} first")
+            return
+        }
         viewModelScope.launch {
             val startTime = System.currentTimeMillis()
-            _uiState.value = _uiState.value.copy(isTesting = true, testPromptResult = "Running AI...")
-            val settings = settingsRepo.getSettings()
+            _uiState.value = _uiState.value.copy(isTestingPrompt = true, testPromptResult = "Running AI analysis...")
             val provider = if (settings.provider == AiProvider.GEMINI) {
-                GeminiProvider(okHttpClient, settings.geminiKey)
+                GeminiProvider(okHttpClient, settings.geminiKey, settings.geminiModel)
             } else {
                 ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel)
             }
@@ -185,11 +215,14 @@ class AiSettingsViewModel(application: Application) : AndroidViewModel(applicati
                 val res = provider.analyze(imageBytes, instruction)
                 val latency = System.currentTimeMillis() - startTime
                 _uiState.value = _uiState.value.copy(
-                    isTesting = false, 
-                    testPromptResult = "Latency: ${latency}ms\nStatus: ${res.status}\nAnswers: ${res.answers.size}"
+                    isTestingPrompt = false, 
+                    testPromptResult = "Latency: ${latency}ms\nStatus: ${res.status}\nAnswers: ${res.answers.size}" + (if (res.reason != null) "\nReason: ${res.reason}" else "")
                 )
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isTesting = false, testPromptResult = "Error: ${e.message}")
+                _uiState.value = _uiState.value.copy(
+                    isTestingPrompt = false, 
+                    testPromptResult = "Error: ${e.message ?: e.javaClass.simpleName}"
+                )
             }
         }
     }

@@ -36,6 +36,10 @@ open class SettingsRepository(private val context: Context?) {
         val SIM_JPEG_QUALITY = intPreferencesKey("sim_jpeg_quality")
         val START_ON_BOOT = booleanPreferencesKey("start_on_boot")
         val ENABLE_HAPTICS = booleanPreferencesKey("enable_haptics")
+        val MAX_SESSION_PAGES = intPreferencesKey("max_session_pages")
+        val SESSION_AUTO_SUBMIT_SEC = intPreferencesKey("session_auto_submit_sec")
+        val MULTI_PHOTO_INSTRUCTION = stringPreferencesKey("multi_photo_instruction")
+        val DOWNSCALE_SESSION_PAYLOAD = booleanPreferencesKey("downscale_session_payload")
     }
 
     open val settingsFlow: Flow<AppSettings>
@@ -48,12 +52,13 @@ open class SettingsRepository(private val context: Context?) {
             }
         }
         .map { preferences ->
+            val defaultSettings = AppSettings()
             AppSettings(
                 serverPort = preferences[PreferencesKeys.SERVER_PORT] ?: 5000,
                 provider = try { AiProvider.valueOf(preferences[PreferencesKeys.PROVIDER] ?: "GEMINI") } catch (e: Exception) { AiProvider.GEMINI },
                 fallbackProvider = try { AiProvider.valueOf(preferences[PreferencesKeys.FALLBACK_PROVIDER] ?: "NONE") } catch (e: Exception) { AiProvider.NONE },
-                geminiModel = preferences[PreferencesKeys.GEMINI_MODEL] ?: "gemini-1.5-flash",
-                claudeModel = preferences[PreferencesKeys.CLAUDE_MODEL] ?: "claude-sonnet-5-5",
+                geminiModel = preferences[PreferencesKeys.GEMINI_MODEL]?.let { if (it == "gemini-1.5-flash" || it == "gemini-2.0-flash") "gemini-3.8-flash" else it } ?: "gemini-3.8-flash",
+                claudeModel = preferences[PreferencesKeys.CLAUDE_MODEL]?.let { if (it == "claude-sonnet-5-5") "claude-3-5-sonnet-20241022" else it } ?: "claude-3-5-sonnet-20241022",
                 geminiKey = preferences[PreferencesKeys.GEMINI_KEY] ?: "",
                 claudeKey = preferences[PreferencesKeys.CLAUDE_KEY] ?: "",
                 activePromptId = preferences[PreferencesKeys.ACTIVE_PROMPT_ID] ?: "default",
@@ -69,7 +74,11 @@ open class SettingsRepository(private val context: Context?) {
                 simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
                 simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80,
                 startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false,
-                enableHaptics = preferences[PreferencesKeys.ENABLE_HAPTICS] ?: false
+                enableHaptics = preferences[PreferencesKeys.ENABLE_HAPTICS] ?: false,
+                maxSessionPages = preferences[PreferencesKeys.MAX_SESSION_PAGES] ?: 12,
+                sessionAutoSubmitSec = preferences[PreferencesKeys.SESSION_AUTO_SUBMIT_SEC] ?: 0,
+                multiPhotoInstruction = preferences[PreferencesKeys.MULTI_PHOTO_INSTRUCTION] ?: defaultSettings.multiPhotoInstruction,
+                downscaleSessionPayload = preferences[PreferencesKeys.DOWNSCALE_SESSION_PAYLOAD] ?: true
             )
         }
 
@@ -77,12 +86,13 @@ open class SettingsRepository(private val context: Context?) {
 
     open suspend fun updateSettings(update: (AppSettings) -> AppSettings) {
         context!!.dataStore.edit { preferences ->
+            val defaultSettings = AppSettings()
             val current = AppSettings(
                 serverPort = preferences[PreferencesKeys.SERVER_PORT] ?: 5000,
                 provider = try { AiProvider.valueOf(preferences[PreferencesKeys.PROVIDER] ?: "GEMINI") } catch (e: Exception) { AiProvider.GEMINI },
                 fallbackProvider = try { AiProvider.valueOf(preferences[PreferencesKeys.FALLBACK_PROVIDER] ?: "NONE") } catch (e: Exception) { AiProvider.NONE },
-                geminiModel = preferences[PreferencesKeys.GEMINI_MODEL] ?: "gemini-1.5-flash",
-                claudeModel = preferences[PreferencesKeys.CLAUDE_MODEL] ?: "claude-sonnet-5-5",
+                geminiModel = preferences[PreferencesKeys.GEMINI_MODEL]?.let { if (it == "gemini-1.5-flash" || it == "gemini-2.0-flash") "gemini-3.8-flash" else it } ?: "gemini-3.8-flash",
+                claudeModel = preferences[PreferencesKeys.CLAUDE_MODEL]?.let { if (it == "claude-sonnet-5-5") "claude-3-5-sonnet-20241022" else it } ?: "claude-3-5-sonnet-20241022",
                 geminiKey = preferences[PreferencesKeys.GEMINI_KEY] ?: "",
                 claudeKey = preferences[PreferencesKeys.CLAUDE_KEY] ?: "",
                 activePromptId = preferences[PreferencesKeys.ACTIVE_PROMPT_ID] ?: "default",
@@ -98,7 +108,11 @@ open class SettingsRepository(private val context: Context?) {
                 simResolution = preferences[PreferencesKeys.SIM_RESOLUTION] ?: "UXGA",
                 simJpegQuality = preferences[PreferencesKeys.SIM_JPEG_QUALITY] ?: 80,
                 startOnBoot = preferences[PreferencesKeys.START_ON_BOOT] ?: false,
-                enableHaptics = preferences[PreferencesKeys.ENABLE_HAPTICS] ?: false
+                enableHaptics = preferences[PreferencesKeys.ENABLE_HAPTICS] ?: false,
+                maxSessionPages = preferences[PreferencesKeys.MAX_SESSION_PAGES] ?: 12,
+                sessionAutoSubmitSec = preferences[PreferencesKeys.SESSION_AUTO_SUBMIT_SEC] ?: 0,
+                multiPhotoInstruction = preferences[PreferencesKeys.MULTI_PHOTO_INSTRUCTION] ?: defaultSettings.multiPhotoInstruction,
+                downscaleSessionPayload = preferences[PreferencesKeys.DOWNSCALE_SESSION_PAYLOAD] ?: true
             )
             
             val updated = update(current)
@@ -123,6 +137,10 @@ open class SettingsRepository(private val context: Context?) {
             preferences[PreferencesKeys.SIM_JPEG_QUALITY] = updated.simJpegQuality
             preferences[PreferencesKeys.START_ON_BOOT] = updated.startOnBoot
             preferences[PreferencesKeys.ENABLE_HAPTICS] = updated.enableHaptics
+            preferences[PreferencesKeys.MAX_SESSION_PAGES] = updated.maxSessionPages
+            preferences[PreferencesKeys.SESSION_AUTO_SUBMIT_SEC] = updated.sessionAutoSubmitSec
+            preferences[PreferencesKeys.MULTI_PHOTO_INSTRUCTION] = updated.multiPhotoInstruction
+            preferences[PreferencesKeys.DOWNSCALE_SESSION_PAYLOAD] = updated.downscaleSessionPayload
         }
     }
 }

@@ -145,6 +145,75 @@ fun AnswersScreen(
                             }) { Icon(Icons.Default.Share, "Share") }
                         }
                     }
+
+                    // Filter "from photo k"
+                    if (uiState.availablePages.size > 1) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            item {
+                                FilterChip(
+                                    selected = uiState.selectedPhotoFilter == null,
+                                    onClick = { viewModel.setPhotoFilter(null) },
+                                    label = { Text("All photos") }
+                                )
+                            }
+                            items(uiState.availablePages) { page ->
+                                FilterChip(
+                                    selected = uiState.selectedPhotoFilter == page,
+                                    onClick = { viewModel.setPhotoFilter(page) },
+                                    label = { Text("Photo $page") }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Warnings Banner (missing question numbers, unreadable photos, hint, Dismiss)
+            if (uiState.warnings.isNotEmpty() && !uiState.isWarningsDismissed) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Session Warnings",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            TextButton(onClick = { viewModel.dismissWarnings() }) {
+                                Text("Dismiss", color = MaterialTheme.colorScheme.onErrorContainer, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        uiState.warnings.forEach { warning ->
+                            Text(
+                                "• $warning",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                        uiState.warningHint?.let { hint ->
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                "Hint: $hint",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
                 }
             }
 
@@ -164,7 +233,8 @@ fun AnswersScreen(
                         item {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 items(uiState.recentBatches) { batch ->
-                                    batch.photoPath?.let { path ->
+                                    val photos = batch.getPhotoPathList()
+                                    photos.forEach { path ->
                                         AsyncImage(
                                             model = File(path),
                                             contentDescription = "Batch photo",
@@ -206,7 +276,20 @@ fun AnswersScreen(
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text("Q${ans.q}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    // "photo k" chip
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)
+                                    ) {
+                                        Text(
+                                            text = "Photo ${ans.page}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(14.dp))
                                     Text(ans.choice, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
                                 }
                                 

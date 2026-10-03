@@ -1,6 +1,8 @@
 package com.antigravity.virtual32.simulator
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -20,7 +22,12 @@ class SimClient(private val host: String, private val port: Int) {
 
     private val uploadClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS) // Upload timeout 60s
+        .readTimeout(60, TimeUnit.SECONDS)
+        .build()
+
+    private val finishClient = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(160, TimeUnit.SECONDS) // Max session analysis 150s
         .build()
         
     private val baseUrl = "http://$host:$port"
@@ -41,17 +48,74 @@ class SimClient(private val host: String, private val port: Int) {
     
     fun repeat(): JsonObject? = getJson("/repeat")
 
+    fun getSession(): JsonObject? = getJson("/session")
+
     private fun getJson(path: String): JsonObject? {
         return try {
             val req = Request.Builder().url("$baseUrl$path").get().build()
             val resp = pingClient.newCall(req).execute()
             val body = resp.body?.string()
+            val code = resp.code
             resp.close()
-            if (resp.isSuccessful && body != null) {
+            if (code in 200..299 && body != null) {
                 Json.parseToJsonElement(body).jsonObject
             } else null
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun postSessionPhoto(jpeg: ByteArray): Pair<Int, JsonObject?> = withContext(Dispatchers.IO) {
+        try {
+            val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("image", "photo.jpg", jpeg.toRequestBody("image/jpeg".toMediaType()))
+                .build()
+            val req = Request.Builder().url("$baseUrl/session/photo").post(body).build()
+            val resp = uploadClient.newCall(req).execute()
+            val code = resp.code
+            val respStr = resp.body?.string()
+            resp.close()
+            val json = if (respStr != null) {
+                try { Json.parseToJsonElement(respStr).jsonObject } catch (e: Exception) { null }
+            } else null
+            Pair(code, json)
+        } catch (e: Exception) {
+            Pair(-1, null)
+        }
+    }
+
+    suspend fun postSessionFinish(): Pair<Int, JsonObject?> = withContext(Dispatchers.IO) {
+        try {
+            val emptyBody = "".toRequestBody("application/json".toMediaType())
+            val req = Request.Builder().url("$baseUrl/session/finish").post(emptyBody).build()
+            val resp = finishClient.newCall(req).execute()
+            val code = resp.code
+            val respStr = resp.body?.string()
+            resp.close()
+            val json = if (respStr != null) {
+                try { Json.parseToJsonElement(respStr).jsonObject } catch (e: Exception) { null }
+            } else null
+            Pair(code, json)
+        } catch (e: Exception) {
+            Pair(-1, null)
+        }
+    }
+
+    suspend fun postSessionCancel(): Pair<Int, JsonObject?> = withContext(Dispatchers.IO) {
+        try {
+            val emptyBody = "".toRequestBody("application/json".toMediaType())
+            val req = Request.Builder().url("$baseUrl/session/cancel").post(emptyBody).build()
+            val resp = uploadClient.newCall(req).execute()
+            val code = resp.code
+            val respStr = resp.body?.string()
+            resp.close()
+            val json = if (respStr != null) {
+                try { Json.parseToJsonElement(respStr).jsonObject } catch (e: Exception) { null }
+            } else null
+            Pair(code, json)
+        } catch (e: Exception) {
+            Pair(-1, null)
         }
     }
 

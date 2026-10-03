@@ -15,6 +15,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.antigravity.virtual32.data.NextResult
 import com.antigravity.virtual32.receiver.pipeline.PipelineState
+import com.antigravity.virtual32.receiver.pipeline.SessionUiState
 import com.antigravity.virtual32.receiver.service.BackgroundHealth
 import com.antigravity.virtual32.receiver.service.ReceiverService
 import com.antigravity.virtual32.receiver.service.ReceiverState
@@ -62,6 +65,7 @@ fun HomeScreen(
     val pipelineState by ReceiverState.pipelineState.collectAsState()
     val lastResult by ReceiverState.lastResult.collectAsState()
     val logs by ReceiverState.logs.collectAsState()
+    val sessionState by viewModel.sessionUiState.collectAsState()
     
     var showChecklist by remember { mutableStateOf(false) }
     var fullScreenImage by remember { mutableStateOf<String?>(null) }
@@ -100,6 +104,17 @@ fun HomeScreen(
         ) {
             item {
                 StatusCard(health = health, onChecklistClick = { showChecklist = true })
+            }
+            item {
+                SessionCard(
+                    sessionState = sessionState,
+                    onImageTap = { fullScreenImage = it },
+                    onDeletePhoto = { viewModel.deletePhoto(it) },
+                    onMoveEarlier = { viewModel.moveEarlier(it) },
+                    onMoveLater = { viewModel.moveLater(it) },
+                    onAnalyzeNow = { viewModel.analyzeNow() },
+                    onCancelSession = { viewModel.cancelSession() }
+                )
             }
             item {
                 PipelineCard(state = pipelineState, onImageTap = { fullScreenImage = it })
@@ -237,6 +252,185 @@ fun StatusCard(health: BackgroundHealth, onChecklistClick: () -> Unit) {
 }
 
 @Composable
+fun SessionCard(
+    sessionState: SessionUiState,
+    onImageTap: (String) -> Unit,
+    onDeletePhoto: (Int) -> Unit,
+    onMoveEarlier: (Int) -> Unit,
+    onMoveLater: (Int) -> Unit,
+    onAnalyzeNow: () -> Unit,
+    onCancelSession: () -> Unit
+) {
+    if (!sessionState.open && !sessionState.isAnalyzing) return
+
+    Card(
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Open Session (${if (sessionState.isAnalyzing) sessionState.analyzingPhotoCount else sessionState.photos.size} photos)",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                if (sessionState.isAnalyzing) {
+                    Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                        Text("Analysing", color = Color.White)
+                    }
+                } else if (sessionState.autoSubmitRemainingSec >= 0) {
+                    Text(
+                        text = "Auto-submits in ${sessionState.autoSubmitRemainingSec}s",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            if (sessionState.isAnalyzing) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Analysing ${sessionState.analyzingPhotoCount} photos... (${sessionState.analyzingElapsedSec}s)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Ordered thumbnail strip 1..N (tap = fullscreen)
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                itemsIndexed(sessionState.photos) { index, photo ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(84.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { onImageTap(photo.cachePath) }
+                        ) {
+                            AsyncImage(
+                                model = File(photo.cachePath),
+                                contentDescription = "Photo ${index + 1}",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(4.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                            ) {
+                                Text(
+                                    text = "${index + 1}",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        // Each photo has Delete and Move earlier/later actions (only while session is open and not analyzing)
+                        if (!sessionState.isAnalyzing) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(
+                                    onClick = { onMoveEarlier(index) },
+                                    enabled = index > 0,
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBack,
+                                        contentDescription = "Move earlier",
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { onDeletePhoto(index) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete photo",
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { onMoveLater(index) },
+                                    enabled = index < sessionState.photos.size - 1,
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = "Move later",
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Action buttons: "Analyze now" and "Cancel session"
+            if (!sessionState.isAnalyzing) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onCancelSession,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Cancel session")
+                    }
+                    Button(
+                        onClick = onAnalyzeNow,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Analyze now")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun PipelineCard(state: PipelineState?, onImageTap: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().animateContentSize(),
@@ -259,6 +453,28 @@ fun PipelineCard(state: PipelineState?, onImageTap: (String) -> Unit) {
                 Text("Current state: ${state.currentStatus}", color = MaterialTheme.colorScheme.primary)
             } else {
                 Text("Idle (Last Latency: ${state.lastLatencyMs}ms)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
+            if (state.currentStatus?.contains("retired", ignoreCase = true) == true) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = state.currentStatus ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
             }
 
             AnimatedVisibility(

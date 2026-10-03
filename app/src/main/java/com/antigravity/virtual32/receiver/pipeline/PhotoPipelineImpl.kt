@@ -28,9 +28,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
 import okhttp3.OkHttpClient
 import android.content.Context
 import android.os.Vibrator
@@ -44,6 +42,13 @@ data class PipelineState(
     val lastLatencyMs: Long = 0L,
     val isPaused: Boolean = false,
     val lastPhotoPath: String? = null
+)
+
+data class PhotoSet(
+    val jpegs: List<ByteArray>,
+    val source: String = "ESP",
+    val cachedPaths: List<String> = emptyList(),
+    val galleryUris: List<String> = emptyList()
 )
 
 class PhotoPipelineImpl(
@@ -64,8 +69,7 @@ class PhotoPipelineImpl(
     private val queue = Channel<QueueItem>(capacity = 20)
     
     data class QueueItem(
-        val jpeg: ByteArray,
-        val source: String,
+        val photoSet: PhotoSet,
         val resultChannel: Channel<String>
     )
 
@@ -76,46 +80,89 @@ class PhotoPipelineImpl(
     }
 
     override suspend fun processPhoto(jpeg: ByteArray, source: String): String {
+        return processPhotos(listOf(jpeg), source)
+    }
+
+    override suspend fun processPhotos(
+        jpegs: List<ByteArray>,
+        source: String,
+        cachedPaths: List<String>,
+        galleryUris: List<String>
+    ): String {
         val settings = settingsRepo.getSettings()
         if (settings.pauseAi) {
-            return buildJsonObject { put("status", "error"); put("reason", "paused") }.toString()
+            return buildJsonObject {
+                put("status", "error")
+                put("reason", "paused")
+                put("pages", jpegs.size)
+                put("warnings", buildJsonArray {})
+            }.toString()
         }
 
         val resultChannel = Channel<String>(1)
-        val item = QueueItem(jpeg, source, resultChannel)
+        val item = QueueItem(PhotoSet(jpegs, source, cachedPaths, galleryUris), resultChannel)
         
         val added = queue.trySend(item).isSuccess
         if (!added) {
             Log.w("PhotoPipeline", "Queue full, dropping item")
-            return buildJsonObject { put("status", "error"); put("reason", "queue_full") }.toString()
+            return buildJsonObject {
+                put("status", "error")
+                put("reason", "queue_full")
+                put("pages", jpegs.size)
+                put("warnings", buildJsonArray {})
+            }.toString()
         }
         
         updateState { it.copy(queueLength = it.queueLength + 1) }
-        
         return resultChannel.receive()
     }
 
     private suspend fun workerLoop() {
         while (scope.isActive) {
             val item = queue.receive()
+            val n = item.photoSet.jpegs.size
             updateState { it.copy(queueLength = it.queueLength - 1, isAnalyzing = true, currentStatus = "Analyzing") }
             val startTime = System.currentTimeMillis()
             
+            val settings = settingsRepo.getSettings()
+            val baseTimeoutMs = settings.requestTimeoutSec * 1000L
+            val itemTimeoutMs = minOf(150_000L, baseTimeoutMs + 8_000L * n)
+
             val resultJson = try {
-                processItemWithRetries(item.jpeg, item.source)
+                kotlinx.coroutines.withTimeout(itemTimeoutMs) {
+                    processItemWithRetries(item.photoSet)
+                }
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                Log.w("PhotoPipeline", "Worker timed out after ${itemTimeoutMs}ms")
+                buildJsonObject {
+                    put("status", "error")
+                    put("reason", "timeout")
+                    put("pages", n)
+                    put("warnings", buildJsonArray {})
+                }.toString()
             } catch (e: Exception) {
                 Log.e("PhotoPipeline", "Worker failed", e)
-                buildJsonObject { put("status", "error"); put("reason", "ai_failed") }.toString()
+                buildJsonObject {
+                    put("status", "error")
+                    put("reason", "ai_failed")
+                    put("pages", n)
+                    put("warnings", buildJsonArray {})
+                }.toString()
             }
             
             val latency = System.currentTimeMillis() - startTime
-            updateState { it.copy(isAnalyzing = false, currentStatus = "Done", lastLatencyMs = latency) }
+            val status = if (resultJson.contains("Model retired")) {
+                "Model retired - change it in Settings > AI & Prompt"
+            } else {
+                "Done"
+            }
+            updateState { it.copy(isAnalyzing = false, currentStatus = status, lastLatencyMs = latency) }
             
             item.resultChannel.send(resultJson)
         }
     }
 
-    private suspend fun processItemWithRetries(jpeg: ByteArray, source: String): String {
+    private suspend fun processItemWithRetries(photoSet: PhotoSet): String {
         val startTime = System.currentTimeMillis()
         while (!isNetworkAvailable()) {
             updateState { it.copy(currentStatus = "Waiting for network", isPaused = true) }
@@ -124,74 +171,101 @@ class PhotoPipelineImpl(
         updateState { it.copy(isPaused = false, currentStatus = "Analyzing") }
 
         val settings = settingsRepo.getSettings()
+        val n = photoSet.jpegs.size
         
-        val batchIdStr = java.util.UUID.randomUUID().toString().substring(0, 8)
-        var galleryUri: String? = null
-        if (settings.saveToGallery) {
-            galleryUri = galleryWriter.savePhoto(jpeg, source, batchIdStr)
+        val finalCachedPaths = mutableListOf<String>()
+        val finalGalleryUris = mutableListOf<String>()
+
+        if (photoSet.cachedPaths.isNotEmpty() && photoSet.cachedPaths.size == photoSet.jpegs.size) {
+            finalCachedPaths.addAll(photoSet.cachedPaths)
+            finalGalleryUris.addAll(photoSet.galleryUris)
+        } else {
+            val batchIdStr = java.util.UUID.randomUUID().toString().substring(0, 8)
+            photoSet.jpegs.forEachIndexed { idx, jpeg ->
+                val pId = if (photoSet.jpegs.size > 1) "${batchIdStr}_p${idx + 1}" else batchIdStr
+                if (settings.saveToGallery) {
+                    val gUri = galleryWriter.savePhoto(jpeg, photoSet.source, pId)
+                    if (gUri != null) finalGalleryUris.add(gUri)
+                }
+                val cPath = photoCache.saveInternal(jpeg, "b${pId}.jpg")
+                if (cPath != null) finalCachedPaths.add(cPath)
+            }
         }
-        val cachePath = photoCache.saveInternal(jpeg, "b${batchIdStr}.jpg")
+
+        updateState { it.copy(lastPhotoPath = finalCachedPaths.firstOrNull()) }
 
         val primaryProvider = if (settings.provider == AiProvider.GEMINI) {
-            GeminiProvider(okHttpClient, settings.geminiKey)
+            GeminiProvider(okHttpClient, settings.geminiKey, settings.geminiModel, downscaleEnabled = settings.downscaleSessionPayload)
         } else {
-            ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel)
+            ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel, downscaleEnabled = settings.downscaleSessionPayload)
         }
         
-        val fallbackProvider = if (settings.provider == AiProvider.GEMINI && settings.claudeKey.isNotBlank()) {
-            ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel)
-        } else if (settings.provider == AiProvider.CLAUDE && settings.geminiKey.isNotBlank()) {
-            GeminiProvider(okHttpClient, settings.geminiKey)
-        } else null
+        val fallbackProvider = when (settings.fallbackProvider) {
+            AiProvider.GEMINI -> if (settings.geminiKey.isNotBlank()) GeminiProvider(okHttpClient, settings.geminiKey, settings.geminiModel, downscaleEnabled = settings.downscaleSessionPayload) else null
+            AiProvider.CLAUDE -> if (settings.claudeKey.isNotBlank()) ClaudeProvider(okHttpClient, settings.claudeKey, settings.claudeModel, downscaleEnabled = settings.downscaleSessionPayload) else null
+            AiProvider.NONE -> null
+        }
 
-        val resizedJpeg = ImageResizer.downscaleIfNeeded(jpeg)
-        
         val prompts = promptRepo.presetsFlow.first()
         val preset = prompts.find { it.id == settings.activePromptId } ?: promptRepo.defaultPresets.first()
-        var instruction = PromptBuilder.build(preset.instruction, includeReasoning = settings.includeReasoning)
+        var instruction = PromptBuilder.build(
+            preset.instruction,
+            includeReasoning = settings.includeReasoning,
+            photoCount = n,
+            multiPhotoInstruction = settings.multiPhotoInstruction
+        )
 
         // Attempt 1
-        var res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
+        var res = attemptAnalyze(primaryProvider, photoSet.jpegs, instruction)
         if (res.isParseError) {
-            instruction = PromptBuilder.build(preset.instruction, includeReasoning = settings.includeReasoning, isRetry = true)
-            res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
+            instruction = PromptBuilder.build(
+                preset.instruction,
+                includeReasoning = settings.includeReasoning,
+                isRetry = true,
+                photoCount = n,
+                multiPhotoInstruction = settings.multiPhotoInstruction
+            )
+            res = attemptAnalyze(primaryProvider, photoSet.jpegs, instruction)
         }
 
         // Retries for network/5xx/429
         if (isRetryableError(res)) {
             delay(1000)
-            res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
+            res = attemptAnalyze(primaryProvider, photoSet.jpegs, instruction)
             if (isRetryableError(res)) {
                 delay(3000)
-                res = attemptAnalyze(primaryProvider, resizedJpeg, instruction)
+                res = attemptAnalyze(primaryProvider, photoSet.jpegs, instruction)
             }
         }
 
         // Fallback
         if (res.status == "error" && fallbackProvider != null) {
             Log.i("PhotoPipeline", "Primary failed, using fallback")
-            res = attemptAnalyze(fallbackProvider, resizedJpeg, instruction)
+            res = attemptAnalyze(fallbackProvider, photoSet.jpegs, instruction)
         }
 
         val batch = Batch(
-            source = source,
-            photoPath = cachePath,
-            galleryUri = galleryUri,
+            source = photoSet.source,
+            photoPath = finalCachedPaths.firstOrNull(),
+            galleryUri = finalGalleryUris.firstOrNull(),
             status = res.status,
             provider = settings.provider.name,
             model = if (settings.provider == AiProvider.GEMINI) settings.geminiModel else settings.claudeModel,
             promptName = settings.activePromptId,
             promptHash = instruction.hashCode().toString(),
             latencyMs = System.currentTimeMillis() - startTime,
-            rawResponse = res.reason // We store error reason in rawResponse for stats
+            rawResponse = res.reason,
+            pageCount = n,
+            photoPaths = Json.encodeToString(finalCachedPaths),
+            galleryUris = Json.encodeToString(finalGalleryUris),
+            warnings = Json.encodeToString(res.warnings)
         )
 
+        val batchId: Long
         if (res.status == "ok") {
-            if (settings.answerMode == AnswerMode.REPLACE) {
-                answerStore.applyBatch(batch, res.answers, "REPLACE")
-            } else {
-                answerStore.applyBatch(batch, res.answers, "APPEND")
-            }
+            val mode = if (settings.answerMode == AnswerMode.REPLACE) "REPLACE" else "APPEND"
+            batchId = answerStore.applyBatch(batch, res.answers, mode)
+
             if (settings.enableHaptics) {
                 try {
                     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
@@ -207,15 +281,15 @@ class PhotoPipelineImpl(
             }
         } else {
             // Still insert the batch to track history
-            answerStore.applyBatch(batch, emptyList(), "APPEND")
+            batchId = answerStore.applyBatch(batch, emptyList(), "APPEND")
         }
 
-        return encodeResult(res)
+        return encodeResult(res, n, batchId)
     }
 
-    private suspend fun attemptAnalyze(provider: VisionProvider, jpeg: ByteArray, instruction: String): RawAiResult {
+    private suspend fun attemptAnalyze(provider: VisionProvider, jpegs: List<ByteArray>, instruction: String): RawAiResult {
         return try {
-            provider.analyze(jpeg, instruction)
+            provider.analyze(jpegs, instruction)
         } catch (e: ProviderException) {
             if (e.retryAfterSeconds != null) {
                 delay(e.retryAfterSeconds * 1000L)
@@ -227,22 +301,29 @@ class PhotoPipelineImpl(
     }
 
     private fun isRetryableError(res: RawAiResult): Boolean {
-        return res.status == "error" && (res.reason?.contains("timeout") == true || res.reason?.contains("50") == true || res.reason?.contains("429") == true)
+        if (res.status != "error") return false
+        val reason = res.reason.orEmpty()
+        if (reason.contains("retired", ignoreCase = true) || reason.contains("not found", ignoreCase = true)) return false
+        return reason.contains("timeout") || reason.contains("50") || reason.contains("429")
     }
 
     private fun updateState(updater: (PipelineState) -> PipelineState) {
         _state.value = updater(_state.value)
     }
 
-    private fun encodeResult(res: RawAiResult): String {
+    private fun encodeResult(res: RawAiResult, pages: Int, batchId: Long): String {
         return buildJsonObject {
             put("status", res.status)
             if (res.status == "ok") {
                 put("count", res.answers.size)
-                // batch id is not strictly required but could be added
+                put("batch", batchId)
             } else {
                 if (res.reason != null) put("reason", res.reason)
             }
+            put("pages", pages)
+            put("warnings", buildJsonArray {
+                res.warnings.forEach { add(JsonPrimitive(it)) }
+            })
         }.toString()
     }
 }

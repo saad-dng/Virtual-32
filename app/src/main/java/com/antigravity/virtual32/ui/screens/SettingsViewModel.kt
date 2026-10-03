@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.antigravity.virtual32.data.AppDatabase
+import com.antigravity.virtual32.settings.AppSettings
 import com.antigravity.virtual32.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,8 +28,10 @@ data class UsageStats(
     val rateLimitCount: Int = 0
 )
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val settingsRepo = SettingsRepository(application)
+class SettingsViewModel(
+    application: Application,
+    private val settingsRepo: SettingsRepository = SettingsRepository(application)
+) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
     
     val settings = settingsRepo.settingsFlow
@@ -42,7 +45,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private fun loadStats() {
         viewModelScope.launch {
-            // Stats aggregation logic
             val startOfDay = java.util.Calendar.getInstance().apply {
                 set(java.util.Calendar.HOUR_OF_DAY, 0)
                 set(java.util.Calendar.MINUTE, 0)
@@ -79,6 +81,37 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun setMaxSessionPages(maxPages: Int) {
+        viewModelScope.launch {
+            settingsRepo.updateSettings { it.copy(maxSessionPages = maxPages.coerceIn(2, 20)) }
+        }
+    }
+
+    fun setSessionAutoSubmitSec(sec: Int) {
+        viewModelScope.launch {
+            settingsRepo.updateSettings { it.copy(sessionAutoSubmitSec = sec) }
+        }
+    }
+
+    fun setMultiPhotoInstruction(instruction: String) {
+        viewModelScope.launch {
+            settingsRepo.updateSettings { it.copy(multiPhotoInstruction = instruction) }
+        }
+    }
+
+    fun resetMultiPhotoInstruction() {
+        viewModelScope.launch {
+            val defaultInst = AppSettings().multiPhotoInstruction
+            settingsRepo.updateSettings { it.copy(multiPhotoInstruction = defaultInst) }
+        }
+    }
+
+    fun setDownscaleSessionPayload(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepo.updateSettings { it.copy(downscaleSessionPayload = enabled) }
+        }
+    }
+
     fun exportSettings(outStream: OutputStream, includeKeys: Boolean) {
         viewModelScope.launch {
             val current = settingsRepo.getSettings()
@@ -86,6 +119,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             
             val json = buildJsonObject {
                 put("provider", backup.provider.name)
+                put("fallbackProvider", backup.fallbackProvider.name)
                 put("geminiKey", backup.geminiKey)
                 put("geminiModel", backup.geminiModel)
                 put("claudeKey", backup.claudeKey)
@@ -94,6 +128,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 put("answerMode", backup.answerMode.name)
                 put("saveToGallery", backup.saveToGallery)
                 put("enableHaptics", backup.enableHaptics)
+                put("maxSessionPages", backup.maxSessionPages)
+                put("sessionAutoSubmitSec", backup.sessionAutoSubmitSec)
+                put("multiPhotoInstruction", backup.multiPhotoInstruction)
+                put("downscaleSessionPayload", backup.downscaleSessionPayload)
             }
             
             withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -110,15 +148,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 
                 settingsRepo.updateSettings { current ->
                     current.copy(
-                        provider = AiProvider.valueOf(json["provider"]?.jsonPrimitive?.content ?: current.provider.name),
+                        provider = try { AiProvider.valueOf(json["provider"]?.jsonPrimitive?.content ?: current.provider.name) } catch (e: Exception) { current.provider },
+                        fallbackProvider = try { AiProvider.valueOf(json["fallbackProvider"]?.jsonPrimitive?.content ?: current.fallbackProvider.name) } catch (e: Exception) { current.fallbackProvider },
                         geminiKey = json["geminiKey"]?.jsonPrimitive?.content.takeIf { !it.isNullOrBlank() } ?: current.geminiKey,
                         geminiModel = json["geminiModel"]?.jsonPrimitive?.content ?: current.geminiModel,
                         claudeKey = json["claudeKey"]?.jsonPrimitive?.content.takeIf { !it.isNullOrBlank() } ?: current.claudeKey,
                         claudeModel = json["claudeModel"]?.jsonPrimitive?.content ?: current.claudeModel,
                         activePromptId = json["activePromptId"]?.jsonPrimitive?.content ?: current.activePromptId,
-                        answerMode = com.antigravity.virtual32.settings.AnswerMode.valueOf(json["answerMode"]?.jsonPrimitive?.content ?: current.answerMode.name),
+                        answerMode = try { com.antigravity.virtual32.settings.AnswerMode.valueOf(json["answerMode"]?.jsonPrimitive?.content ?: current.answerMode.name) } catch (e: Exception) { current.answerMode },
                         saveToGallery = json["saveToGallery"]?.jsonPrimitive?.booleanOrNull ?: current.saveToGallery,
-                        enableHaptics = json["enableHaptics"]?.jsonPrimitive?.booleanOrNull ?: current.enableHaptics
+                        enableHaptics = json["enableHaptics"]?.jsonPrimitive?.booleanOrNull ?: current.enableHaptics,
+                        maxSessionPages = json["maxSessionPages"]?.jsonPrimitive?.intOrNull ?: current.maxSessionPages,
+                        sessionAutoSubmitSec = json["sessionAutoSubmitSec"]?.jsonPrimitive?.intOrNull ?: current.sessionAutoSubmitSec,
+                        multiPhotoInstruction = json["multiPhotoInstruction"]?.jsonPrimitive?.content ?: current.multiPhotoInstruction,
+                        downscaleSessionPayload = json["downscaleSessionPayload"]?.jsonPrimitive?.booleanOrNull ?: current.downscaleSessionPayload
                     )
                 }
             }
