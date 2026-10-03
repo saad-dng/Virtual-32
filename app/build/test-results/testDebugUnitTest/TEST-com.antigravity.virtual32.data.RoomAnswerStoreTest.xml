@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.data.RoomAnswerStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:16.956Z" hostname="MR-ROBOT" time="1.036">
+<testsuite name="com.antigravity.virtual32.data.RoomAnswerStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:47:58.056Z" hostname="MR-ROBOT" time="0.853">
   <properties/>
-  <testcase name="testReplaceAndNext" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.163"/>
-  <testcase name="testEmpty" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.022"/>
-  <testcase name="testEdit" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.044"/>
-  <testcase name="testRetention" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.701"/>
-  <testcase name="testCursorPersistence" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.041"/>
-  <testcase name="testAppend" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.034"/>
-  <testcase name="testRepeat" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.031"/>
+  <testcase name="testReplaceAndNext" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.136"/>
+  <testcase name="testEmpty" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.021"/>
+  <testcase name="testEdit" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.039"/>
+  <testcase name="testRetention" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.583"/>
+  <testcase name="testCursorPersistence" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.026"/>
+  <testcase name="testAppend" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.025"/>
+  <testcase name="testRepeat" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.022"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

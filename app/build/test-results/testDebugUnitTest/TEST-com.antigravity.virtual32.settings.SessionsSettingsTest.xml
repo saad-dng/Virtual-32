@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.settings.SessionsSettingsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:25.983Z" hostname="MR-ROBOT" time="0.095">
+<testsuite name="com.antigravity.virtual32.settings.SessionsSettingsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:48:05.653Z" hostname="MR-ROBOT" time="0.083">
   <properties/>
-  <testcase name="testSessionsSettingsPersistence" classname="com.antigravity.virtual32.settings.SessionsSettingsTest" time="0.095"/>
+  <testcase name="testSessionsSettingsPersistence" classname="com.antigravity.virtual32.settings.SessionsSettingsTest" time="0.083"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
