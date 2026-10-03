@@ -1,6 +1,7 @@
 # agent.md — Engineering Conventions for the Antigravity Agent
 
 > Read this alongside `guide.md`. Split of responsibility:
+>
 > - `guide.md` = **what** to build (product spec, error-case table, session
 >   resume/wrap-up protocol, status log).
 > - `agent.md` (this file) = **how** to build it (stack, conventions, rules
@@ -9,6 +10,7 @@
 ---
 
 ## Tech stack (locked for this direction)
+
 - Native Android, Kotlin, Jetpack Compose, Material 3, cozy dotted theme (keep).
 - CameraX (Simulator only), OkHttp (AI calls + simulator upload), kotlinx-serialization-json (replaces org.json), Coroutines/Flow, Room (KSP) for answers/history, DataStore for settings.
 - Embedded HTTP server: keep our own coroutine socket server in receiver/server/ (no extra web framework).
@@ -16,18 +18,20 @@
 - minSdk stays as is; target latest stable SDK.
 
 ## Package layout (app/src/main/java/com/antigravity/virtual32/)
+
 - receiver/server/ (ReceiverHttpServer, routes, ServerState, LogBuffer)
 - receiver/ai/ (VisionProvider, GeminiProvider, ClaudeProvider, PromptBuilder, AiResponseParser)
 - receiver/pipeline/ (PhotoPipeline queue/worker, AnswerMode)
 - receiver/service/ (ReceiverService, watchdog, locks, notification, QS tile)
 - data/ (Room DB, entities, DAOs, AnswerStore, GalleryWriter, PhotoCache)
-- simulator/ (SimulatorScreen, BlinkPatterns, BlinkEngine, DoubleTapDetector, SimClient)
+- simulator/ (SimulatorScreen, BlinkPatterns, BlinkEngine, DoubleTapDetector, LongPressDetector, SimClient)
 - settings/ (AppSettings, SettingsRepository, backup)
 - ui/ (components, screens: Home, Answers, History, Simulator, Settings, PromptEditor, Diagnostics, SetupChecklist; theme)
 - util/ (IpDiscovery, Oem helpers, TimeSource)
 - tools/ (esp32_client_sim.py) and docs/ (ESP32_CONTRACT.md)
 
 ## Hard rules
+
 - No TTS, no Bluetooth audio, no sound of any kind anywhere in the app.
 - The protocol in guide.md §3 and blink language in §4 are a contract. Any change must update guide.md, docs/ESP32_CONTRACT.md and BlinkPatterns.kt in the same task.
 - Blink timings exist only in BlinkPatterns.kt. No magic numbers elsewhere.
@@ -40,6 +44,7 @@
 - Silent capture in the Simulator (no shutter sound/animation).
 
 ## Definition of Done (applies to EVERY task)
+
 1. Add/update unit tests for new logic; run the unit test task; all must pass.
 2. Assemble the debug APK successfully.
 3. Update guide.md: mark the phase in the Roadmap and append a Status Log entry at the TOP (date, done, decisions, Next).
@@ -48,6 +53,7 @@
 6. Final reply: max 5 lines: what changed, what to test manually. No spec recap.
 
 ## Files in this project
+
 - `guide.md` — Product spec, protocol contract, session protocol, and status log.
 - `agent.md` — Engineering conventions, architecture rules, and file inventory.
 - `USER_GUIDE.md` — Setup instructions and LED cheat sheet.
@@ -80,6 +86,7 @@
 ---
 
 ## Legacy phases (done)
+
 - **Phase 1 [COMPLETED]** — Scaffolding & silent capture:
   - Clean Architecture packages (`camera/`, `network/`, `settings/`, `ui/`).
   - CameraX silent single-frame JPEG capture matching OV3660 framing (zero shutter sound, zero capture flash).

@@ -10,12 +10,14 @@
 
 **On session start / when the user says "resume", "continue", or opens this
 project:**
+
 1. Read the `## Status Log` section at the bottom — that's the current state.
 2. Pick up at the "Next" item of the most recent entry.
 3. Don't re-summarize the whole spec back to the user — just say what you're
    about to do and do it. Keep replies short; token budget matters.
 
 **On "wrap up for today":**
+
 1. Stop new feature work.
 2. Add a new entry at the **top** of the Status Log with: date, what was
    completed this session, any decisions made or changed, and a concrete
@@ -28,17 +30,22 @@ don't duplicate the spec elsewhere or ask the user to repeat it.
 
 ---
 
-# §1 Project Overview
+## §1 Project Overview
+
 Virtual 32 is the phone-side app for a university project: an ESP32-S3 Sense device takes a photo of multiple-choice questions when Button 1 is pressed, sends it to this app over the phone's hotspot, the app sends it to a vision AI, stores the answers, and the ESP32 shows them ONLY via LEDs (no display, no sound). Button 2 cycles through the answers one by one; a double-click repeats the current one. A red LED signals problems. Test material: practice/sample MCQ sheets only.
 The ESP32 firmware is built outside Antigravity. This app must follow the contract in §3 exactly so the firmware can be written against it.
 
-# §2 Modes (one APK)
+## §2 Modes (one APK)
+
 - Receiver (default): embedded HTTP server + AI pipeline + answer store + dashboard. Runs as a foreground service.
 - Simulator: the phone pretends to be the ESP32 (camera, virtual Button 1/2, virtual blue/red LEDs) using the same protocol and blink patterns. Used for testing before hardware arrives; can target this phone (loopback) or a second phone.
+
 Navigation: bottom bar = Home | Answers | Simulator | Settings.
 
-# §3 Protocol contract (source of truth; mirror in docs/ESP32_CONTRACT.md)
-Base URL: http://<phone-ip>:5000 (fallback port 8080). All replies are JSON with header "Connection: close".
+## §3 Protocol contract (source of truth; mirror in docs/ESP32_CONTRACT.md)
+
+Base URL: `http://<phone-ip>:5000` (fallback port 8080). All replies are JSON with header "Connection: close".
+
 - GET /ping (alias /status) -> {"ok":true,"app":"virtual32","answers":N,"cursor":i,"busy":bool,"pages":N}. Any call updates "ESP last seen". The ESP pings about every 10 s.
 - POST /upload -> body is multipart field "image" OR raw Content-Type image/jpeg. One-photo shortcut (= a one-photo session + finish). Validate JPEG magic bytes (FF D8) and size 2 KB–8 MB (else 400 {"status":"error","reason":"bad_image"} / 413). Blocks until the AI result is ready (max 45 s), then 200:
   {"status":"ok","count":N,"batch":id} | {"status":"unclear","reason":"..."} | {"status":"error","reason":"ai_failed|no_key|no_internet|timeout|paused"}.
@@ -54,18 +61,21 @@ Base URL: http://<phone-ip>:5000 (fallback port 8080). All replies are JSON with
 - New batch rules: Replace mode = new photo replaces the active list and resets the cycle. Append mode = new answers are added to the end of the active list (same question number replaced by the newer answer), cursor unchanged.
 - Every photo is processed the same way, forever (continuous mode). Photos arriving while one is processing are queued FIFO.
 
-# §4 Blink language (identical in Simulator, app docs and future firmware)
+## §4 Blink language (identical in Simulator, app docs and future firmware)
+
 Blue LED: photo added = 1 flash (100 ms on; shorter than an answer blink) | answer = N blinks (250 ms on / 250 ms off) | processing = slow pulse (500/500) until a reply | ready (upload ok) = solid 1000 ms.
 Red LED: photo unclear = 1 long (1200 ms) | cycle complete = 2 medium (500 on / 300 off) | no answers yet = 1 short (150) + 1 long (800), 200 ms gap | server unreachable (ESP-side) = 3 fast (120/120) | server/AI error = 5 fast (120/120).
 A new button press interrupts any pattern in progress. Double-click window = 350 ms. Button 1 short-press = add photo to session (or /upload), Button 1 long-press = 1500 ms (LONG_PRESS_MS) to finish session. All timings live in one constants object (BlinkPatterns.kt).
 
-# §5 Features
+## §5 Features
+
 Core: continuous processing queue; multi-photo sessions (/session/photo, /session/finish, /session/cancel, auto-submit timer); Session card with thumbnail strip, reordering, and auto-submit countdown; answer list in the app (with cursor mirror, photo k chip, photo filter, warnings banner, manual edit, low-confidence flag); every photo saved to the gallery (Pictures/Virtual32); editable AI prompt with presets, multi-photo instruction editor, and a locked JSON output contract; Gemini + Claude providers with fallback; runs reliably in the background.
 Extras: process photos from the gallery (test without ESP); reprocess a batch with a new prompt (re-sends all photos of a batch); history with batch thumbnail strip and multi-photo detail view + export; diagnostics + self-test; usage stats; settings backup/restore; Quick Settings tile; pause-AI switch; Simulator with Button 1 short/long press and session indicator.
 
-# §6 Failure & backup matrix
+## §6 Failure & backup matrix
+
 | Failure | Behaviour |
-|---|---|
+| --- | --- |
 | Primary AI fails / rate-limited | Retry 2x with backoff, then fallback provider if configured |
 | No internet | Photo stays queued (gallery copy already saved), auto-retry when network returns; /upload replies error/no_internet |
 | ESP32 dies or is absent | Next / Repeat / Reset available on the phone; answers persist |
@@ -76,7 +86,9 @@ Extras: process photos from the gallery (test without ESP); reprocess a batch wi
 ---
 
 ## 4. Antigravity IDE Workflow (how this project gets built)
+
 Standard workflow for this user's app builds, applied here:
+
 1. Plan the app idea with Claude first (done — this file is the output).
 2. In the project folder, open in Google Antigravity (Gemini-based agentic
    IDE).
@@ -87,12 +99,14 @@ Standard workflow for this user's app builds, applied here:
    "how to write code here" file. Read both at session start.
 5. Build a prompt library: a set of prompts covering the build end-to-end,
    from sketch to final polish.
+
 Keep all of this efficient — avoid burning tokens re-explaining the spec;
 that's what this file is for.
 
 ---
 
-# Roadmap
+## Roadmap
+
 Legacy foundation (done): 1 Scaffolding · 2 Networking · 3 Standalone test pass · 4 Polish · 5 Old receiver/earbuds (now being replaced).
 6 Cleanup & foundation · 7 Protocol server · 8 AI pipeline & queue · 9 Storage & gallery · 10 Background reliability · 11 Dashboard & Answers · 12 AI & Prompt settings · 13 Simulator v2 · 14 Power features · 15 Integration hardening & docs · 16 ESP32 firmware (outside Antigravity; uses docs/ESP32_CONTRACT.md).
 17 Sessions: protocol/AI/storage · 18 Sessions: UI/Simulator (done) · 19 Integration & Hardware Rollout.
@@ -101,7 +115,8 @@ Current phase: 18 completed. Next: Phase 19.
 ---
 
 ## Status Log
-*(most recent entry first — append, don't rewrite)*
+
+Note: most recent entry first — append, don't rewrite.
 
 - **2026-10-03** — Multi-Photo Sessions: UI, Simulator & Documentation (Phase 18):
   - **Done:** Home "Session" Card: visible only when session is open or analyzing; ordered thumbnail strip (1..N, tap fullscreen); Delete and Move earlier/later buttons per photo; Analyze now and Cancel session buttons; auto-submit countdown display; "Analysing N photos... (Xs)" elapsed ticker; foreground notification text updated with photo count ("3 photos waiting").
@@ -173,7 +188,7 @@ Current phase: 18 completed. Next: Phase 19.
   - **Next:** Simulator v2 (Phase 13).
 
 - **2026-09-30** — Dashboard & Answers UI (Phase 11):
-  - **Done:** Implemented the `HomeScreen` dashboard with unified `ReceiverState` tracking (Status Card, Pipeline Card, current signaller status, recent pipeline imagery, background health checks, and server logs). 
+  - **Done:** Implemented the `HomeScreen` dashboard with unified `ReceiverState` tracking (Status Card, Pipeline Card, current signaller status, recent pipeline imagery, background health checks, and server logs).
   - **Done:** Implemented the `AnswersScreen` with complete batch persistence visualization, cursor tracking (highlights and auto-scroll), manual data overrides/edits via long-press, confidence flagging, empty states, and clipboard/sharing utilities. Used Room Database queries mapped to local Compose UI state via `AnswersViewModel`.
   - **Done:** Wired the entire UI securely into `ReceiverService`'s Background and HTTP lifecycle, removing UI threading delays. Fixed Room + Coroutine threading configuration for Robolectric tests.
   - **Next:** Perform the manual 30-minute Soak Test on physical hardware (Phase 10) to verify the `specialUse` background resilience, followed by Phase 12 (AI & Prompt settings).
