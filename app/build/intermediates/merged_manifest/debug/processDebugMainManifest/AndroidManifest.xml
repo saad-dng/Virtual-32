@@ -32,6 +32,7 @@
     <uses-permission android:name="com.antigravity.virtual32.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
+        android:name="com.antigravity.virtual32.Virtual32App"
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -95,13 +96,6 @@
                 android:value="androidx.camera.camera2.Camera2Config$DefaultProvider" />
         </service>
 
-        <activity
-            android:name="androidx.compose.ui.tooling.PreviewActivity"
-            android:exported="true" />
-        <activity
-            android:name="androidx.activity.ComponentActivity"
-            android:exported="true" />
-
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="com.antigravity.virtual32.androidx-startup"
@@ -116,6 +110,13 @@
                 android:name="androidx.profileinstaller.ProfileInstallerInitializer"
                 android:value="androidx.startup" />
         </provider>
+
+        <activity
+            android:name="androidx.activity.ComponentActivity"
+            android:exported="true" />
+        <activity
+            android:name="androidx.compose.ui.tooling.PreviewActivity"
+            android:exported="true" />
 
         <service
             android:name="androidx.room.MultiInstanceInvalidationService"

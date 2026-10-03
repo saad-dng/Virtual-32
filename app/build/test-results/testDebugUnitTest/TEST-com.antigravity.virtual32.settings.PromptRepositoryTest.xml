@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.settings.PromptRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:31.680Z" hostname="MR-ROBOT" time="0.184">
+<testsuite name="com.antigravity.virtual32.settings.PromptRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:25.725Z" hostname="MR-ROBOT" time="0.254">
   <properties/>
-  <testcase name="built-in presets cannot be overwritten" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.059"/>
-  <testcase name="custom preset can be deleted" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.078"/>
+  <testcase name="built-in presets cannot be overwritten" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.1"/>
+  <testcase name="custom preset can be deleted" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.102"/>
   <testcase name="default presets are loaded initially" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.014"/>
-  <testcase name="custom preset can be saved and loaded" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.023"/>
-  <testcase name="true false preset has correct mapping" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.01"/>
+  <testcase name="custom preset can be saved and loaded" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.026"/>
+  <testcase name="true false preset has correct mapping" classname="com.antigravity.virtual32.settings.PromptRepositoryTest" time="0.012"/>
   <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
+  <system-err><![CDATA[No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+No package ID 7f found for ID 0x7f0c0001.
+]]></system-err>
 </testsuite>

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.antigravity.virtual32.util.DownscaledThumbnail
 import com.antigravity.virtual32.data.AnswerEntity
 import com.antigravity.virtual32.data.Batch
 import com.antigravity.virtual32.ui.components.DottedBackgroundBox
@@ -156,14 +157,14 @@ fun HistoryScreen(
                                 Spacer(modifier = Modifier.height(8.dp))
                                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     items(photoPaths) { path ->
-                                        AsyncImage(
-                                            model = File(path),
+                                        DownscaledThumbnail(
+                                            imagePath = path,
                                             contentDescription = "Thumbnail",
                                             modifier = Modifier
                                                 .size(60.dp)
                                                 .clip(RoundedCornerShape(8.dp))
                                                 .clickable { fullScreenImage = path },
-                                            contentScale = ContentScale.Crop
+                                            targetSize = 120
                                         )
                                     }
                                 }
@@ -248,14 +249,14 @@ fun HistoryScreen(
                     Spacer(modifier = Modifier.height(6.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(photos) { path ->
-                            AsyncImage(
-                                model = File(path),
+                            DownscaledThumbnail(
+                                imagePath = path,
                                 contentDescription = "Photo",
                                 modifier = Modifier
                                     .size(72.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { fullScreenImage = path },
-                                contentScale = ContentScale.Crop
+                                targetSize = 150
                             )
                         }
                     }

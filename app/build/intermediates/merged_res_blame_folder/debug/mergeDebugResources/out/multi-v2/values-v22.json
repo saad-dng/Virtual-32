@@ -4,7 +4,7 @@
             "outputFile": "com.antigravity.virtual32.app-mergeDebugResources-2:/values-v22/values-v22.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\saad\\.gradle\\caches\\8.13\\transforms\\bd3a4af7ffc7e8bd619d85633ea18a6d\\transformed\\appcompat-1.6.1\\res\\values-v22\\values-v22.xml",
+                    "source": "C:\\Users\\saad\\.gradle\\caches\\9.6.0\\transforms\\50f3f6d308d1a18d801f3d80e07515e2\\transformed\\appcompat-1.6.1\\res\\values-v22\\values-v22.xml",
                     "from": {
                         "startLines": "2,3,4,9",
                         "startColumns": "4,4,4,4",

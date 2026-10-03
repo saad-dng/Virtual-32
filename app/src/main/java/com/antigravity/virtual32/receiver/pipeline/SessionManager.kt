@@ -62,8 +62,12 @@ class SessionManager(
     private val json = Json { ignoreUnknownKeys = true }
 
     init {
-        loadPersistedSession()
-        updateUiStateLocked()
+        coroutineScope.launch(Dispatchers.IO) {
+            mutex.withLock {
+                loadPersistedSession()
+                updateUiStateLocked()
+            }
+        }
     }
 
     fun setOnAutoSubmit(callback: suspend (List<SessionPhotoEntry>) -> Unit) {
@@ -88,7 +92,13 @@ class SessionManager(
     private fun saveLocked() {
         try {
             val text = json.encodeToString(openPhotos)
-            sessionFile.writeText(text)
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    sessionFile.writeText(text)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -217,8 +227,15 @@ class SessionManager(
         return@withLock SessionInfo(open = isOpen, pages = pages, idleMs = idleMs)
     }
 
-    fun getSessionInfoBlocking(): SessionInfo = runBlocking {
-        getSessionInfo()
+    fun getSessionInfoBlocking(): SessionInfo {
+        return if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper() || mutex.isLocked) {
+            val state = _uiState.value
+            SessionInfo(open = state.open, pages = state.photos.size, idleMs = 0L)
+        } else {
+            runBlocking(Dispatchers.IO) {
+                getSessionInfo()
+            }
+        }
     }
 
     fun getAutoSubmitRemainingSec(nowMs: Long = timeSource(), autoSubmitSec: Int = currentAutoSubmitSec): Int {

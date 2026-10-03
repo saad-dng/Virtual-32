@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:32.010Z" hostname="MR-ROBOT" time="0.053">
+<testsuite name="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:26.198Z" hostname="MR-ROBOT" time="0.068">
   <properties/>
-  <testcase name="testSessionCardReorder" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.013"/>
-  <testcase name="testSessionCardAnalyzeNow" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.01"/>
-  <testcase name="testSessionCardCountdown" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.008"/>
-  <testcase name="testSessionCardCancel" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.011"/>
-  <testcase name="testSessionCardDelete" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.011"/>
+  <testcase name="testSessionCardReorder" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.016"/>
+  <testcase name="testSessionCardAnalyzeNow" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.014"/>
+  <testcase name="testSessionCardCountdown" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.012"/>
+  <testcase name="testSessionCardCancel" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.013"/>
+  <testcase name="testSessionCardDelete" classname="com.antigravity.virtual32.ui.screens.HomeViewModelSessionTest" time="0.013"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

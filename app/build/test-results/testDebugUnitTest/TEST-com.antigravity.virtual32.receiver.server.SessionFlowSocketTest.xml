@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:28.808Z" hostname="MR-ROBOT" time="1.42">
+<testsuite name="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:21.653Z" hostname="MR-ROBOT" time="1.694">
   <properties/>
-  <testcase name="testSessionFlow_autoSubmit_withFakeClock" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.261"/>
-  <testcase name="testSessionFlow_emptyFinish" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.201"/>
-  <testcase name="testSessionFlow_newPhotoDuringAnalysis_startsFreshSession" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.428"/>
-  <testcase name="testSessionFlow_sessionFull_409" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.173"/>
-  <testcase name="testSessionFlow_photo_photo_finish" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.181"/>
-  <testcase name="testSessionFlow_cancel" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.176"/>
+  <testcase name="testSessionFlow_autoSubmit_withFakeClock" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.27"/>
+  <testcase name="testSessionFlow_emptyFinish" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.226"/>
+  <testcase name="testSessionFlow_newPhotoDuringAnalysis_startsFreshSession" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.468"/>
+  <testcase name="testSessionFlow_sessionFull_409" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.217"/>
+  <testcase name="testSessionFlow_photo_photo_finish" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.267"/>
+  <testcase name="testSessionFlow_cancel" classname="com.antigravity.virtual32.receiver.server.SessionFlowSocketTest" time="0.246"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

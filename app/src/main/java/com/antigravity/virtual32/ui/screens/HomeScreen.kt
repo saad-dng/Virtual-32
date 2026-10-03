@@ -38,6 +38,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.antigravity.virtual32.util.DownscaledThumbnail
 import com.antigravity.virtual32.data.NextResult
 import com.antigravity.virtual32.receiver.pipeline.PipelineState
 import com.antigravity.virtual32.receiver.pipeline.SessionUiState
@@ -66,6 +67,7 @@ fun HomeScreen(
     val lastResult by ReceiverState.lastResult.collectAsState()
     val logs by ReceiverState.logs.collectAsState()
     val sessionState by viewModel.sessionUiState.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     
     var showChecklist by remember { mutableStateOf(false) }
     var fullScreenImage by remember { mutableStateOf<String?>(null) }
@@ -102,6 +104,14 @@ fun HomeScreen(
             contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (isLoading) {
+                item {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
             item {
                 StatusCard(health = health, onChecklistClick = { showChecklist = true })
             }
@@ -332,11 +342,11 @@ fun SessionCard(
                                 .clip(RoundedCornerShape(12.dp))
                                 .clickable { onImageTap(photo.cachePath) }
                         ) {
-                            AsyncImage(
-                                model = File(photo.cachePath),
+                            DownscaledThumbnail(
+                                imagePath = photo.cachePath,
                                 contentDescription = "Photo ${index + 1}",
                                 modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                                targetSize = 160
                             )
                             Surface(
                                 modifier = Modifier
@@ -485,15 +495,15 @@ fun PipelineCard(state: PipelineState?, onImageTap: (String) -> Unit) {
                 if (state.lastPhotoPath != null) {
                     Column {
                         Spacer(modifier = Modifier.height(8.dp))
-                        AsyncImage(
-                            model = File(state.lastPhotoPath),
+                        DownscaledThumbnail(
+                            imagePath = state.lastPhotoPath,
                             contentDescription = "Current photo",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(150.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable { onImageTap(state.lastPhotoPath) },
-                            contentScale = ContentScale.Crop
+                            targetSize = 300
                         )
                     }
                 }

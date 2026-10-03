@@ -8,6 +8,10 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import android.util.Log
+
 @Database(entities = [Batch::class, AnswerEntity::class, CycleState::class], version = 2, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun answerDao(): AnswerDao
@@ -45,6 +49,28 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = builder.build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        suspend fun initDatabase(context: Context): AppDatabase = withContext(Dispatchers.IO) {
+            try {
+                val db = getDatabase(context)
+                // Force open & migration off the main thread
+                db.openHelper.writableDatabase
+                db
+            } catch (e: Exception) {
+                Log.e("AppDatabase", "Database initialization/migration failed, falling back safely", e)
+                try {
+                    context.deleteDatabase("virtual32_database")
+                } catch (delEx: Exception) {
+                    Log.e("AppDatabase", "Failed to delete database file", delEx)
+                }
+                synchronized(this) {
+                    INSTANCE = null
+                }
+                val fallbackDb = getDatabase(context)
+                fallbackDb.openHelper.writableDatabase
+                fallbackDb
             }
         }
     }

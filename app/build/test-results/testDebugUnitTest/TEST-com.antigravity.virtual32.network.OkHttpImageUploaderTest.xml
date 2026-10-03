@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.network.OkHttpImageUploaderTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:25.567Z" hostname="MR-ROBOT" time="0.663">
+<testsuite name="com.antigravity.virtual32.network.OkHttpImageUploaderTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:17.995Z" hostname="MR-ROBOT" time="0.717">
   <properties/>
-  <testcase name="testConnection_successAndFailure" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.118"/>
-  <testcase name="testUpload_MalformedOrUnexpectedCode" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.01"/>
-  <testcase name="testUpload_422ValidationError" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.007"/>
-  <testcase name="testUpload_Timeout" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.51"/>
-  <testcase name="testUpload_500ServerError" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.007"/>
+  <testcase name="testConnection_successAndFailure" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.158"/>
+  <testcase name="testUpload_MalformedOrUnexpectedCode" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.013"/>
+  <testcase name="testUpload_422ValidationError" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.008"/>
+  <testcase name="testUpload_Timeout" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.513"/>
+  <testcase name="testUpload_500ServerError" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.009"/>
   <testcase name="testResolveEndpointUrl_handlesComplexInputs" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.005"/>
-  <testcase name="testUpload_200Success" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.006"/>
+  <testcase name="testUpload_200Success" classname="com.antigravity.virtual32.network.OkHttpImageUploaderTest" time="0.01"/>
   <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[Oct 03, 2026 1:44:26 PM okhttp3.mockwebserver.MockWebServer$SocketHandler handle
-WARNING: MockWebServer[54492] connection from /127.0.0.1 didn't make a request
+  <system-err><![CDATA[Oct 03, 2026 9:00:18 PM okhttp3.mockwebserver.MockWebServer$SocketHandler handle
+WARNING: MockWebServer[60569] connection from /127.0.0.1 didn't make a request
 ]]></system-err>
 </testsuite>

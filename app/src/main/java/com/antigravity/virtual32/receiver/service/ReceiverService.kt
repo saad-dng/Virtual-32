@@ -40,6 +40,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class ReceiverService : Service() {
@@ -70,6 +72,7 @@ class ReceiverService : Service() {
     
     private var watchdogJob: Job? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private val dependenciesReady = CompletableDeferred<Unit>()
 
     override fun onCreate() {
         super.onCreate()
@@ -79,12 +82,14 @@ class ReceiverService : Service() {
         startForeground(NOTIFICATION_ID, buildNotification(), if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0)
 
         acquireLocks()
-        setupDependencies()
         startNetworkListener()
         startWatchdog()
         
-        // Initial setup and bind
-        scope.launch {
+        // Initial setup and bind asynchronously on Dispatchers.IO
+        scope.launch(Dispatchers.IO) {
+            setupDependencies()
+            dependenciesReady.complete(Unit)
+
             val port = settingsRepo.getSettings().serverPort
             ReceiverState.update { it.copy(serverPort = port) }
             val ip = IpDiscovery.getBestIpAddress()
@@ -100,25 +105,25 @@ class ReceiverService : Service() {
             } else {
                 logBuffer.addAppLog("I", "SelfTest", "All tests passed")
             }
-        }
-        
-        scope.launch {
-            pipeline.state.collect { state ->
-                ReceiverState.updatePipeline(state)
-            }
-        }
-        
-        scope.launch {
-            // Keep notification updated with answers count
-            answerStore.activeAnswers().collect { list ->
-                ReceiverState.update { it.copy(answersCount = list.size) }
-                updateNotification()
-            }
-        }
 
-        scope.launch {
-            sessionManager.uiState.collect {
-                updateNotification()
+            scope.launch {
+                pipeline.state.collect { state ->
+                    ReceiverState.updatePipeline(state)
+                }
+            }
+            
+            scope.launch {
+                // Keep notification updated with answers count
+                answerStore.activeAnswers().collect { list ->
+                    ReceiverState.update { it.copy(answersCount = list.size) }
+                    updateNotification()
+                }
+            }
+
+            scope.launch {
+                sessionManager.uiState.collect {
+                    updateNotification()
+                }
             }
         }
         
@@ -133,16 +138,16 @@ class ReceiverService : Service() {
         }
     }
 
-    private fun setupDependencies() {
-        val db = AppDatabase.getDatabase(this)
+    private suspend fun setupDependencies() = withContext(Dispatchers.IO) {
+        val db = AppDatabase.initDatabase(this@ReceiverService)
         answerStore = RoomAnswerStore(db.answerDao())
-        settingsRepo = SettingsRepository(this)
-        promptRepo = PromptRepository(this)
-        galleryWriter = GalleryWriter(this)
-        photoCache = PhotoCache(this)
+        settingsRepo = SettingsRepository(this@ReceiverService)
+        promptRepo = PromptRepository(this@ReceiverService)
+        galleryWriter = GalleryWriter(this@ReceiverService)
+        photoCache = PhotoCache(this@ReceiverService)
 
         pipeline = PhotoPipelineImpl(
-            context = this,
+            context = this@ReceiverService,
             settingsRepo = settingsRepo,
             promptRepo = promptRepo,
             answerStore = answerStore,
@@ -152,7 +157,7 @@ class ReceiverService : Service() {
             isNetworkAvailable = { ReceiverState.health.value.isNetworkUp }
         )
 
-        sessionManager = com.antigravity.virtual32.receiver.pipeline.SessionManager.getInstance(this).apply {
+        sessionManager = com.antigravity.virtual32.receiver.pipeline.SessionManager.getInstance(this@ReceiverService).apply {
             setOnAutoSubmit { photos ->
                 val jpegs = photos.map { java.io.File(it.cachePath).readBytes() }
                 val paths = photos.map { it.cachePath }
@@ -324,6 +329,7 @@ class ReceiverService : Service() {
             if (uriStr != null) {
                 scope.launch {
                     try {
+                        dependenciesReady.await()
                         val uri = android.net.Uri.parse(uriStr)
                         contentResolver.openInputStream(uri)?.use { stream ->
                             val bytes = stream.readBytes()
@@ -341,6 +347,7 @@ class ReceiverService : Service() {
             if (!photoPaths.isNullOrEmpty() && batchId != -1L) {
                 scope.launch {
                     try {
+                        dependenciesReady.await()
                         val db = AppDatabase.getDatabase(this@ReceiverService)
                         db.answerDao().markBatchesSuperseded(listOf(batchId))
                         val jpegs = photoPaths.map { java.io.File(it).readBytes() }

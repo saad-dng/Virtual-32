@@ -28,7 +28,7 @@ data class UsageStats(
     val rateLimitCount: Int = 0
 )
 
-class SettingsViewModel(
+class SettingsViewModel @JvmOverloads constructor(
     application: Application,
     private val settingsRepo: SettingsRepository = SettingsRepository(application)
 ) : AndroidViewModel(application) {

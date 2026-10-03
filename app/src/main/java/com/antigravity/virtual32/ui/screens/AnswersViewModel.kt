@@ -30,7 +30,7 @@ data class AnswersUiState(
     val recentBatches: List<Batch> = emptyList()
 )
 
-class AnswersViewModel(
+class AnswersViewModel @JvmOverloads constructor(
     application: Application,
     private val answerStore: RoomAnswerStore = RoomAnswerStore(AppDatabase.getDatabase(application).answerDao()),
     private val settingsRepo: SettingsRepository = SettingsRepository(application),

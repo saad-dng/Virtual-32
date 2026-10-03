@@ -60,7 +60,8 @@
 - `build.gradle.kts` (root and app) — KSP, Room, and serialization configured.
 - `app/src/main/AndroidManifest.xml` — Declares permissions, Foreground Service (specialUse), and Quick Settings Tile.
 - `app/src/main/java/com/antigravity/virtual32/`:
-  - `MainActivity.kt` — App entry point and bottom navigation.
+  - `Virtual32App.kt` — Application class with StrictMode and startup timestamp tracking.
+  - `MainActivity.kt` — App entry point, time-to-first-frame telemetry, and bottom navigation.
   - `data/` — Room DB (`AppDatabase`), DAOs (`AnswerDao`), `AnswerStore`, `RoomAnswerStore`, `GalleryWriter`, `PhotoCache`, `Entities.kt`.
   - `receiver/`:
     - `ai/` — `VisionProvider`, `GeminiProvider`, `ClaudeProvider`, `AiResponseParser`, `PromptBuilder`, `PromptRepository`.
@@ -73,15 +74,16 @@
     - `components/` — `DottedBackgroundBox.kt`.
     - `screens/` — `HomeScreen`, `HomeViewModel`, `AnswersScreen`, `AnswersViewModel`, `SimulatorScreen`, `SimulatorViewModel`, `SettingsScreen`, `SettingsViewModel`, `AiSettingsScreen`, `DiagnosticsScreen`, `HistoryScreen`, `HistoryViewModel`.
     - `theme/` — `Color.kt`, `Theme.kt`, `Type.kt`.
-  - `util/` — `IpDiscovery.kt`, `ImageResizer.kt`.
+  - `util/` — `IpDiscovery.kt`, `ImageResizer.kt`, `ThumbnailCache.kt` (Background downscaling and memory cache).
 - `app/src/test/java/com/antigravity/virtual32/`:
   - `receiver/` — Tests for `ReceiverHttpServer`, `SessionFlowSocketTest`, `PhotoPipeline`, `VisionProviders`, `MultiImageProviderRequestShapeTest`, `AiResponseParserTest`.
   - `simulator/` — Tests for `BlinkPatterns`, `DoubleTapDetector`, `LongPressDetectorTest`.
-  - `ui/` — `HomeViewModelSessionTest`, `AnswersViewModelWarningsTest`.
+  - `ui/` — `HomeViewModelSessionTest`, `AnswersViewModelWarningsTest`, `StartupRegressionTest`.
   - `settings/` — `SessionsSettingsTest`.
   - `data/` — Tests for `RoomAnswerStore`, `GalleryWriter`, `MigrationTest`.
 - `tools/esp32_client_sim.py` — Python client simulator for firmware dev testing (supports single upload and multi-photo sessions).
 - `docs/ESP32_CONTRACT.md` — Complete HTTP and Blink language contract for firmware.
+- `docs/anr-trace.txt` — Main-thread crash and ANR trace logs.
 
 ---
 

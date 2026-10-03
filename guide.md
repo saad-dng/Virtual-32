@@ -118,6 +118,14 @@ Current phase: 18 completed. Next: Phase 19.
 
 Note: most recent entry first — append, don't rewrite.
 
+- **2026-10-03** — Fix Launch ANR & Main-Thread Blocking (Post Phase 18 Fix):
+  - **Done:** Identified root causes: `HomeViewModel` lacked `@JvmOverloads` causing `NoSuchMethodException` on `AndroidViewModelFactory` reflection instantiation, `SessionManager` executed synchronous disk reads/metadata queries on main thread in `init`, Room DB and `RoomAnswerStore` initialized synchronously on main thread, and full-size JPEGs were decoded for thumbnails in Session and History strips.
+  - **Done:** Made dependency initialization lazy on `Dispatchers.IO`: `AppDatabase.initDatabase` with safe fallback, `SessionManager` background persisted session restore, and `HomeViewModel` background DB/store initialization with immediate `isLoading` state on `HomeScreen`.
+  - **Done:** Added `ThumbnailCache` with memory `LruCache` and `inSampleSize` background decoding; replaced full-image decodes with `DownscaledThumbnail` in `HomeScreen` and `HistoryScreen`.
+  - **Done:** Added `Virtual32App` with `StrictMode` enabled in debug builds (detecting disk/network on main thread with `penaltyLog`) and time-to-first-frame startup logging in `MainActivity`.
+  - **Done:** Added `StartupRegressionTest` verifying reflection instantiation and immediate UI readiness without IO delays. All unit tests pass and debug APK assembled cleanly.
+  - **Next:** Phase 19 — Integration and hardware testing with ESP32-S3 Sense firmware.
+
 - **2026-10-03** — Multi-Photo Sessions: UI, Simulator & Documentation (Phase 18):
   - **Done:** Home "Session" Card: visible only when session is open or analyzing; ordered thumbnail strip (1..N, tap fullscreen); Delete and Move earlier/later buttons per photo; Analyze now and Cancel session buttons; auto-submit countdown display; "Analysing N photos... (Xs)" elapsed ticker; foreground notification text updated with photo count ("3 photos waiting").
   - **Done:** Answers Screen: added "photo k" chip per answer row, "from photo k" filter chips ("All photos", "Photo 1", ...), and dismissible warnings banner for missing question gaps or unreadable pages with concise action hints ("retake photo 2 and send all again").

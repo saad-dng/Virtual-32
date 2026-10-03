@@ -9,19 +9,34 @@ import com.antigravity.virtual32.receiver.pipeline.SessionManager
 import com.antigravity.virtual32.receiver.pipeline.SessionUiState
 import com.antigravity.virtual32.receiver.service.ReceiverState
 import com.antigravity.virtual32.settings.SettingsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
+class HomeViewModel @JvmOverloads constructor(
     application: Application,
     private val sessionManager: SessionManager = SessionManager.getInstance(application),
     private val settingsRepo: SettingsRepository = SettingsRepository(application)
 ) : AndroidViewModel(application) {
 
-    private val db = AppDatabase.getDatabase(application)
-    private val answerStore = RoomAnswerStore(db.answerDao())
+    private var db: AppDatabase? = null
+    private var answerStore: RoomAnswerStore? = null
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     val sessionUiState: StateFlow<SessionUiState> = sessionManager.uiState
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val database = AppDatabase.initDatabase(application)
+            db = database
+            answerStore = RoomAnswerStore(database.answerDao())
+            _isLoading.value = false
+        }
+    }
 
     fun deletePhoto(index: Int) {
         viewModelScope.launch {
@@ -58,22 +73,25 @@ class HomeViewModel(
     }
 
     fun next() {
-        viewModelScope.launch {
-            val res = answerStore.next()
+        viewModelScope.launch(Dispatchers.IO) {
+            val store = answerStore ?: return@launch
+            val res = store.next()
             ReceiverState.updateLastResult(res)
         }
     }
 
     fun repeat() {
-        viewModelScope.launch {
-            val res = answerStore.repeat()
+        viewModelScope.launch(Dispatchers.IO) {
+            val store = answerStore ?: return@launch
+            val res = store.repeat()
             ReceiverState.updateLastResult(res)
         }
     }
 
     fun reset() {
-        viewModelScope.launch {
-            val res = answerStore.reset()
+        viewModelScope.launch(Dispatchers.IO) {
+            val store = answerStore ?: return@launch
+            val res = store.reset()
             ReceiverState.updateLastResult(res)
         }
     }

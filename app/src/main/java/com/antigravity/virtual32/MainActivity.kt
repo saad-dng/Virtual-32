@@ -22,6 +22,9 @@ import com.antigravity.virtual32.ui.screens.DiagnosticsScreen
 import com.antigravity.virtual32.ui.screens.HistoryScreen
 import com.antigravity.virtual32.ui.theme.Virtual32Theme
 
+import android.os.SystemClock
+import android.util.Log
+
 enum class Screen {
     Home, Answers, Simulator, Settings, AiSettings, Diagnostics, History
 }
@@ -29,7 +32,21 @@ enum class Screen {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Log time to first frame when view is laid out and drawn
+        window.decorView.post {
+            val startTime = Virtual32App.appStartTimeMs.takeIf { it > 0 } ?: SystemClock.uptimeMillis()
+            val timeToFirstFrame = SystemClock.uptimeMillis() - startTime
+            Log.i("Virtual32Startup", "Time to first frame: ${timeToFirstFrame}ms")
+        }
+
         setContent {
+            LaunchedEffect(Unit) {
+                val startTime = Virtual32App.appStartTimeMs.takeIf { it > 0 } ?: SystemClock.uptimeMillis()
+                val timeToFirstComposition = SystemClock.uptimeMillis() - startTime
+                Log.i("Virtual32Startup", "First composition rendered in: ${timeToFirstComposition}ms")
+            }
+
             Virtual32Theme {
                 var currentScreen by remember { mutableStateOf(Screen.Home) }
 

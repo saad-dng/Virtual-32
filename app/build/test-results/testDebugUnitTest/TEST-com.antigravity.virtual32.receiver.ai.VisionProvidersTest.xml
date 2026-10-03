@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:26.750Z" hostname="MR-ROBOT" time="0.053">
+<testsuite name="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:19.323Z" hostname="MR-ROBOT" time="0.062">
   <properties/>
-  <testcase name="testGeminiProvider_extractErrorMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.007"/>
-  <testcase name="testGeminiProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
-  <testcase name="testClaudeProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.004"/>
-  <testcase name="testProvider_error429" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.004"/>
-  <testcase name="testProvider_error500" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.004"/>
+  <testcase name="testGeminiProvider_extractErrorMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.01"/>
+  <testcase name="testGeminiProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.006"/>
+  <testcase name="testClaudeProvider_success" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
+  <testcase name="testProvider_error429" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.006"/>
+  <testcase name="testProvider_error500" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
   <testcase name="testClaudeProvider_extractErrorMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.002"/>
-  <testcase name="testClaudeProvider_emptyKeyReturnsError" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.003"/>
-  <testcase name="testGeminiProvider_modelRetired404_analyzeThrowsClearMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.014"/>
-  <testcase name="testGeminiProvider_modelRetired404_testConnectionReturnsClearMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.006"/>
+  <testcase name="testClaudeProvider_emptyKeyReturnsError" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.004"/>
+  <testcase name="testGeminiProvider_modelRetired404_analyzeThrowsClearMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.016"/>
+  <testcase name="testGeminiProvider_modelRetired404_testConnectionReturnsClearMessage" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.005"/>
   <testcase name="testGeminiProvider_emptyKeyReturnsError" classname="com.antigravity.virtual32.receiver.ai.VisionProvidersTest" time="0.003"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

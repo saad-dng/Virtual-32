@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.antigravity.virtual32.data.RoomAnswerStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:44:24.693Z" hostname="MR-ROBOT" time="0.871">
+<testsuite name="com.antigravity.virtual32.data.RoomAnswerStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-03T15:00:16.956Z" hostname="MR-ROBOT" time="1.036">
   <properties/>
-  <testcase name="testReplaceAndNext" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.143"/>
-  <testcase name="testEmpty" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.02"/>
-  <testcase name="testEdit" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.04"/>
-  <testcase name="testRetention" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.587"/>
-  <testcase name="testCursorPersistence" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.033"/>
-  <testcase name="testAppend" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.026"/>
-  <testcase name="testRepeat" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.022"/>
+  <testcase name="testReplaceAndNext" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.163"/>
+  <testcase name="testEmpty" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.022"/>
+  <testcase name="testEdit" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.044"/>
+  <testcase name="testRetention" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.701"/>
+  <testcase name="testCursorPersistence" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.041"/>
+  <testcase name="testAppend" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.034"/>
+  <testcase name="testRepeat" classname="com.antigravity.virtual32.data.RoomAnswerStoreTest" time="0.031"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
